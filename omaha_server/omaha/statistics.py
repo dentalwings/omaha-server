@@ -18,8 +18,6 @@ License for the specific language governing permissions and limitations under
 the License.
 """
 
-import os
-
 from builtins import range
 
 from functools import partial

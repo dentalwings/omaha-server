@@ -227,7 +227,7 @@ class UpdateViewTest(OverloadTestStorageMixin, TestCase, XmlTestMixin):
         now = datetime.utcnow()
         userid = '{D0BBD725-742D-44ae-8D46-0231E881D58E}'
         user_id = get_id(userid)
-        appid1 = '{430FD4D0-B729-4F61-AA34-91526481799D}'
+        appid1 = '{DD13223F-AC0E-436E-B20D-85F7371A555D}'
         appid2 = '{D0AB2EBC-931B-4013-9FEB-C9C4C2225C8C}'
         install_date = datetime(year=2014, month=1, day=1, hour=15, minute=41, second=48)
         update_date = install_date + timedelta(days=31)
@@ -314,7 +314,7 @@ class UpdateViewTest(OverloadTestStorageMixin, TestCase, XmlTestMixin):
     @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     @patch('omaha.models.version_upload_to', lambda o, f: f)
     def test_data(self):
-        app = ApplicationFactory.create(id='{430FD4D0-B729-4F61-AA34-91526481799D}', name='chrome')
+        app = ApplicationFactory.create(id='{DD13223F-AC0E-436E-B20D-85F7371A555D}', name='chrome')
         platform = PlatformFactory.create(name='win')
         channel = ChannelFactory.create(name='stable')
         obj = VersionFactory.create(

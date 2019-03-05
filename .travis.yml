@@ -22,8 +22,6 @@ matrix:
         - PATH_TO_TEST=omaha.tests.test_public
         - DJANGO_SETTINGS_MODULE=omaha_server.settings_test_postgres
         - OMAHA_SERVER_PRIVATE=False
-    - python: "3.4"
-      env: TOX_ENV=py34
     - python: "2.7"
       env: TOX_ENV=coverage
 
@@ -53,5 +51,6 @@ install:
   - pip install tox==2.2.1
   - pip install google-compute-engine
 
+before_script: cd omaha_server
 script:
   - tox -e $TOX_ENV

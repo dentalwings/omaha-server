@@ -26,7 +26,15 @@ import pytz
 from omaha.models import Application, Platform, Channel, Version, Action, Data, PartialUpdate
 
 
-__all__ = ['AppSerializer', 'PlatformSerializer', 'ChannelSerializer', 'VersionSerializer']
+__all__ = [
+    'AppSerializer',
+    'PlatformSerializer',
+    'ChannelSerializer',
+    'VersionSerializer',
+    'DataSerializer',
+    'ActionSerializer',
+    'PartialUpdateSerializer'
+]
 
 
 class TimeZoneAwareDateTimeField(serializers.DateTimeField):

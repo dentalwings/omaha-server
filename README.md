@@ -26,6 +26,7 @@ sudo add-apt-repository \
    stable"
 sudo apt-get update
 sudo apt-get install docker-ce
+sudo usermod -aG docker $USER
 
 # checkout the code, assuming you're in your favorite source directory already
 git clone git@github.com:dentalwings/omaha-server.git

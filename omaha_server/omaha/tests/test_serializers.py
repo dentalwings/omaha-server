@@ -22,9 +22,10 @@ from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from omaha.tests.utils import temporary_media_root
-from omaha.models import Version
-from omaha.factories import ApplicationFactory, DataFactory, PlatformFactory, ChannelFactory, VersionFactory, ActionFactory, PartialUpdateFactory
-from omaha.serializers import AppSerializer, DataSerializer, PlatformSerializer, ChannelSerializer, VersionSerializer, ActionSerializer, PartialUpdateSerializer
+from omaha.factories import ApplicationFactory, DataFactory, PlatformFactory, ChannelFactory, VersionFactory,\
+    ActionFactory, PartialUpdateFactory
+from omaha.serializers import AppSerializer, DataSerializer, PlatformSerializer, ChannelSerializer, VersionSerializer,\
+    ActionSerializer, PartialUpdateSerializer
 from datetime import date
 
 

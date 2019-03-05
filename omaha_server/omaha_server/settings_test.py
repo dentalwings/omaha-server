@@ -1,10 +1,10 @@
 # coding: utf8
 
+from .settings import *
+
 import os
 
 os.environ.setdefault('OMAHA_SERVER_PRIVATE', 'True')
-
-from .settings import *
 
 
 class DisableMigrations(object):
@@ -13,7 +13,7 @@ class DisableMigrations(object):
         return True
 
     def __getitem__(self, item):
-        return "notmigrations"
+        return None
 
 
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
@@ -82,5 +82,5 @@ AWS_SECRET_ACCESS_KEY = ''
 
 SENTRY_STACKTRACE_DOMAIN = 'test'
 SENTRY_STACKTRACE_ORG_SLUG = 'test'
-SENTRY_STACKTRACE_PROJ_SLUG ='test'
+SENTRY_STACKTRACE_PROJ_SLUG = 'test'
 SENTRY_STACKTRACE_API_KEY = 'test'
