@@ -45,7 +45,8 @@ from furl import furl
 
 __all__ = ['Application', 'Channel', 'Platform', 'Version',
            'Action', 'EVENT_DICT_CHOICES', 'EVENT_CHOICES',
-           'Data']
+           'Data', 'AppRequest']
+
 
 class BaseModel(models.Model):
     created = CreationDateTimeField('created')
@@ -252,6 +253,7 @@ class Os(models.Model):
             ('platform', 'version', 'sp', 'arch'),
         )
 
+
 class Hw(models.Model):
     sse = models.PositiveIntegerField(null=True, blank=True)
     sse2 = models.PositiveIntegerField(null=True, blank=True)
@@ -337,8 +339,6 @@ def pre_version_save(sender, instance, *args, **kwargs):
         sha1.update(chunk)
     instance.file.seek(0)
     instance.file_hash = base64.b64encode(sha1.digest()).decode()
-
-
 
 
 @receiver(pre_delete, sender=Version)
