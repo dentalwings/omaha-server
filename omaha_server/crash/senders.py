@@ -17,7 +17,7 @@ class BaseSender(object):
 
 
 class SentrySender(BaseSender):
-    name="Sentry"
+    name = "Sentry"
 
     def __init__(self):
         self.client = sentry_sdk.init()
@@ -28,14 +28,14 @@ class SentrySender(BaseSender):
             message=message,
             extra=extra,
             tags=tags,
-            data=data,
+            data=sentry_data,
             level='error'
         )
         signature("tasks.get_sentry_link", args=(crash_obj.pk, event_id)).apply_async(queue='private', countdown=1)
 
 
 class ELKSender(BaseSender):
-    name="ELK"
+    name = "ELK"
     handler = None
 
     def send(self, message, extra={}, tags={}, sentry_data={}, crash_obj=None):
@@ -58,6 +58,7 @@ class ELKSender(BaseSender):
 
             # Send message with logger.
             logger.info(add_extra_to_log_message("received crash report", extra=extra))
+
 
 senders_dict = {
     "Sentry": SentrySender,

@@ -133,12 +133,4 @@ class PartialUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PartialUpdate
-        fields = (
-            'active_users',
-            'is_enabled',
-            'percent',
-            'version',
-            'start_date',
-            'end_date',
-            'exclude_new_users',
-        )
+        fields = '__all__'

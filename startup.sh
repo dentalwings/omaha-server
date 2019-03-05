@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 docker-compose up -d db redis
 docker-compose build django
 docker-compose up -d django

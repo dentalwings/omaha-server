@@ -23,16 +23,17 @@ import logging
 from django.views.generic import View
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
-from django.conf import settings
 
 from django_select2.views import AutoResponseView
 from lxml.etree import XMLSyntaxError
 
 from omaha.builder import build_response
+from crash.senders import get_sender
 from omaha_server.utils import get_client_ip
 from omaha.models import Request
 
 logger = logging.getLogger(__name__)
+
 
 class UpdateView(View):
     http_method_names = ['post']
@@ -89,6 +90,6 @@ class UsageStatsView(View):
         return super(UsageStatsView, self).dispatch(*args, **kwargs)
 
     def post(self, request):
-        client.captureMessage('Omaha Clients Usage Statistics: {0}'.format(request.body), tags=request.GET,
-                              data={'level': 20, 'logger': 'usagestats'})
+        get_sender.captureMessage('Omaha Clients Usage Statistics: {0}'.format(request.body), tags=request.GET,
+                                  data={'level': 20, 'logger': 'usagestats'})
         return HttpResponse('ok')
