@@ -139,5 +139,6 @@ class PartialUpdateSerializer(serializers.ModelSerializer):
             'percent',
             'version',
             'start_date',
+            'end_date',
             'exclude_new_users',
         )
