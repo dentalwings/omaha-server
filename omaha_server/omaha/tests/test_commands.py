@@ -1,7 +1,5 @@
 # coding: utf8
 
-import datetime
-
 from django.test import TestCase
 from django.core.management import call_command
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -9,7 +7,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from bitmapist import YearEvents
 
 from omaha.tests.utils import temporary_media_root
-from omaha.utils import redis
+from omaha.utils import redis, timezone
 from omaha.models import (
     Application,
     Platform,
@@ -74,7 +72,7 @@ class GenerateFakeStatisticsTest(TestCase):
         redis.flushdb()
 
     def test_command(self):
-        now = datetime.datetime.now()
+        now = timezone.now()
         year = now.year
         self.assertEqual(0, len(YearEvents('request', year)))
         call_command('generate_fake_statistics', self.app.id, count=10)

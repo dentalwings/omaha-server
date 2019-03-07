@@ -11,7 +11,6 @@ from django.core.cache import cache
 from django.template import defaultfilters as filters
 
 import boto
-from boto.s3.key import Key
 from sentry_sdk import capture_message
 
 from omaha.models import Version as OmahaVersion

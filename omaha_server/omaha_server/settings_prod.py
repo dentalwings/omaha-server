@@ -1,13 +1,7 @@
 # coding: utf8
 
-import os
-
 from django.utils import crypto
-
-from furl import furl
-
 from .settings import *
-from omaha_server.utils import get_sentry_organization_slug, get_sentry_project_slug
 
 DEBUG = False
 

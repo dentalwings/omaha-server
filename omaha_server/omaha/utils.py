@@ -32,7 +32,7 @@ from django.utils import timezone
 from omaha.settings import KEY_PREFIX, KEY_LAST_ID
 from omaha.models import Platform
 from sparkle.models import SparkleVersion
-__all__ = ['get_sec_since_midnight', 'get_id']
+__all__ = ['get_sec_since_midnight', 'get_id', 'valuedispatch', 'redis']
 
 redis = get_redis_connection('statistics')
 

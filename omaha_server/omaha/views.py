@@ -28,7 +28,7 @@ from django_select2.views import AutoResponseView
 from lxml.etree import XMLSyntaxError
 
 from omaha.builder import build_response
-from sentry_sdk import capture_message
+# from sentry_sdk import capture_message
 from omaha_server.utils import get_client_ip
 from omaha.models import Request
 

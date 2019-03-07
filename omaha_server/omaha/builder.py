@@ -22,7 +22,7 @@ from builtins import filter
 from functools import partial, reduce
 from uuid import UUID
 
-from django.utils.timezone import now
+from django.utils import timezone
 from django.db.models import Q
 
 from lxml import etree
@@ -34,7 +34,7 @@ from omaha.parser import parse_request
 from omaha import parser
 from omaha.statistics import is_user_active
 from omaha.core import (Response, App, Updatecheck_negative, Manifest, Updatecheck_positive,
-                  Packages, Package, Actions, Action, Event, Data)
+                        Packages, Package, Actions, Action, Event, Data)
 
 
 __all__ = ['build_response']
@@ -78,7 +78,7 @@ def is_new_user(version):
 
 @cached_as(Version, timeout=60)
 def _get_version(partialupdate, app_id, platform, channel, version, date=None):
-    date = date or now()
+    date = date or timezone.now()
 
     qs = Version.objects.select_related('app')
     qs = qs.filter_by_enabled(app=app_id,
@@ -180,6 +180,5 @@ def build_response(request, pretty_print=True, ip=None):
     userid = obj.get('userid')
     apps = obj.findall('app')
     apps_list = reduce(partial(on_app, os=obj.os, userid=userid), apps, [])
-    response = Response(apps_list, date=now())
-    return etree.tostring(response, pretty_print=pretty_print,
-                          xml_declaration=True, encoding='UTF-8')
+    response = Response(apps_list, date=timezone.now())
+    return etree.tostring(response, pretty_print=pretty_print, xml_declaration=True, encoding='UTF-8')

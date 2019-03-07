@@ -19,6 +19,7 @@ the License.
 """
 from __future__ import unicode_literals
 from builtins import bytes, range
+from override_storage import override_storage
 
 import base64
 from datetime import datetime, timedelta, date
@@ -29,13 +30,11 @@ from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.conf import settings
 
-from lxml.builder import E
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 from bitmapist import mark_event
 from freezegun import freeze_time
 import pytz
-import factory
 
 from omaha_server.utils import is_private
 from omaha.statistics import userid_counting, get_users_versions, get_channel_statistics
@@ -53,7 +52,7 @@ from omaha.serializers import (
 )
 from omaha.factories import ApplicationFactory, DataFactory, PlatformFactory, ChannelFactory, VersionFactory, ActionFactory, PartialUpdateFactory
 from omaha.models import Application, Data, Channel, Platform, Version, Action, PartialUpdate
-from omaha.tests import fixtures, OverloadTestStorageMixin
+from omaha.tests import fixtures
 from omaha.tests.utils import temporary_media_root, create_app_xml
 from sparkle.models import SparkleVersion
 from sparkle.statistics import userid_counting as mac_userid_counting
@@ -118,8 +117,7 @@ class AppTest(BaseTest, APITestCase):
     @is_private()
     def test_create(self):
         data = dict(id='test_id', name='test_name', data_set=[])
-        response = self.client.post(reverse(self.url
-                                            ), data, format='json')
+        response = self.client.post(reverse(self.url), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         obj = Application.objects.get(id=response.data['id'])
         self.assertEqual(response.data, self.serializer(obj).data)
@@ -232,7 +230,8 @@ class ChannelTest(BaseTest, APITestCase):
         self.assertEqual(obj.name, 'test_name2')
 
 
-class VersionTest(OverloadTestStorageMixin, BaseTest, APITestCase):
+@override_storage()
+class VersionTest(BaseTest, APITestCase):
     url = 'version-list'
     url_detail = 'version-detail'
     factory = VersionFactory
@@ -392,41 +391,60 @@ class LiveStatistics(APITestCase):
 
         hours = [datetime(2016, 2, 13, 0, tzinfo=pytz.UTC) + timedelta(hours=hour)
                  for hour in range(self.n_hours)]
-        self.win_statistics_ch1  = [('1.0.0.0', [[hour.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), self.n_hours - i]
-                                            for (i, hour)in enumerate(hours)])]
-        self.win_statistics_ch2 = [('2.0.0.0', [[hour.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), i]
-                                                for (i, hour)in enumerate(hours)])]
+        self.win_statistics_ch1 = [
+            ('1.0.0.0', [[hour.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), self.n_hours - i] for (i, hour)in enumerate(hours)])
+        ]
+        self.win_statistics_ch2 = [
+            ('2.0.0.0', [[hour.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), i] for (i, hour)in enumerate(hours)])
+        ]
         self.win_statistics = self.win_statistics_ch1 + self.win_statistics_ch2
 
-        self.mac_statistics_ch1 = [('3.0.0.0', [[hour.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), self.n_hours - i]
-                                            for (i, hour)in enumerate(hours)])]
-        self.mac_statistics_ch2 = [('4.0.0.1', [[hour.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), i]
-                                                for (i, hour)in enumerate(hours)])]
+        self.mac_statistics_ch1 = [
+            ('3.0.0.0', [[hour.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), self.n_hours - i] for (i, hour)in enumerate(hours)])
+        ]
+        self.mac_statistics_ch2 = [
+            ('4.0.0.1', [[hour.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), i] for (i, hour)in enumerate(hours)])
+        ]
         self.mac_statistics = self.mac_statistics_ch1 + self.mac_statistics_ch2
 
-        self.win_daily_stat_ch1 = [('1.0.0.0', [['2016-02-13T00:00:00.000000Z', 36], ['2016-02-14T00:00:00.000000Z', 12]])]
-        self.win_daily_stat_ch2 = [('2.0.0.0', [['2016-02-13T00:00:00.000000Z', 23], ['2016-02-14T00:00:00.000000Z', 35]])]
+        self.win_daily_stat_ch1 = [
+            ('1.0.0.0', [['2016-02-13T00:00:00.000000Z', 36], ['2016-02-14T00:00:00.000000Z', 12]])
+        ]
+        self.win_daily_stat_ch2 = [
+            ('2.0.0.0', [['2016-02-13T00:00:00.000000Z', 23], ['2016-02-14T00:00:00.000000Z', 35]])
+        ]
         self.win_daily_statistics = self.win_daily_stat_ch1 + self.win_daily_stat_ch2
 
-        self.mac_daily_stat_ch1 = [('3.0.0.0', [['2016-02-13T00:00:00.000000Z', 36], ['2016-02-14T00:00:00.000000Z', 12]])]
-        self.mac_daily_stat_ch2 = [('4.0.0.1', [['2016-02-13T00:00:00.000000Z', 23], ['2016-02-14T00:00:00.000000Z', 35]])]
+        self.mac_daily_stat_ch1 = [
+            ('3.0.0.0', [['2016-02-13T00:00:00.000000Z', 36], ['2016-02-14T00:00:00.000000Z', 12]])
+        ]
+        self.mac_daily_stat_ch2 = [
+            ('4.0.0.1', [['2016-02-13T00:00:00.000000Z', 23], ['2016-02-14T00:00:00.000000Z', 35]])
+        ]
         self.mac_daily_statistics = self.mac_daily_stat_ch1 + self.mac_daily_stat_ch2
 
-        self.data = {'hourly': {}, 'daily':{}}
-        self.data['hourly']['channel1'] = dict(data=dict(win=dict(self.win_statistics_ch1),
-                                             mac=dict(self.mac_statistics_ch1)))
-        self.data['hourly']['channel2'] = dict(data=dict(win=dict(self.win_statistics_ch2),
-                                             mac=dict(self.mac_statistics_ch2)))
-        self.data['hourly']['all'] = dict(data=dict(win=dict(self.win_statistics),
-                                             mac=dict(self.mac_statistics)))
-        self.data['hourly']['channel1'] = dict(data=dict(win=dict(self.win_statistics_ch1),
-                                                         mac=dict(self.mac_statistics_ch1)))
-        self.data['daily']['channel1'] = dict(data=dict(win=dict(self.win_daily_stat_ch1),
-                                             mac=dict(self.mac_daily_stat_ch1)))
-        self.data['daily']['channel2'] = dict(data=dict(win=dict(self.win_daily_stat_ch2),
-                                             mac=dict(self.mac_daily_stat_ch2)))
-        self.data['daily']['all'] = dict(data=dict(win=dict(self.win_daily_statistics),
-                                                            mac=dict(self.mac_daily_statistics)))
+        self.data = {'hourly': {}, 'daily': {}}
+        self.data['hourly']['channel1'] = dict(
+            data=dict(win=dict(self.win_statistics_ch1), mac=dict(self.mac_statistics_ch1))
+        )
+        self.data['hourly']['channel2'] = dict(
+            data=dict(win=dict(self.win_statistics_ch2), mac=dict(self.mac_statistics_ch2))
+        )
+        self.data['hourly']['all'] = dict(
+            data=dict(win=dict(self.win_statistics), mac=dict(self.mac_statistics))
+        )
+        self.data['hourly']['channel1'] = dict(
+            data=dict(win=dict(self.win_statistics_ch1), mac=dict(self.mac_statistics_ch1))
+        )
+        self.data['daily']['channel1'] = dict(
+            data=dict(win=dict(self.win_daily_stat_ch1), mac=dict(self.mac_daily_stat_ch1))
+        )
+        self.data['daily']['channel2'] = dict(
+            data=dict(win=dict(self.win_daily_stat_ch2), mac=dict(self.mac_daily_stat_ch2))
+        )
+        self.data['daily']['all'] = dict(
+            data=dict(win=dict(self.win_daily_statistics), mac=dict(self.mac_daily_statistics))
+        )
 
     @is_private()
     def test_unauthorized(self):
@@ -479,6 +497,7 @@ class LiveStatistics(APITestCase):
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertDictEqual(StatisticsMonthsSerializer(self.data['daily']['channel2']).data, response.data)
+
 
 class StatisticsMonthsMixin(object):
     url = None
@@ -641,7 +660,6 @@ class ServerVersionTest(APITestCase):
         response = self.client.get(reverse(self.url), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(self.serializer(self.data).data, response.data)
-
 
 
 class PartialUpdateTest(BaseTest, APITestCase):

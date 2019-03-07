@@ -3,6 +3,8 @@ anyjson==0.3.3
 billiard==3.5.0.5
 bitmapist==3.101
 boto==2.49.0
+boto3==1.7.47
+botocore==1.10.72
 celery==4.2.1
 certifi==2018.11.29
 chardet==3.0.4

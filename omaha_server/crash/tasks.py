@@ -42,6 +42,7 @@ from crash.utils import (
 
 
 logger = logging.getLogger(__name__)
+
 SENTRY_DOMAIN = getattr(settings, 'SENTRY_STACKTRACE_DOMAIN', None)
 SENTRY_ORG_SLUG = getattr(settings, 'SENTRY_STACKTRACE_ORG_SLUG', None)
 SENTRY_PROJ_SLUG = getattr(settings, 'SENTRY_STACKTRACE_PROJ_SLUG', None)

@@ -28,9 +28,9 @@ from omaha.utils import get_sec_since_midnight, get_days_since_20070101
 
 
 __all__ = [
-    'Response', 'Url', 'Urls', 'Package', 'Packages',
+    'Response', 'Url', 'Urls', 'Package', 'Packages', 'Data',
     'Action', 'Actions', 'Manifest', 'App', 'Updatecheck',
-    'Updatecheck_positive', 'Updatecheck_negative',
+    'Updatecheck_positive', 'Updatecheck_negative', 'Event'
 ]
 
 

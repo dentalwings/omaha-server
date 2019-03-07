@@ -92,18 +92,22 @@ def run_worker(data, versions, channels, year):
 
 class Command(BaseCommand):
     help = 'A command for generating fake statistics'
-    option_list = BaseCommand.option_list + (
-        make_option('--count',
-                    dest='count',
-                    default='1000',
-                    type=int,
-                    help='Total number of data values (default: 1000)'),
-        make_option('--year',
-                    dest='year',
-                    default=datetime.now().year,
-                    type=int,
-                    help='Year of statistics (default: Current year)'),
-    )
+
+    def add_arguments(self, parser):
+        parser.add_arguments(
+            '--count',
+            dest='count',
+            default='1000',
+            type=int,
+            help='Total number of data values (default: 1000)',
+        )
+        parser.add_arguments(
+            '--year',
+            dest='year',
+            default=datetime.now().year,
+            type=int,
+            help='Year of statistics (default: Current year)',
+        )
 
     def handle(self, *args, **options):
         user_count = options['count'] + 1

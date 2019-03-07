@@ -35,7 +35,6 @@ from omaha.tests.test_api import BaseTest
 from omaha_server.utils import is_private, storage_with_spaces_instance
 
 
-
 BASE_DIR = os.path.dirname(__file__)
 TEST_DATA_DIR = os.path.join(BASE_DIR, 'testdata')
 SYM_FILE = os.path.join(TEST_DATA_DIR, 'BreakpadTestApp.sym')

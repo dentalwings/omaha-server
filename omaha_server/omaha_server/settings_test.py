@@ -76,9 +76,15 @@ OMAHA_UID_KEY_PREFIX = 'test:uid'
 CRASH_SYMBOLS_PATH = os.path.join(BASE_DIR, 'crash', 'tests', 'testdata', 'symbols')
 CRASH_S3_MOUNT_PATH = os.path.join(BASE_DIR, 'crash', 'tests', 'testdata')
 
-AWS_STORAGE_BUCKET_NAME = 'dentalwings-testrunner'
+AWS_STORAGE_BUCKET_NAME = 'test'
 
 SENTRY_STACKTRACE_DOMAIN = 'test'
 SENTRY_STACKTRACE_ORG_SLUG = 'test'
 SENTRY_STACKTRACE_PROJ_SLUG = 'test'
 SENTRY_STACKTRACE_API_KEY = 'test'
+
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'UTC'
+USE_I18N = True
+USE_L10N = True
+USE_TZ = True

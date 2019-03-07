@@ -154,7 +154,6 @@ class BuilderTest(TestCase):
             version='39.0.0.0',
         )
 
-
         id = get_id(userid_beta)
         mark_event('request', id)
 

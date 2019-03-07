@@ -20,6 +20,7 @@ the License.
 
 from django import test
 from django.core.files.uploadedfile import SimpleUploadedFile
+from override_storage import override_storage
 
 from mock import patch
 
@@ -27,7 +28,6 @@ from omaha.models import Application, Channel, Platform, Version, Action, EVENT_
 from omaha.models import version_upload_to
 from omaha.factories import ApplicationFactory, ChannelFactory, PlatformFactory, VersionFactory
 from omaha.tests.utils import temporary_media_root
-from omaha.tests import OverloadTestStorageMixin
 
 
 class ApplicationModelTest(test.SimpleTestCase):
@@ -50,7 +50,8 @@ class PlatformModelTest(test.TestCase):
         self.assertTrue(Platform.objects.get(id=platform.id))
 
 
-class VersionModelTest(OverloadTestStorageMixin, test.TestCase):
+@override_storage()
+class VersionModelTest(test.TestCase):
     model = Version
 
     @temporary_media_root()
@@ -64,7 +65,6 @@ class VersionModelTest(OverloadTestStorageMixin, test.TestCase):
                              version.version,
                              version.file.name,
                          ))
-
 
     @temporary_media_root()
     def test_factory(self):
@@ -82,14 +82,14 @@ class VersionModelTest(OverloadTestStorageMixin, test.TestCase):
                          u'http://cache.pack.google.com/edgedl/chrome/install/782.112/')
 
     @temporary_media_root()
-    @test.override_settings(OMAHA_URL_PREFIX='http://example.com')
+    @test.override_settings(OMAHA_URL_PREFIX='http://example.com/')
     def test_property_default_storage(self):
         version = VersionFactory.create(file=SimpleUploadedFile('./chrome_installer.exe', ''))
-        _url = 'http://example.com/static/media/build/%s/%s/%s/37.0.2062.124/chrome_installer.exe' \
-              % (version.app.name, version.channel.name, version.platform.name)
+        _url = 'http://example.com/build/%s/%s/%s/37.0.2062.124/chrome_installer.exe' \
+               % (version.app.name, version.channel.name, version.platform.name)
         self.assertEqual(version.file_absolute_url, _url)
         self.assertEqual(version.file_package_name, 'chrome_installer.exe')
-        _url = u'http://example.com/static/media/build/%s/%s/%s/37.0.2062.124/' \
+        _url = u'http://example.com/build/%s/%s/%s/37.0.2062.124/' \
                % (version.app.name, version.channel.name, version.platform.name)
         self.assertEqual(version.file_url, _url)
 

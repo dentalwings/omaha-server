@@ -33,7 +33,9 @@ __all__ = [
     'VersionSerializer',
     'DataSerializer',
     'ActionSerializer',
-    'PartialUpdateSerializer'
+    'PartialUpdateSerializer',
+    'StatisticsMonthsSerializer',
+    'ServerVersionSerializer'
 ]
 
 

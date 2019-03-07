@@ -27,15 +27,16 @@ from xmlunittest import XmlTestMixin
 from freezegun import freeze_time
 
 from omaha.tests.utils import temporary_media_root
-from omaha.tests import OverloadTestStorageMixin
 from omaha.factories import ApplicationFactory, ChannelFactory
+from override_storage import override_storage
 
 from sparkle.models import SparkleVersion
 from sparkle.tests import fixtures
 from sparkle.factories import SparkleVersionFactory
 
 
-class SparkleViewTest(OverloadTestStorageMixin, TestCase, XmlTestMixin):
+@override_storage()
+class SparkleViewTest(TestCase, XmlTestMixin):
     model = SparkleVersion
 
     def setUp(self):
@@ -156,8 +157,8 @@ class SparkleViewTest(OverloadTestStorageMixin, TestCase, XmlTestMixin):
             file_size=23963192)
         second_crit_version.save()
 
-        response = self.client.get("%s?appVersionShort=13.0.782.110" % reverse('sparkle_appcast', args=(app.name, channel.name)),
-                                   HTTP_HOST='example.com')
+        response = self.client.get("%s?appVersionShort=13.0.782.110" %
+                                   reverse('sparkle_appcast', args=(app.name, channel.name)), HTTP_HOST='example.com')
 
         self.assertEqual(response.status_code, 200)
 
@@ -165,15 +166,14 @@ class SparkleViewTest(OverloadTestStorageMixin, TestCase, XmlTestMixin):
         self.assertXmlEquivalentOutputs(response.content,
                                         fixtures.first_crit_response_sparkle)
 
-        response = self.client.get("%s?appVersionShort=13.0.782.111" % reverse('sparkle_appcast', args=(app.name, channel.name)),
-                                   HTTP_HOST='example.com')
+        response = self.client.get("%s?appVersionShort=13.0.782.111" %
+                                   reverse('sparkle_appcast', args=(app.name, channel.name)), HTTP_HOST='example.com')
 
         self.assertEqual(response.status_code, 200)
 
         self.assertXmlDocument(response.content)
         self.assertXmlEquivalentOutputs(response.content,
                                         fixtures.second_crit_response_sparkle)
-
 
     @freeze_time('2014-10-14 08:28:05')
     @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
@@ -209,8 +209,8 @@ class SparkleViewTest(OverloadTestStorageMixin, TestCase, XmlTestMixin):
             file_size=23963192)
         last_version.save()
 
-        response = self.client.get("%s?appVersionShort=13.0.782.111" % reverse('sparkle_appcast', args=(app.name, channel.name)),
-                                   HTTP_HOST='example.com')
+        response = self.client.get("%s?appVersionShort=13.0.782.111" %
+                                   reverse('sparkle_appcast', args=(app.name, channel.name)), HTTP_HOST='example.com')
 
         self.assertEqual(response.status_code, 200)
 

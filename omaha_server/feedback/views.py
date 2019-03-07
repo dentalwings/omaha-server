@@ -23,7 +23,7 @@ import StringIO
 
 from google.protobuf.descriptor import FieldDescriptor
 from protobuf_to_dict import protobuf_to_dict, TYPE_CALLABLE_MAP
-from sentry_sdk import capture_message
+from sentry_sdk import capture_message, configure_scope
 from celery import signature
 
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -33,10 +33,10 @@ from django.http import HttpResponse, HttpResponseBadRequest
 from django.conf import settings
 
 from feedback.forms import FeedbackForm
-from feedback.tasks import send_email_feedback
 from feedback.proto_gen.extension_pb2 import ExtensionSubmit
 from omaha_server.utils import get_client_ip
 from utils import get_file_extension
+
 
 class FeedbackFormView(FormView):
     http_method_names = ('post',)
@@ -115,5 +115,5 @@ class FeedbackFormView(FormView):
 
     def form_invalid(self, form):
         message = 'Invalid feedback form: ' + form.errors.as_json()
-        capture_message(message=message, extra=form.cleaned_data, level='error')
+        capture_message(message=message, level='error')
         return HttpResponseBadRequest(message)

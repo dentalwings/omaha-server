@@ -1,11 +1,11 @@
-from storages.backends.s3boto import S3BotoStorage
+from storages.backends.s3boto3 import S3Boto3Storage
 from furl import furl
 
 from django.utils.module_loading import import_string
 from django.conf import settings
 
 
-class BaseS3Storage(S3BotoStorage):
+class BaseS3Storage(S3Boto3Storage):
     def url(self, name):
         url = super(BaseS3Storage, self).url(name)
         if not self.querystring_auth:

@@ -3,7 +3,7 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-.virtual_env
+.venv
 .idea
 .elasticbeanstalk
 

@@ -43,7 +43,7 @@ from omaha.models import (
 )
 from sparkle.models import SparkleVersion
 
-__all__ = ['userid_counting', 'is_user_active']
+__all__ = ['userid_counting', 'is_user_active', 'collect_statistics', 'get_users_versions', 'get_channel_statistics']
 
 setup_redis('default',
             settings.REDIS_STAT_HOST,

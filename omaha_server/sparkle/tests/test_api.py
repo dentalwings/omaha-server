@@ -23,6 +23,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 
 from rest_framework import status
 from rest_framework.test import APITestCase
+from override_storage import override_storage
 
 from omaha.factories import ApplicationFactory, ChannelFactory
 
@@ -31,12 +32,12 @@ from sparkle.factories import SparkleVersionFactory
 from sparkle.models import SparkleVersion
 
 from omaha.tests.utils import temporary_media_root
-from omaha.tests import OverloadTestStorageMixin
 from omaha.tests.test_api import BaseTest
 from omaha_server.utils import is_private
 
 
-class VersionTest(OverloadTestStorageMixin, BaseTest, APITestCase):
+@override_storage()
+class VersionTest(BaseTest, APITestCase):
     url = 'sparkleversion-list'
     url_detail = 'sparkleversion-detail'
     factory = SparkleVersionFactory

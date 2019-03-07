@@ -82,7 +82,7 @@ def parse_request(request):
     obj = objectify.fromstring(request, parser)
 
     # Check if this is coming from update_engine, which handles machines not applications
-    if obj.get('userid') == None and obj.app.get('machineid') != None:
+    if obj.get('userid') is None and obj.app.get('machineid') is not None:
         obj.set('userid', obj.app.get('machineid'))
 
     return obj
