@@ -89,6 +89,4 @@ class UsageStatsView(View):
         return super(UsageStatsView, self).dispatch(*args, **kwargs)
 
     def post(self, request):
-        client.captureMessage('Omaha Clients Usage Statistics: {0}'.format(request.body), tags=request.GET,
-                              data={'level': 20, 'logger': 'usagestats'})
         return HttpResponse('ok')
