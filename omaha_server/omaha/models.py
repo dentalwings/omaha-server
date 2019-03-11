@@ -45,7 +45,7 @@ from furl import furl
 
 __all__ = ['Application', 'Channel', 'Platform', 'Version',
            'Action', 'EVENT_DICT_CHOICES', 'EVENT_CHOICES',
-           'Data', 'AppRequest', 'Request']
+           'Data', 'AppRequest', 'Request', 'PartialUpdate']
 
 
 class BaseModel(models.Model):

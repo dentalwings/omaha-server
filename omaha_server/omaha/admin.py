@@ -27,6 +27,7 @@ from versionfield import VersionField
 from omaha.models import Channel, Platform, Application, Version, Action, PartialUpdate, Data
 from omaha.forms import ApplicationAdminForm, VersionAdminForm, ActionAdminForm, DataAdminForm
 
+
 @admin.register(Platform)
 class PlatformAdmin(admin.ModelAdmin):
     list_display = ('name',)
@@ -48,6 +49,7 @@ class ApplicationAdmin(admin.ModelAdmin):
     list_display = ('name', 'id',)
     form = ApplicationAdminForm
     inlines = (DataInline,)
+
 
 class ActionInline(admin.StackedInline):
     model = Action
@@ -74,6 +76,7 @@ def my_display_for_field(value, field, *args, **kwargs):
     if isinstance(field, VersionField):
         return smart_text(value)
     return django_display_for_field(value, field, *args, **kwargs)
+
 
 django_display_for_field = copy.deepcopy(utils.display_for_field)
 utils.display_for_field = my_display_for_field

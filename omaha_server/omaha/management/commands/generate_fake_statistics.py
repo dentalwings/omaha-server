@@ -22,7 +22,6 @@ import __builtin__
 import random
 from datetime import datetime
 from uuid import uuid4
-from optparse import make_option
 from multiprocessing import Pool, cpu_count
 from multiprocessing.dummy import Pool as ThreadPool
 from functools import partial
@@ -60,9 +59,9 @@ def generate_statistics(i, versions, channels, year):
     channel = random.choice(channels)
     if platform != 'mac':
         app = create_app_xml(appid=version.app.id,
-                       version=str(version.version),
-                       tag=channel.name,
-                       events=[random.choice(events)])
+                             version=str(version.version),
+                             tag=channel.name,
+                             events=[random.choice(events)])
         app_list = [app]
     else:
         app_list = dict(

@@ -31,7 +31,7 @@ from celery import signature
 from omaha.models import Application, Version, Action, Data
 
 
-__all__ = ['ApplicationAdminForm', 'VersionAdminForm', 'ActionAdminForm']
+__all__ = ['ApplicationAdminForm', 'VersionAdminForm', 'ActionAdminForm', 'DataAdminForm']
 
 
 class ApplicationAdminForm(forms.ModelForm):

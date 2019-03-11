@@ -101,7 +101,7 @@ def _(cls, qs):
 
 
 def s3_bulk_delete(qs, file_fields, s3_fields):
-    conn = boto.connect_s3(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
+    conn = boto.connect_s3()
     bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
 
     file_keys = qs.values_list(*file_fields)
@@ -199,40 +199,36 @@ def monitoring_size():
     if size > gpm['Version__limit_size'] * 1024 * 1024 * 1024:
         capture_message("[Limitation]Size limit of omaha versions is exceeded. Current size is %s [%d]" %
                              (filters.filesizeformat(size).replace(u'\xa0', u' '), time.time()),
-                             category='limitations', level="error")
+                             level="error")
     cache.set('omaha_version_size', size)
 
     size = SparkleVersion.objects.get_size()
     if size > gpm['SparkleVersion__limit_size'] * 1024 * 1024 * 1024:
-        capture_message("[Limitation]Size limit of sparkle versions is exceeded. Current size is %s [%d]" %
-                             (filters.filesizeformat(size).replace(u'\xa0', u' '), time.time()),
-                             category='limitations', level="error")
+        capture_message("[Limitation]Size limit of sparkle versions is exceeded. Current size is %s [%d]"
+                        % (filters.filesizeformat(size).replace(u'\xa0', u' '), time.time()), level="error")
     cache.set('sparkle_version_size', size)
 
     size = Feedback.objects.get_size()
     if size > gpm['Feedback__limit_size'] * 1024 * 1024 * 1024:
-        capture_message("[Limitation]Size limit of feedbacks is exceeded. Current size is %s [%d]" %
-                             (filters.filesizeformat(size).replace(u'\xa0', u' '), time.time()),
-                             category='limitations', level="error")
+        capture_message("[Limitation]Size limit of feedbacks is exceeded. Current size is %s [%d]"
+                        % (filters.filesizeformat(size).replace(u'\xa0', u' '), time.time()), level="error")
     cache.set('feedbacks_size', size)
 
     size = Crash.objects.get_size()
     if size > gpm['Crash__limit_size'] * 1024 * 1024 * 1024:
-        capture_message("[Limitation]Size limit of crashes is exceeded. Current size is %s [%d]" %
-                             (filters.filesizeformat(size).replace(u'\xa0', u' '), time.time()),
-                             category='limitations', level="error")
+        capture_message("[Limitation]Size limit of crashes is exceeded. Current size is %s [%d]"
+                        % (filters.filesizeformat(size).replace(u'\xa0', u' '), time.time()), level="error")
     cache.set('crashes_size', size)
 
     size = Symbols.objects.get_size()
     if size > gpm['Symbols__limit_size'] * 1024 * 1024 * 1024:
-        capture_message("[Limitation]Size limit of symbols is exceeded. Current size is %s [%d]" %
-                             (filters.filesizeformat(size).replace(u'\xa0', u' '), time.time()),
-                             category='limitations', level="error")
+        capture_message("[Limitation]Size limit of symbols is exceeded. Current size is %s [%d]"
+                        % (filters.filesizeformat(size).replace(u'\xa0', u' '), time.time()), level="error")
     cache.set('symbols_size', size)
 
 
 def handle_dangling_files(model, prefix, file_fields):
-    conn = boto.connect_s3(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
+    conn = boto.connect_s3()
     bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
     result = dict()
     dangling_files_in_db, dangling_files_in_s3 = check_dangling_files(model, prefix, file_fields, bucket)

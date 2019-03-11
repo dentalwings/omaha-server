@@ -28,29 +28,29 @@ class BaseS3Test(object):
     file_fields = None
     files = None
 
-    @moto.mock_s3
+    @moto.mock_s3_deprecated
     def test_model_delete(self):
         conn = boto.connect_s3()
-        conn.create_bucket('test-omaha-server')
+        conn.create_bucket('test')
         obj = self.factory()
 
-        keys = conn.get_bucket('test-omaha-server').get_all_keys()
+        keys = conn.get_bucket('test').get_all_keys()
         keys = [key.name for key in keys]
         for field in self.file_fields:
             self.assertIn(getattr(obj, field).name, keys)
 
         obj.delete()
-        keys = conn.get_bucket('test-omaha-server').get_all_keys()
+        keys = conn.get_bucket('test').get_all_keys()
         self.assertFalse(keys)
 
-    @moto.mock_s3
+    @moto.mock_s3_deprecated
     def test_model_update(self):
         conn = boto.connect_s3()
-        conn.create_bucket('test-omaha-server')
+        conn.create_bucket('test')
         obj = self.factory()
         new_obj = self.factory()
 
-        old_keys = conn.get_bucket('test-omaha-server').get_all_keys()
+        old_keys = conn.get_bucket('test').get_all_keys()
         old_keys = [key.name for key in old_keys]
 
         for field in self.file_fields:
@@ -58,17 +58,17 @@ class BaseS3Test(object):
             setattr(obj, field, getattr(new_obj, field))
             obj.save()
 
-        new_keys = conn.get_bucket('test-omaha-server').get_all_keys()
+        new_keys = conn.get_bucket('test').get_all_keys()
         self.assertFalse(set(old_keys) & set(new_keys))
 
-    @moto.mock_s3
+    @moto.mock_s3_deprecated
     def test_bulk_delete(self):
         conn = boto.connect_s3()
-        conn.create_bucket('test-omaha-server')
+        conn.create_bucket('test')
         self.factory.create_batch(10)
         qs = self.model.objects.all()
         self.assertEqual(qs.count(), 10)
-        keys = conn.get_bucket('test-omaha-server').get_all_keys()
+        keys = conn.get_bucket('test').get_all_keys()
         self.assertEqual(len(keys), len(self.file_fields) * 10)
         with mock.patch('boto.__init__') as my_mock:
             my_mock.connect_s3.return_value = conn
@@ -77,16 +77,16 @@ class BaseS3Test(object):
             except boto.exception.S3ResponseError:  # but mocked boto does
                 pass
 
-        keys = conn.get_bucket('test-omaha-server').get_all_keys()
+        keys = conn.get_bucket('test').get_all_keys()
         self.assertFalse(keys)
 
-    @moto.mock_s3
+    @moto.mock_s3_deprecated
     def test_dangling_delete_db(self):
         conn = boto.connect_s3()
-        conn.create_bucket('test-omaha-server')
-        bucket = conn.get_bucket('test-omaha-server')
+        conn.create_bucket('test')
+        bucket = conn.get_bucket('test')
         self.factory.create_batch(2)
-        keys = [key.name for key in conn.get_bucket('test-omaha-server').get_all_keys()]
+        keys = [key.name for key in conn.get_bucket('test').get_all_keys()]
         bucket.delete_key(keys[0])
         result = omaha.limitation.handle_dangling_files(
             self.model,
@@ -95,12 +95,12 @@ class BaseS3Test(object):
         )
         self.assertEqual(result['status'], 'Send notifications')
 
-    @moto.mock_s3
+    @moto.mock_s3_deprecated
     def test_dangling_delete_s3(self):
         # create bucket and send file in s3
         conn = boto.connect_s3()
-        conn.create_bucket('test-omaha-server')
-        bucket = conn.get_bucket('test-omaha-server')
+        conn.create_bucket('test')
+        bucket = conn.get_bucket('test')
         prefix = get_prefix(self.model)
         for f in self.files:
             k = Key(bucket, '%s/%s' % (f['prefix'], f['file_path']))
@@ -115,7 +115,7 @@ class BaseS3Test(object):
         )
         for _file in result['data']:
             self.assertFalse(
-                _file in [key.name for key in conn.get_bucket('test-omaha-server').get_all_keys()]
+                _file in [key.name for key in conn.get_bucket('test').get_all_keys()]
             )
 
 
