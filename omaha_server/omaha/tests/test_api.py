@@ -50,7 +50,15 @@ from omaha.serializers import (
     ServerVersionSerializer,
     PartialUpdateSerializer,
 )
-from omaha.factories import ApplicationFactory, DataFactory, PlatformFactory, ChannelFactory, VersionFactory, ActionFactory, PartialUpdateFactory
+from omaha.factories import (
+    ApplicationFactory,
+    DataFactory,
+    PlatformFactory,
+    ChannelFactory,
+    VersionFactory,
+    ActionFactory,
+    PartialUpdateFactory
+)
 from omaha.models import Application, Data, Channel, Platform, Version, Action, PartialUpdate
 from omaha.tests import fixtures
 from omaha.tests.utils import temporary_media_root, create_app_xml

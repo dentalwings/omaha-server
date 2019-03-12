@@ -23,7 +23,7 @@ import StringIO
 
 from google.protobuf.descriptor import FieldDescriptor
 from protobuf_to_dict import protobuf_to_dict, TYPE_CALLABLE_MAP
-from sentry_sdk import capture_message, configure_scope
+from sentry_sdk import capture_message
 from celery import signature
 
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -99,7 +99,8 @@ class FeedbackFormView(FormView):
             blackbox_name += '.%s' % file_description['file_extension']
         else:
             capture_message(
-                'This is file type not supported, mime type: %s' % file_description['mime_type'], level='error'
+                'This is file type not supported, mime type: %s' % file_description['mime_type'],
+                level='error'
             )
         return blackbox_name
 
@@ -115,5 +116,5 @@ class FeedbackFormView(FormView):
 
     def form_invalid(self, form):
         message = 'Invalid feedback form: ' + form.errors.as_json()
-        capture_message(message=message, level='error')
+        capture_message(message, level='error')
         return HttpResponseBadRequest(message)

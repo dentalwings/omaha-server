@@ -25,6 +25,7 @@ from django.test import override_settings
 
 from lxml.builder import E
 
+
 class temporary_media_root(override_settings):
     """Temporarily override settings.MEDIA_ROOT with a temporary directory.
 
@@ -32,7 +33,7 @@ class temporary_media_root(override_settings):
 
     Use this function as a context manager:
 
-    >>> from django_downloadview.test import temporary_media_root
+    >>> from omaha.tests.utils import temporary_media_root
     >>> from django.conf import settings  # NoQA
     >>> global_media_root = settings.MEDIA_ROOT
     >>> with temporary_media_root():

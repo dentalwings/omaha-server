@@ -7,6 +7,7 @@ from django.conf import settings
 
 import requests
 
+
 class is_private(object):
     def __init__(self, is_private=True):
         self.is_private = is_private
@@ -81,5 +82,6 @@ def get_sentry_project_slug(domain, organization, project_id, api_key):
 class StorageWithSpaces(DefaultStorage):
     def get_valid_name(self, name):
         return name
+
 
 storage_with_spaces_instance = StorageWithSpaces()

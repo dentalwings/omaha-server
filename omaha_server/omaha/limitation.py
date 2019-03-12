@@ -197,33 +197,47 @@ def delete_size_is_exceeded(app, model_name, limit=None):
 def monitoring_size():
     size = OmahaVersion.objects.get_size()
     if size > gpm['Version__limit_size'] * 1024 * 1024 * 1024:
-        capture_message("[Limitation]Size limit of omaha versions is exceeded. Current size is %s [%d]" %
-                             (filters.filesizeformat(size).replace(u'\xa0', u' '), time.time()),
-                             level="error")
+        capture_message(
+            "[Limitation]Size limit of omaha versions is exceeded. Current size is %s [%d]"
+            % (filters.filesizeformat(size).replace(u'\xa0', u' '), time.time()),
+            level='error'
+        )
     cache.set('omaha_version_size', size)
 
     size = SparkleVersion.objects.get_size()
     if size > gpm['SparkleVersion__limit_size'] * 1024 * 1024 * 1024:
-        capture_message("[Limitation]Size limit of sparkle versions is exceeded. Current size is %s [%d]"
-                        % (filters.filesizeformat(size).replace(u'\xa0', u' '), time.time()), level="error")
+        capture_message(
+            "[Limitation]Size limit of sparkle versions is exceeded. Current size is %s [%d]"
+            % (filters.filesizeformat(size).replace(u'\xa0', u' '), time.time()),
+            level='error'
+        )
     cache.set('sparkle_version_size', size)
 
     size = Feedback.objects.get_size()
     if size > gpm['Feedback__limit_size'] * 1024 * 1024 * 1024:
-        capture_message("[Limitation]Size limit of feedbacks is exceeded. Current size is %s [%d]"
-                        % (filters.filesizeformat(size).replace(u'\xa0', u' '), time.time()), level="error")
+        capture_message(
+            "[Limitation]Size limit of feedbacks is exceeded. Current size is %s [%d]"
+            % (filters.filesizeformat(size).replace(u'\xa0', u' '), time.time()),
+            level='error'
+        )
     cache.set('feedbacks_size', size)
 
     size = Crash.objects.get_size()
     if size > gpm['Crash__limit_size'] * 1024 * 1024 * 1024:
-        capture_message("[Limitation]Size limit of crashes is exceeded. Current size is %s [%d]"
-                        % (filters.filesizeformat(size).replace(u'\xa0', u' '), time.time()), level="error")
+        capture_message(
+            "[Limitation]Size limit of crashes is exceeded. Current size is %s [%d]"
+            % (filters.filesizeformat(size).replace(u'\xa0', u' '), time.time()),
+            level='error'
+        )
     cache.set('crashes_size', size)
 
     size = Symbols.objects.get_size()
     if size > gpm['Symbols__limit_size'] * 1024 * 1024 * 1024:
-        capture_message("[Limitation]Size limit of symbols is exceeded. Current size is %s [%d]"
-                        % (filters.filesizeformat(size).replace(u'\xa0', u' '), time.time()), level="error")
+        capture_message(
+            "[Limitation]Size limit of symbols is exceeded. Current size is %s [%d]"
+            % (filters.filesizeformat(size).replace(u'\xa0', u' '), time.time()),
+            level='error'
+        )
     cache.set('symbols_size', size)
 
 

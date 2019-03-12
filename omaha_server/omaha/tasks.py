@@ -17,14 +17,13 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
 """
-import time
 import logging
 import uuid
 
 from django.template import defaultfilters as filters
 
 from omaha_server.celery import app
-from omaha_server.utils import add_extra_to_log_message, get_splunk_url
+from omaha_server.utils import add_extra_to_log_message
 from omaha import statistics
 from omaha.parser import parse_request
 from omaha.limitation import (
@@ -38,7 +37,7 @@ from omaha.models import Version
 from sparkle.models import SparkleVersion
 from crash.models import Crash, Symbols
 from feedback.models import Feedback
-from sentry_sdk import capture_event, capture_message
+
 
 @app.task(ignore_result=True)
 def collect_statistics(request, ip=None):
@@ -56,21 +55,6 @@ def auto_delete_older_than():
         result = delete_older_than(*model)
         if result.get('count', 0):
             log_id = str(uuid.uuid4())
-            params = dict(log_id=log_id)
-            splunk_url = get_splunk_url(params)
-            splunk_filter = 'log_id=%s' % log_id if splunk_url else None
-            ids_list = sorted([element['id'] for element in result['elements']])
-            sentry_hint = {
-                "id": log_id,
-                "splunk_url": splunk_url,
-                "splunk_filter": splunk_filter,
-                "%s_list" % (model[1]): ids_list,
-                "category": 'limitation',
-            }
-            sentry_message =\
-                "[Limitation]Periodic task 'Older than' cleaned up %d %s, total size of cleaned space is %s [%d]" %\
-                (result['count'], model[1], filters.filesizeformat(result['size']).replace(u'\xa0', u' '), time.time())
-            capture_event({'message': sentry_message, 'level': 'error'}, sentry_hint)
             extra = dict(
                 log_id=log_id,
                 meta=True,
@@ -96,21 +80,6 @@ def auto_delete_size_is_exceeded():
         result = delete_size_is_exceeded(*model)
         if result.get('count', 0):
             log_id = str(uuid.uuid4())
-            params = dict(log_id=log_id)
-            splunk_url = get_splunk_url(params)
-            splunk_filter = 'log_id=%s' % log_id if splunk_url else None
-            ids_list = sorted([element['id'] for element in result['elements']])
-            sentry_hint = {
-                "id": log_id,
-                "splunk_url": splunk_url,
-                "splunk_filter": splunk_filter,
-                "%s_list" % (model[1]): ids_list,
-                "category": 'limitation'
-            }
-            sentry_message =\
-                "[Limitation]Periodic task 'Size is exceeded' cleaned up %d %s, total size of cleaned space is %s [%d]" %\
-                (result['count'], model[1], filters.filesizeformat(result['size']).replace(u'\xa0', u' '), time.time())
-            capture_event({'message': sentry_message, 'level': 'error'}, sentry_hint)
             extra = dict(
                 log_id=log_id,
                 meta=True,
@@ -131,21 +100,6 @@ def auto_delete_duplicate_crashes():
     result = delete_duplicate_crashes()
     if result.get('count', 0):
         log_id = str(uuid.uuid4())
-        params = dict(log_id=log_id)
-        splunk_url = get_splunk_url(params)
-        splunk_filter = 'log_id=%s' % log_id if splunk_url else None
-        ids_list = sorted([element['id'] for element in result['elements']])
-        sentry_hint = {
-            "id": log_id,
-            "splunk_url": splunk_url,
-            "splunk_filter": splunk_filter,
-            "crash_list": ids_list,
-            "category": 'limitation',
-        }
-        sentry_message = \
-            "[Limitation]Periodic task 'Duplicated' cleaned up %d crashes, total size of cleaned space is %s [%d]" % \
-            (result['count'], filters.filesizeformat(result['size']).replace(u'\xa0', u' '), time.time())
-        capture_event({'message': sentry_message, 'level': 'error'}, sentry_hint)
         extra = dict(
             log_id=log_id,
             meta=True,
@@ -186,17 +140,17 @@ def deferred_manual_cleanup(model, limit_size=None, limit_days=None, limit_dupli
             full_result['elements'] += result['elements']
 
     log_id = str(uuid.uuid4())
-    params = dict(log_id=log_id)
-    splunk_url = get_splunk_url(params)
-    splunk_filter = 'log_id=%s' % log_id if splunk_url else None
-    ids_list = sorted([element['id'] for element in full_result['elements']])
-    sentry_extra = {"id": log_id, "splunk_url": splunk_url, "splunk_filter": splunk_filter, "%s_list" % (model[1]): ids_list}
-    capture_event("[Limitation]Manual cleanup freed %d %s, total size of cleaned space is %s [%s]" %
-                         (full_result['count'], model[1], filters.filesizeformat(full_result['size']).replace(u'\xa0', u' '), log_id),
-                         category='limitations', extra=sentry_extra, level='error')
-
-    extra = dict(log_id=log_id, meta=True, count=full_result['count'], size=filters.filesizeformat(full_result['size']).replace(u'\xa0', u' '), model=model[1],
-                 limit_duplicated=limit_duplicated, limit_size=limit_size, limit_days=limit_days, reason='manual')
+    extra = dict(
+        log_id=log_id,
+        meta=True,
+        count=full_result['count'],
+        size=filters.filesizeformat(full_result['size']).replace(u'\xa0', u' '),
+        model=model[1],
+        limit_duplicated=limit_duplicated,
+        limit_size=limit_size,
+        limit_days=limit_days,
+        reason='manual'
+    )
     logger.info(add_extra_to_log_message('Manual cleanup', extra=extra))
     for element in full_result['elements']:
         element.update({"log_id": log_id, "%s_id" % (model[1]): element.pop('id')})
@@ -236,13 +190,7 @@ def auto_delete_dangling_files():
         )
         if result['mark'] == 'db':
             logger.info('Dangling files detected in db [%d], files path: %s' % (result['count'], result['data']))
-            capture_message(
-                "[Limitation]Dangling files detected in db, total: %d" % result['count'],
-                level='error')
         elif result['mark'] == 's3':
             logger.info('Dangling files deleted from s3 [%d], files path: %s' % (result['count'], result['data']))
-            capture_message(
-                "[Limitation]Dangling files deleted from s3, cleaned up %d files" % result['count'],
-                level='error')
         else:
             logger.info('Dangling files not detected')

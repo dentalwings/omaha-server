@@ -4,8 +4,6 @@ from .settings import *
 
 import os
 
-os.environ.setdefault('OMAHA_SERVER_PRIVATE', 'True')
-
 
 class DisableMigrations(object):
 
