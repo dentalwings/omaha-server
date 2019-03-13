@@ -3,12 +3,11 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-.virtual_env
+venv
 .elasticbeanstalk
 
 # Unit test / coverage reports
 htmlcov/
-.tox/
 .coverage
 .cache
 nosetests.xml
@@ -36,3 +35,6 @@ deploy/google/app.yaml
 
 ### Vagrant ###
 .vagrant/
+
+### PyCharm ###
+.idea/
