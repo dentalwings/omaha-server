@@ -143,7 +143,6 @@ eb deploy {PrivateEnvironment|PublicEnvironment}
 | DB_PUBLIC_USER            |                      |                            |
 | DB_PUBLIC_PASSWORD        |                      |                            |
 | AWS_ROLE                  |                      |                            |
-| OMAHA_URL_PREFIX          | no trailing slash!   |                            |
 | SENTRY_DSN                | Sentry DSN           |                            |
 | OMAHA_ONLY_HTTPS          | HTTPS-only           | False                      |
 | CUP_REQUEST_VALIDATION    |                      | False                      |

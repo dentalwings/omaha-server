@@ -79,10 +79,6 @@ class SparkleVersion(BaseModel):
         return os.path.basename(self.file_absolute_url)
 
     @property
-    def file_url(self):
-        return '%s/' % os.path.dirname(self.file_absolute_url)
-
-    @property
     def size(self):
         return self.file_size
 

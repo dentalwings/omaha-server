@@ -19,6 +19,7 @@ the License.
 """
 
 from django.test import TestCase
+from django.test import override_settings
 from django.test.client import Client
 from django.core.urlresolvers import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -44,7 +45,7 @@ class SparkleViewTest(TestCase, XmlTestMixin):
         super(SparkleViewTest, self).setUp()
 
     @freeze_time('2014-10-14 08:28:05')
-    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_sparkle(self):
         app = ApplicationFactory.create(id='{D0AB2EBC-931B-4013-9FEB-C9C4C2225C8C}', name='chrome')
         channel = ChannelFactory.create(name='stable')
@@ -54,7 +55,8 @@ class SparkleViewTest(TestCase, XmlTestMixin):
             version='782.112',
             short_version='13.0.782.112',
             file=SimpleUploadedFile('./chrome.dmg', b'_' * 23963192),
-            file_size=23963192)
+            file_size=23963192,
+        )
         obj.save()
 
         response = self.client.get(reverse('sparkle_appcast', args=(app.name, channel.name)),
@@ -63,11 +65,10 @@ class SparkleViewTest(TestCase, XmlTestMixin):
         self.assertEqual(response.status_code, 200)
 
         self.assertXmlDocument(response.content)
-        self.assertXmlEquivalentOutputs(response.content,
-                                        fixtures.response_sparkle)
+        self.assertXmlEquivalentOutputs(response.content, fixtures.response_sparkle)
 
     @freeze_time('2014-10-14 08:28:05')
-    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_sparkle(self):
         app = ApplicationFactory.create(id='{D0AB2EBC-931B-4013-9FEB-C9C4C2225C8C}', name='chrome')
         channel = ChannelFactory.create(name='stable')
@@ -78,7 +79,8 @@ class SparkleViewTest(TestCase, XmlTestMixin):
             short_version='13.0.782.112',
             minimum_system_version='10.8.6',
             file=SimpleUploadedFile('./chrome.dmg', b'_' * 23963192),
-            file_size=23963192)
+            file_size=23963192,
+        )
         obj.save()
 
         response = self.client.get(reverse('sparkle_appcast', args=(app.name, channel.name)),
@@ -87,11 +89,10 @@ class SparkleViewTest(TestCase, XmlTestMixin):
         self.assertEqual(response.status_code, 200)
 
         self.assertXmlDocument(response.content)
-        self.assertXmlEquivalentOutputs(response.content,
-                                        fixtures.response_sparkle_with_minimum_system_version)
+        self.assertXmlEquivalentOutputs(response.content, fixtures.response_sparkle_with_minimum_system_version)
 
     @freeze_time('2014-10-14 08:28:05')
-    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_sparkle_with_dsa_signature(self):
         app = ApplicationFactory.create(id='{D0AB2EBC-931B-4013-9FEB-C9C4C2225C9C}', name='chrome_dsa')
         channel = ChannelFactory.create(name='stable')
@@ -111,11 +112,10 @@ class SparkleViewTest(TestCase, XmlTestMixin):
         self.assertEqual(response.status_code, 200)
 
         self.assertXmlDocument(response.content)
-        self.assertXmlEquivalentOutputs(fixtures.response_sparkle_with_dsa,
-                                        response.content)
+        self.assertXmlEquivalentOutputs(response.content, fixtures.response_sparkle_with_dsa)
 
     @freeze_time('2014-10-14 08:28:05')
-    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_sparkle_critical(self):
         app = ApplicationFactory.create(id='{D0AB2EBC-931B-4013-9FEB-C9C4C2225C8C}', name='chrome')
         channel = ChannelFactory.create(name='stable')
@@ -125,7 +125,8 @@ class SparkleViewTest(TestCase, XmlTestMixin):
             version='782.110',
             short_version='13.0.782.110',
             file=SimpleUploadedFile('./chrome1.dmg', b'_' * 23963192),
-            file_size=23963192)
+            file_size=23963192,
+        )
         first_version.save()
 
         first_crit_version = SparkleVersionFactory.create(
@@ -135,7 +136,8 @@ class SparkleViewTest(TestCase, XmlTestMixin):
             short_version='13.0.782.111',
             is_critical=True,
             file=SimpleUploadedFile('./chrome2.dmg', b'_' * 23963192),
-            file_size=23963192)
+            file_size=23963192,
+        )
         first_crit_version.save()
 
         last_version = SparkleVersionFactory.create(
@@ -144,7 +146,8 @@ class SparkleViewTest(TestCase, XmlTestMixin):
             version='782.112',
             short_version='13.0.782.112',
             file=SimpleUploadedFile('./chrome3.dmg', b'_' * 23963192),
-            file_size=23963192)
+            file_size=23963192,
+        )
         last_version.save()
 
         second_crit_version = SparkleVersionFactory.create(
@@ -154,7 +157,8 @@ class SparkleViewTest(TestCase, XmlTestMixin):
             short_version='13.0.782.113',
             is_critical=True,
             file=SimpleUploadedFile('./chrome4.dmg', b'_' * 23963192),
-            file_size=23963192)
+            file_size=23963192,
+        )
         second_crit_version.save()
 
         response = self.client.get("%s?appVersionShort=13.0.782.110" %
@@ -163,8 +167,7 @@ class SparkleViewTest(TestCase, XmlTestMixin):
         self.assertEqual(response.status_code, 200)
 
         self.assertXmlDocument(response.content)
-        self.assertXmlEquivalentOutputs(response.content,
-                                        fixtures.first_crit_response_sparkle)
+        self.assertXmlEquivalentOutputs(response.content, fixtures.first_crit_response_sparkle)
 
         response = self.client.get("%s?appVersionShort=13.0.782.111" %
                                    reverse('sparkle_appcast', args=(app.name, channel.name)), HTTP_HOST='example.com')
@@ -172,11 +175,10 @@ class SparkleViewTest(TestCase, XmlTestMixin):
         self.assertEqual(response.status_code, 200)
 
         self.assertXmlDocument(response.content)
-        self.assertXmlEquivalentOutputs(response.content,
-                                        fixtures.second_crit_response_sparkle)
+        self.assertXmlEquivalentOutputs(response.content, fixtures.second_crit_response_sparkle)
 
     @freeze_time('2014-10-14 08:28:05')
-    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_sparkle_critical_on_other_channel(self):
         app = ApplicationFactory.create(id='{D0AB2EBC-931B-4013-9FEB-C9C4C2225C8C}', name='chrome')
         channel = ChannelFactory.create(name='stable')
@@ -187,7 +189,8 @@ class SparkleViewTest(TestCase, XmlTestMixin):
             version='782.110',
             short_version='13.0.782.110',
             file=SimpleUploadedFile('./chrome0.dmg', b'_' * 23963192),
-            file_size=23963192)
+            file_size=23963192,
+        )
         first_version.save()
 
         first_crit_version = SparkleVersionFactory.create(
@@ -197,7 +200,8 @@ class SparkleViewTest(TestCase, XmlTestMixin):
             short_version='13.0.782.111',
             is_critical=True,
             file=SimpleUploadedFile('./chrome2.dmg', b'_' * 23963192),
-            file_size=23963192)
+            file_size=23963192,
+        )
         first_crit_version.save()
 
         last_version = SparkleVersionFactory.create(
@@ -206,7 +210,8 @@ class SparkleViewTest(TestCase, XmlTestMixin):
             version='782.112',
             short_version='13.0.782.112',
             file=SimpleUploadedFile('./chrome.dmg', b'_' * 23963192),
-            file_size=23963192)
+            file_size=23963192,
+        )
         last_version.save()
 
         response = self.client.get("%s?appVersionShort=13.0.782.111" %
@@ -215,5 +220,4 @@ class SparkleViewTest(TestCase, XmlTestMixin):
         self.assertEqual(response.status_code, 200)
 
         self.assertXmlDocument(response.content)
-        self.assertXmlEquivalentOutputs(response.content,
-                                        fixtures.response_sparkle)
+        self.assertXmlEquivalentOutputs(response.content, fixtures.response_sparkle)

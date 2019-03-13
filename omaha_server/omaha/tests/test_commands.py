@@ -6,7 +6,8 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 
 from bitmapist import YearEvents
 
-from omaha.tests.utils import temporary_media_root
+from override_storage import override_storage
+
 from omaha.utils import redis, timezone
 from omaha.models import (
     Application,
@@ -19,7 +20,7 @@ from omaha.models import (
 
 
 class GenerateFakeDataTest(TestCase):
-    @temporary_media_root()
+    @override_storage()
     def setUp(self):
         redis.flushdb()
         self.app = Application.objects.create(id='{5FAD27D4-6BFA-4daa-A1B3-5A1F821FEE0F}', name='app')
@@ -49,7 +50,7 @@ class GenerateFakeDataTest(TestCase):
 
 
 class GenerateFakeStatisticsTest(TestCase):
-    @temporary_media_root()
+    @override_storage()
     def setUp(self):
         redis.flushdb()
         self.app = Application.objects.create(id='{5FAD27D4-6BFA-4daa-A1B3-5A1F821FEE0F}', name='app')

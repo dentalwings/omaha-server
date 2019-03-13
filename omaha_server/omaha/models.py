@@ -45,7 +45,8 @@ from furl import furl
 
 __all__ = ['Application', 'Channel', 'Platform', 'Version',
            'Action', 'EVENT_DICT_CHOICES', 'EVENT_CHOICES',
-           'Data', 'AppRequest', 'Request', 'PartialUpdate']
+           'Data', 'AppRequest', 'Request', 'PartialUpdate',
+           'BaseModel', 'version_upload_to']
 
 
 class BaseModel(models.Model):
@@ -135,21 +136,13 @@ class Version(BaseModel):
     def file_absolute_url(self):
         url = furl(self.file.url)
         if not url.scheme:
-            url = '%s%s' % (settings.OMAHA_URL_PREFIX, url)
+            url = '%s%s' % (settings.MEDIA_URL, url)
         return str(url)
 
     @property
     def file_package_name(self):
         url = furl(self.file_absolute_url)
         return os.path.basename(url.pathstr)
-
-    @property
-    def file_url(self):
-        url = furl(self.file_absolute_url)
-        if url.port and url.port != 80:
-            return '%s://%s:%d%s/' % (url.scheme, url.host, url.port, os.path.dirname(url.pathstr))
-        else:
-            return '%s://%s%s/' % (url.scheme, url.host, os.path.dirname(url.pathstr))
 
     @property
     def size(self):
