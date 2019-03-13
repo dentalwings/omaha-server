@@ -9,7 +9,6 @@ venv
 
 # Unit test / coverage reports
 htmlcov/
-.tox/
 .coverage
 .cache
 nosetests.xml
@@ -37,3 +36,6 @@ deploy/google/app.yaml
 
 ### Vagrant ###
 .vagrant/
+
+### PyCharm ###
+.idea/

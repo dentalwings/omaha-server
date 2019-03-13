@@ -4,6 +4,10 @@
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
 
+# python pre compiled files
+__pycache__/
+*.py[cod]
+
 # Unit test / coverage reports
 htmlcov/
 .tox/
