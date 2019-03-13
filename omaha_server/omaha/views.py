@@ -82,7 +82,7 @@ class FilterByUserIDResponseView(AutoResponseView):
 
 
 class UsageStatsView(View):
-    http_method_names = ['post', 'get']
+    http_method_names = ['post']
 
     @csrf_exempt
     def dispatch(self, *args, **kwargs):
