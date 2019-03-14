@@ -49,10 +49,6 @@ env:
 services:
   - redis-server
 
-install:
-  - pip install tox==2.2.1
-  - pip install google-compute-engine
-
 before_script: cd omaha_server
 script:
   - tox -e $TOX_ENV
