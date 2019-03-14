@@ -82,7 +82,7 @@ class Command(BaseCommand):
             'app_id',
             help='<AppID>'
         )
-        parser.add_arguments(
+        parser.add_argument(
             '--hours',
             dest='n_hours',
             default='24',

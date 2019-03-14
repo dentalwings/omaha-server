@@ -93,14 +93,14 @@ class Command(BaseCommand):
     help = 'A command for generating fake statistics'
 
     def add_arguments(self, parser):
-        parser.add_arguments(
+        parser.add_argument(
             '--count',
             dest='count',
             default='1000',
             type=int,
             help='Total number of data values (default: 1000)',
         )
-        parser.add_arguments(
+        parser.add_argument(
             '--year',
             dest='year',
             default=datetime.now().year,
