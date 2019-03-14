@@ -29,7 +29,7 @@ class ApplicationFactory(factory.DjangoModelFactory):
     class Meta:
         model = 'omaha.Application'
 
-    id = factory.Sequence(lambda n: '{D0AB2EBC-931B-4013-9FEB-C9C4C2225%s}' % n)
+    id = factory.Sequence(lambda n: u'{D0AB2EBC-931B-4013-9FEB-C9C4C2225%s}' % n)
     name = factory.Sequence(lambda n: 'chrome%s' % n)
 
 
