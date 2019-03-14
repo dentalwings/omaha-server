@@ -49,6 +49,9 @@ env:
 services:
   - redis-server
 
+install:
+  - pip install tox
+
 before_script: cd omaha_server
 script:
   - tox -e $TOX_ENV
