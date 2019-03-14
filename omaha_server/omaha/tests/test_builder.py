@@ -24,8 +24,7 @@ from bitmapist import mark_event
 
 from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
-
-from omaha.tests.utils import temporary_media_root
+from override_storage import override_storage
 
 from omaha.factories import VersionFactory
 from omaha.builder import get_version
@@ -33,7 +32,7 @@ from omaha.models import PartialUpdate, Version, Channel, ACTIVE_USERS_DICT_CHOI
 from omaha.utils import redis, get_id
 
 
-@temporary_media_root()
+@override_storage()
 class BuilderTest(TestCase):
     def setUp(self):
         redis.flushdb()

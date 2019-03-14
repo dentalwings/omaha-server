@@ -20,6 +20,8 @@ the License.
 
 import os
 
+from django.test import override_settings
+from override_storage import override_storage
 from django.core.urlresolvers import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 
@@ -27,10 +29,9 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from crash.serializers import SymbolsSerializer, CrashSerializer
-from crash.models import Symbols, Crash
+from crash.models import Symbols
 from crash.factories import SymbolsFactory, CrashFactory
 
-from omaha.tests.utils import temporary_media_root
 from omaha.tests.test_api import BaseTest
 from omaha_server.utils import is_private, storage_with_spaces_instance
 
@@ -47,23 +48,27 @@ class SymbolsTest(BaseTest, APITestCase):
     serializer = SymbolsSerializer
 
     @is_private()
-    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @override_storage()
+    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def setUp(self):
         storage_with_spaces_instance._setup()
         super(SymbolsTest, self).setUp()
 
     @is_private()
-    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @override_storage()
+    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_detail(self):
         super(SymbolsTest, self).test_detail()
 
     @is_private()
-    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @override_storage()
+    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_list(self):
         super(SymbolsTest, self).test_list()
 
     @is_private()
-    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @override_storage()
+    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_create(self):
         with open(SYM_FILE, 'rb') as f:
             data = dict(file=SimpleUploadedFile('./BreakpadTestApp.sym', f.read()))
@@ -75,7 +80,8 @@ class SymbolsTest(BaseTest, APITestCase):
         self.assertEqual(symbols.debug_file, 'BreakpadTestApp.pdb')
 
     @is_private()
-    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @override_storage()
+    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_create_without_file(self):
         data = dict()
         response = self.client.post(reverse(self.url), data)
@@ -93,6 +99,7 @@ class SymbolsTest(BaseTest, APITestCase):
         response = self.client.post(reverse(self.url), data)
         self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
         self.assertEqual(response.data['message'], 'Duplicate symbol')
+
 
 class CrashTest(BaseTest, APITestCase):
     url = 'crash-list'

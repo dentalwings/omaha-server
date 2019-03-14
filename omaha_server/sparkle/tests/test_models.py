@@ -21,15 +21,16 @@ the License.
 from django import test
 from django.core.files.uploadedfile import SimpleUploadedFile
 
+from override_storage import override_storage
 from mock import patch
 
 # from omaha.models import Application, Channel, Platform, Version, Action, EVENT_DICT_CHOICES
 from sparkle.models import version_upload_to
 from sparkle.factories import SparkleVersionFactory
-from omaha.tests.utils import temporary_media_root
+
 
 class VersionModelTest(test.TestCase):
-    @temporary_media_root()
+    @override_storage()
     def test_version_upload_to(self):
         version = SparkleVersionFactory.create(file=SimpleUploadedFile('./chrome_installer.exe', False))
         self.assertEqual(version_upload_to(version, 'chrome_installer.exe'),

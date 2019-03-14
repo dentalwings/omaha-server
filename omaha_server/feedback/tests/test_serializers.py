@@ -21,17 +21,16 @@ the License.
 from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from omaha.tests.utils import temporary_media_root
+from override_storage import override_storage
 
 from feedback.models import Feedback
 from feedback.serializers import FeedbackSerializer
 
 
-
 class FeedbackSerializerTest(TestCase):
     maxDiff = None
 
-    @temporary_media_root()
+    @override_storage()
     def test_serializer(self):
         description = 'Test description'
         email = 'me@example.com'

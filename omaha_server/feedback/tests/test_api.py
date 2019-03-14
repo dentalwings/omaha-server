@@ -18,17 +18,16 @@ License for the specific language governing permissions and limitations under
 the License.
 """
 
-import os
-
+from django.test import override_settings
 from django.core.urlresolvers import reverse
 
 from rest_framework import status
 from rest_framework.test import APITestCase
+from override_storage import override_storage
 
 from feedback.serializers import FeedbackSerializer
 from feedback.factories import FeedbackFactory
 
-from omaha.tests.utils import temporary_media_root
 from omaha.tests.test_api import BaseTest
 from omaha_server.utils import is_private
 
@@ -40,12 +39,14 @@ class FeedbackTest(BaseTest, APITestCase):
     serializer = FeedbackSerializer
 
     @is_private()
-    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @override_storage()
+    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_detail(self):
         super(FeedbackTest, self).test_detail()
 
     @is_private()
-    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @override_storage()
+    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_list(self):
         response = self.client.get(reverse(self.url), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -53,7 +54,8 @@ class FeedbackTest(BaseTest, APITestCase):
         self.assertEqual(self.serializer(self.objects, many=True).data, response.data['results'][::-1])
 
     @is_private()
-    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @override_storage()
+    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_create(self):
         response = self.client.post(reverse(self.url), {})
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)

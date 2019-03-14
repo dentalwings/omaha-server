@@ -18,10 +18,10 @@ License for the specific language governing permissions and limitations under
 the License.
 """
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from omaha.tests.utils import temporary_media_root
+from override_storage import override_storage
 from omaha.factories import ApplicationFactory, DataFactory, PlatformFactory, ChannelFactory, VersionFactory,\
     ActionFactory, PartialUpdateFactory
 from omaha.serializers import AppSerializer, DataSerializer, PlatformSerializer, ChannelSerializer, VersionSerializer,\
@@ -112,7 +112,8 @@ class DataSerializerTest(TestCase):
 class VersionSerializerTest(TestCase):
     maxDiff = None
 
-    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @override_storage()
+    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_serializer(self):
         version = VersionFactory.create(file=SimpleUploadedFile('./chrome_installer.exe', False))
         self.assertDictEqual(VersionSerializer(version).data, dict(
@@ -131,7 +132,8 @@ class VersionSerializerTest(TestCase):
             modified=version.modified.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
         ))
 
-    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @override_storage()
+    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_auto_fill_file_size(self):
         version = VersionFactory.create(file=SimpleUploadedFile('./chrome_installer.exe', b' ' * 10))
         data = dict(

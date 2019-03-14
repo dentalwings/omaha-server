@@ -27,7 +27,6 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from xmlunittest import XmlTestMixin
 from freezegun import freeze_time
 
-from omaha.tests.utils import temporary_media_root
 from omaha.factories import ApplicationFactory, ChannelFactory
 from override_storage import override_storage
 

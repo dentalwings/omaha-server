@@ -22,10 +22,9 @@ from builtins import str
 
 import os
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.core.files.uploadedfile import SimpleUploadedFile
-
-from omaha.tests.utils import temporary_media_root
+from override_storage import override_storage
 
 from crash.models import Symbols, Crash
 from crash.serializers import SymbolsSerializer, CrashSerializer
@@ -51,7 +50,8 @@ class SymbolsSerializerTest(TestCase):
                                   created=symbols.created.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
                                   modified=symbols.modified.strftime('%Y-%m-%dT%H:%M:%S.%fZ'), ))
 
-    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @override_storage
+    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_auto_fill_file_size(self):
         with open(SYM_FILE, 'rb') as f:
             data = dict(file=SimpleUploadedFile('./BreakpadTestApp.sym', f.read()))
@@ -67,7 +67,8 @@ class SymbolsSerializerTest(TestCase):
 class CrashSerializerTest(TestCase):
     maxDiff = None
 
-    @temporary_media_root(
+    @override_storage
+    @override_settings(
         CELERY_ALWAYS_EAGER=False,
         CELERY_EAGER_PROPAGATES_EXCEPTIONS=False,
     )
