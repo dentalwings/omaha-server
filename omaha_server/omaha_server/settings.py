@@ -48,6 +48,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'absolute.context_processors.absolute',
                 'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.media',
             ],
         },
     },
@@ -369,3 +370,5 @@ TINYMCE_DEFAULT_CONFIG = {
     'paste_text_sticky_default': True,
     'plugins': 'table,media'
 }
+
+AWS_DEFAULT_ACL = 'authenticated-read'

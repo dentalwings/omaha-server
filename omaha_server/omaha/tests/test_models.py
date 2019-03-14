@@ -76,12 +76,16 @@ class VersionModelTest(test.TestCase):
                          'http://cache.pack.google.com/edgedl/chrome/install/782.112/chrome_installer.exe')
         self.assertEqual(version.file_package_name, 'chrome_installer.exe')
 
+    @test.override_settings(MEDIA_URL='http://example.com')
     def test_property_default_storage(self):
         version = VersionFactory.create(file=SimpleUploadedFile('./chrome_installer.exe', ''))
-        _url = '/static/media/build/%s/%s/%s/37.0.2062.124/chrome_installer.exe' \
-               % (version.app.name, version.channel.name, version.platform.name)
+        _url = 'http://example.com/static/media/build/%s/%s/%s/37.0.2062.124/chrome_installer.exe' \
+              % (version.app.name, version.channel.name, version.platform.name)
         self.assertEqual(version.file_absolute_url, _url)
         self.assertEqual(version.file_package_name, 'chrome_installer.exe')
+        _url = u'http://example.com/static/media/build/%s/%s/%s/37.0.2062.124/' \
+               % (version.app.name, version.channel.name, version.platform.name)
+        self.assertEqual(version.file_url, _url)
 
     @test.override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     @patch('omaha.models.version_upload_to', lambda o, f: f)

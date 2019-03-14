@@ -145,6 +145,14 @@ class Version(BaseModel):
         return os.path.basename(url.pathstr)
 
     @property
+    def file_url(self):
+        url = furl(self.file_absolute_url)
+        if url.port and url.port != 80:
+            return '%s://%s:%d%s/' % (url.scheme, url.host, url.port, os.path.dirname(url.pathstr))
+        else:
+            return '%s://%s%s/' % (url.scheme, url.host, os.path.dirname(url.pathstr))
+
+    @property
     def size(self):
          return self.file_size
 

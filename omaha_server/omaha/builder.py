@@ -155,7 +155,7 @@ def on_app(apps_list, app, os, userid):
     if updatecheck:
         actions = reduce(on_action, version.actions.all(), [])
         updatecheck = Updatecheck_positive(
-            urls=[version.file_absolute_url],
+            urls=[version.file_url],
             manifest=Manifest(
                 version=str(version.version),
                 packages=Packages([Package(

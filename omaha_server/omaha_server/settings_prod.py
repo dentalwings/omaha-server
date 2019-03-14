@@ -26,7 +26,6 @@ EMAIL_RECIPIENTS = os.environ.get('EMAIL_RECIPIENTS')
 STATIC_URL = ''.join([S3_URL, 'static/'])
 AWS_PRELOAD_METADATA = True
 AWS_IS_GZIPPED = True
-AWS_DEFAULT_ACL = 'authenticated-read'
 
 FILEBEAT_HOST = os.environ.get('FILEBEAT_HOST', 'localhost')
 FILEBEAT_PORT = os.environ.get('FILEBEAT_PORT', 9021)
