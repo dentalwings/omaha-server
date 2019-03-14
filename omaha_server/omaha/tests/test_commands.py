@@ -76,5 +76,5 @@ class GenerateFakeStatisticsTest(TestCase):
         now = timezone.now()
         year = now.year
         self.assertEqual(0, len(YearEvents('request', year)))
-        call_command('generate_fake_statistics', self.app.id, count=10)
+        call_command('generate_fake_statistics', count=10)
         self.assertGreater(len(YearEvents('request', year)), 0)
