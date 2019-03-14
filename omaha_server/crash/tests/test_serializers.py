@@ -35,6 +35,7 @@ TEST_DATA_DIR = os.path.join(BASE_DIR, 'testdata')
 SYM_FILE = os.path.join(TEST_DATA_DIR, 'BreakpadTestApp.sym')
 
 
+@override_storage()
 class SymbolsSerializerTest(TestCase):
     def test_serializer(self):
         data = dict(file=SimpleUploadedFile('./test.pdb', False),
@@ -50,7 +51,6 @@ class SymbolsSerializerTest(TestCase):
                                   created=symbols.created.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
                                   modified=symbols.modified.strftime('%Y-%m-%dT%H:%M:%S.%fZ'), ))
 
-    @override_storage
     @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_auto_fill_file_size(self):
         with open(SYM_FILE, 'rb') as f:
@@ -64,10 +64,10 @@ class SymbolsSerializerTest(TestCase):
         self.assertEqual(symbols_instance.file_size, 68149)
 
 
+@override_storage()
 class CrashSerializerTest(TestCase):
     maxDiff = None
 
-    @override_storage
     @override_settings(
         CELERY_ALWAYS_EAGER=False,
         CELERY_EAGER_PROPAGATES_EXCEPTIONS=False,

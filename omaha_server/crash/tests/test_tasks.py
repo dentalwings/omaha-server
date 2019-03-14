@@ -41,8 +41,8 @@ SYMBOLS_PATH = os.path.join(TEST_DATA_DIR, 'symbols')
 STACKTRACE_PATH = os.path.join(TEST_DATA_DIR, 'stacktrace.txt')
 
 
+@override_storage()
 class CrashModelTest(test.TestCase):
-    @override_storage()
     @test.override_settings(
         MEDIA_URL='http://omaha-test.s3.amazonaws.com/',
         CRASH_S3_MOUNT_PATH=TEST_DATA_DIR,
@@ -84,7 +84,6 @@ class CrashModelTest(test.TestCase):
         self.assertEqual(crash.build_number, '1.0.0.1')
         self.assertEqual(crash.channel, 'alpha')
 
-    @override_storage
     @test.override_settings(
         MEDIA_URL='http://omaha-test.s3.amazonaws.com/',
         CRASH_S3_MOUNT_PATH=TEST_DATA_DIR,
@@ -110,7 +109,6 @@ class CrashModelTest(test.TestCase):
             )
             self.assertRaises(CommandError, Crash.objects.create, **obj)
 
-    @override_storage
     @test.override_settings(
         MEDIA_URL='http://omaha-test.s3.amazonaws.com/',
         CRASH_S3_MOUNT_PATH=TEST_DATA_DIR,
