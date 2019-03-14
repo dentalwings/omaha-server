@@ -62,7 +62,7 @@ def attach_upload_to(obj, filename):
 class Feedback(BaseModel):
     description = models.TextField()
     email = models.CharField(max_length=500, null=False, blank=True)
-    page_url = models.CharField(max_length=2048, null=True, blank=True)
+    page_url = models.CharField(max_length=2048, null=False, blank=True)
     screenshot = models.ImageField(upload_to=screenshot_upload_to, blank=True, null=True)
     screenshot_size = models.PositiveIntegerField(null=True, blank=True)
     blackbox = models.FileField(upload_to=blackbox_upload_to, blank=True, null=True)

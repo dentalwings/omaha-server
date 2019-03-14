@@ -52,7 +52,7 @@ class GenerateFakeDataTest(TestCase):
 class GenerateFakeStatisticsTest(TestCase):
     @override_storage()
     def setUp(self):
-        redis.flushdb()
+        redis.flushall()
         self.app = Application.objects.create(id='{5FAD27D4-6BFA-4daa-A1B3-5A1F821FEE0F}', name='app')
         self.channel = Channel.objects.create(name='stable')
         self.platform = Platform.objects.create(name='win')
@@ -70,7 +70,7 @@ class GenerateFakeStatisticsTest(TestCase):
             file=SimpleUploadedFile('./chrome_installer.exe', False))
 
     def tearDown(self):
-        redis.flushdb()
+        redis.flushall()
 
     def test_command(self):
         now = timezone.now()
