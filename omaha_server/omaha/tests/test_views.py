@@ -25,6 +25,7 @@ from django.test.client import Client
 from django.core.urlresolvers import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 from override_storage import override_storage
+from django_redis import get_redis_connection
 
 from xmlunittest import XmlTestMixin
 from freezegun import freeze_time
@@ -43,11 +44,11 @@ class UpdateViewTest(TestCase, XmlTestMixin):
 
     def setUp(self):
         self.client = Client()
-        redis.flushdb()
+        redis.flushall()
         super(UpdateViewTest, self).setUp()
 
     def tearDown(self):
-        redis.flushdb()
+        redis.flushall()
         super(UpdateViewTest, self).tearDown()
 
     @freeze_time('2014-01-01 15:41:48')  # 56508 sec

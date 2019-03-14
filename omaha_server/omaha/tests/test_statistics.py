@@ -72,10 +72,10 @@ from sparkle.statistics import userid_counting as mac_userid_counting
 
 class StatisticsTest(TestCase):
     def setUp(self):
-        redis.flushdb()
+        redis.flushall()
 
     def tearDown(self):
-        redis.flushdb()
+        redis.flushall()
 
     def generate_version(self, is_enabled):
         app = Application.objects.create(id='{D0AB2EBC-931B-4013-9FEB-C9C4C2225C8C}', name='app')
@@ -511,7 +511,7 @@ class GetStatisticsTest(TestCase):
 
     @override_storage()
     def setUp(self):
-        redis.flushdb()
+        redis.flushall()
         self.app = Application.objects.create(id='app', name='app')
         self.channel = Channel.objects.create(name='stable')
         self.platform = Platform.objects.create(name='win')
@@ -558,7 +558,7 @@ class GetStatisticsTest(TestCase):
         self.mac_users_statistics = dict(new=mac_installs, updates=mac_updates)
 
     def tearDown(self):
-        redis.flushdb()
+        redis.flushall()
 
     def test_get_users_statistics_months(self):
         self.assertDictEqual(get_users_statistics_months(app_id=self.app.id), self.users_statistics)

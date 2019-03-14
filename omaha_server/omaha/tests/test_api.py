@@ -361,7 +361,7 @@ class LiveStatistics(APITestCase):
         self.client.credentials(
             HTTP_AUTHORIZATION='Basic %s' % base64.b64encode(bytes('{}:{}'.format('test', 'secret'), 'utf8')).decode())
 
-        redis.flushdb()
+        redis.flushall()
         self.app = Application.objects.create(id='app', name='app')
         self.channel = Channel.objects.create(name='stable')
         self.channel2 = Channel.objects.create(name='alpha')
@@ -540,7 +540,7 @@ class StatisticsMonthsMixin(object):
         self.client.credentials(
             HTTP_AUTHORIZATION='Basic %s' % base64.b64encode(bytes('{}:{}'.format('test', 'secret'), 'utf8')).decode())
 
-        redis.flushdb()
+        redis.flushall()
         self.app = Application.objects.create(id='app', name='app')
         self.channel = Channel.objects.create(name='stable')
         self.platform = Platform.objects.create(name='win')

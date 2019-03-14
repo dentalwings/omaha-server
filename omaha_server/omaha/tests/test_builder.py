@@ -35,10 +35,10 @@ from omaha.utils import redis, get_id
 @override_storage()
 class BuilderTest(TestCase):
     def setUp(self):
-        redis.flushdb()
+        redis.flushall()
 
     def tearDown(self):
-        redis.flushdb()
+        redis.flushall()
 
     def test_get_version(self):
         userid = '{D0BBD725-742D-44ae-8D46-0231E881D58E}'
