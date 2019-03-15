@@ -24,6 +24,7 @@ INSTALLED_APPS += (
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 NOSE_ARGS = [
+    '--exe',
     '--with-coverage',
     '--cover-package=omaha_server,omaha,crash,feedback,sparkle,healthcheck,downloads',
     '--cover-inclusive',
