@@ -20,9 +20,10 @@ the License.
 
 from django.test import TestCase
 
+from override_storage import override_storage
+
 from crash.models import Crash, Symbols
 from crash.factories import CrashFactory, SymbolsFactory
-
 
 
 class CrashManagerTest(TestCase):
@@ -34,6 +35,7 @@ class CrashManagerTest(TestCase):
         self.assertEqual(size, (archive_size + minidump_size) * 10)
 
 
+@override_storage()
 class SymbolsManagerTest(TestCase):
     def test_get_size(self):
         file_size = 42
