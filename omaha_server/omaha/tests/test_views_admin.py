@@ -188,9 +188,9 @@ class VersionUsageViewTest(TestCase):
         self.assertEqual(AppRequest.objects.count(), 4)
         self.assertEqual(len(res), 2)
 
-        self.assertEqual(d("#usage-table tbody tr .userid").contents(),
+        self.assertEqual(d("#usage-table tbody tr td:first-child").contents(),
                          ['00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002'])
-        self.assertEqual(d("#usage-table tbody tr .last_update").contents()[0], '07/07/2015 midnight')
+        self.assertEqual(d("#usage-table tbody tr td:nth-child(3)").contents()[0], '07/07/2015 midnight')
 
 
 class ManualCleanupView(TestCase):

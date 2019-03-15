@@ -40,11 +40,11 @@ class LatestVersionView(APIView):
 
     def get(self, request, format=None):
         win_versions = Version.objects.filter_by_enabled()\
-            .select_related('app__name', 'channel__name')\
+            .select_related('app', 'channel')\
             .order_by('app__name', 'channel__name', '-version')\
             .distinct('app__name', 'channel__name')
         mac_versions = SparkleVersion.objects.filter_by_enabled()\
-            .select_related('app__name', 'channel__name')\
+            .select_related('app', 'channel')\
             .order_by('app__name', 'channel__name', '-short_version')\
             .distinct('app__name', 'channel__name')
 
