@@ -36,7 +36,6 @@ from omaha.tests.test_api import BaseTest
 from omaha_server.utils import is_private
 
 
-@override_storage()
 class VersionTest(BaseTest, APITestCase):
     url = 'sparkleversion-list'
     url_detail = 'sparkleversion-detail'

@@ -55,19 +55,16 @@ class SymbolsTest(BaseTest, APITestCase):
         super(SymbolsTest, self).setUp()
 
     @is_private()
-    @override_storage()
     @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_detail(self):
         super(SymbolsTest, self).test_detail()
 
     @is_private()
-    @override_storage()
     @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_list(self):
         super(SymbolsTest, self).test_list()
 
     @is_private()
-    @override_storage()
     @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_create(self):
         with open(SYM_FILE, 'rb') as f:
