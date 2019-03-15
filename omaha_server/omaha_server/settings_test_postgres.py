@@ -31,6 +31,7 @@ INSTALLED_APPS += (
 TEST_RUNNER = 'omaha_server.runner.PublicPrivateNoseTestSuiteRunner'
 
 NOSE_ARGS = [
+    '--exe',
     '--with-coverage',
     '--cover-package=omaha_server,omaha,crash,feedback,sparkle,healthcheck',
     '--cover-inclusive',
