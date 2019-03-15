@@ -28,7 +28,7 @@ INSTALLED_APPS += (
     'django_nose',
 )
 
-#TEST_RUNNER = 'omaha_server.runner.PublicPrivateNoseTestSuiteRunner'
+TEST_RUNNER = 'omaha_server.runner.PublicPrivateNoseTestSuiteRunner'
 
 NOSE_ARGS = [
     '--with-coverage',
