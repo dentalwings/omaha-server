@@ -1,7 +1,7 @@
 # omaha-server
 
-[![Build Status](https://travis-ci.org/dentalwings/omaha-server.svg?branch=master)](https://travis-ci.org/dentalwings/omaha-server)
-[![Coverage Status](https://coveralls.io/repos/dentalwings/omaha-server/badge.png?branch=master)](https://coveralls.io/r/dentalwings/omaha-server?branch=master)
+[![Build Status](https://travis-ci.com/dentalwings/omaha-server.svg?branch=master)](https://travis-ci.com/dentalwings/omaha-server)
+[![Coverage Status](https://coveralls.io/repos/github/dentalwings/omaha-server/badge.svg?branch=travis-tests)](https://coveralls.io/github/dentalwings/omaha-server?branch=travis-tests)
 [![Apache License, Version 2.0](https://img.shields.io/badge/license-Apache%202.0-red.svg)](https://github.com/dentalwings/omaha-server/blob/master/LICENSE)
 
 Google Omaha server implementation and Sparkle (mac) feed management.
