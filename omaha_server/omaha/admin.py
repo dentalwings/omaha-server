@@ -22,7 +22,8 @@ import copy
 from django.contrib import admin
 from django.contrib.admin import utils
 from django.utils.encoding import smart_text
-from versionfield import VersionField
+
+from omaha.fields import BigVersionField
 
 from omaha.models import Channel, Platform, Application, Version, Action, PartialUpdate, Data
 from omaha.forms import ApplicationAdminForm, VersionAdminForm, ActionAdminForm, DataAdminForm
@@ -73,7 +74,7 @@ class VersionAdmin(admin.ModelAdmin):
 
 
 def my_display_for_field(value, field, *args, **kwargs):
-    if isinstance(field, VersionField):
+    if isinstance(field, BigVersionField):
         return smart_text(value)
     return django_display_for_field(value, field, *args, **kwargs)
 

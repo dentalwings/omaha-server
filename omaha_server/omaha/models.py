@@ -32,14 +32,13 @@ from django.db.models.signals import pre_save, pre_delete
 from django.utils.timezone import now as datetime_now
 
 from omaha.managers import VersionManager
-from omaha.fields import PercentField
+from omaha.fields import PercentField, BigVersionField
 from omaha_server.s3utils import public_read_storage
 
 from django_extensions.db.fields import (
     CreationDateTimeField, ModificationDateTimeField,
 )
 from jsonfield import JSONField
-from versionfield import VersionField
 from furl import furl
 
 
@@ -109,7 +108,7 @@ class Version(BaseModel):
     app = models.ForeignKey(Application)
     platform = models.ForeignKey(Platform, db_index=True)
     channel = models.ForeignKey(Channel, db_index=True)
-    version = VersionField(help_text='Format: 255.255.65535.65535', number_bits=(8, 8, 16, 16), db_index=True)
+    version = BigVersionField(help_text='Format: 255.255.65535.65535', number_bits=(8, 8, 16, 16), db_index=True)
     release_notes = models.TextField(blank=True, null=True)
     file = models.FileField(upload_to=_version_upload_to, null=True,
                             storage=public_read_storage)
@@ -272,7 +271,7 @@ class Hw(models.Model):
 class Request(models.Model):
     os = models.ForeignKey(Os, null=True, blank=True)
     hw = models.ForeignKey(Hw, null=True, blank=True)
-    version = VersionField(help_text='Format: 255.255.65535.65535', number_bits=(8, 8, 16, 16))
+    version = BigVersionField(help_text='Format: 255.255.65535.65535', number_bits=(8, 8, 16, 16))
     ismachine = models.PositiveSmallIntegerField(null=True, blank=True)
     sessionid = models.CharField(max_length=40, null=True, blank=True)
     userid = models.CharField(max_length=40, null=True, blank=True)
@@ -315,10 +314,10 @@ class Event(models.Model):
 class AppRequest(models.Model):
     request = models.ForeignKey(Request, db_index=True)
     appid = models.CharField(max_length=38, db_index=True)
-    version = VersionField(help_text='Format: 255.255.65535.65535',
-                           number_bits=(8, 8, 16, 16), default=0, null=True, blank=True)
-    nextversion = VersionField(help_text='Format: 255.255.65535.65535',
-                               number_bits=(8, 8, 16, 16), default=0, null=True, blank=True)
+    version = BigVersionField(help_text='Format: 255.255.65535.65535',
+                              number_bits=(8, 8, 16, 16), default=0, null=True, blank=True)
+    nextversion = BigVersionField(help_text='Format: 255.255.65535.65535',
+                                  number_bits=(8, 8, 16, 16), default=0, null=True, blank=True)
     lang = models.CharField(max_length=40, null=True, blank=True)
     tag = models.CharField(max_length=40, null=True, blank=True)
     installage = models.SmallIntegerField(null=True, blank=True)
