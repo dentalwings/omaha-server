@@ -39,13 +39,11 @@ class FeedbackTest(BaseTest, APITestCase):
     serializer = FeedbackSerializer
 
     @is_private()
-    @override_storage()
     @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_detail(self):
         super(FeedbackTest, self).test_detail()
 
     @is_private()
-    @override_storage()
     @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_list(self):
         response = self.client.get(reverse(self.url), format='json')

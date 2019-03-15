@@ -239,7 +239,6 @@ class ChannelTest(BaseTest, APITestCase):
         self.assertEqual(obj.name, 'test_name2')
 
 
-@override_storage()
 class VersionTest(BaseTest, APITestCase):
     url = 'version-list'
     url_detail = 'version-detail'
