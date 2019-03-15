@@ -27,8 +27,7 @@ from django.db import models
 from django.dispatch import receiver
 from django.db.models.signals import pre_delete,pre_save
 
-from versionfield import VersionField
-
+from omaha.fields import BigVersionField
 from omaha.models import BaseModel, Application, Channel
 from sparkle.managers import VersionManager
 from omaha_server.s3utils import public_read_storage
@@ -44,11 +43,11 @@ class SparkleVersion(BaseModel):
     is_critical = models.BooleanField(default=False)
     app = models.ForeignKey(Application)
     channel = models.ForeignKey(Channel, db_index=True)
-    version = VersionField(help_text='Format: 65535.65535',
+    version = BigVersionField(help_text='Format: 65535.65535',
                            number_bits=(16, 16), db_index=True)
-    short_version = VersionField(help_text='Format: 255.255.65535.65535',
+    short_version = BigVersionField(help_text='Format: 255.255.65535.65535',
                                  number_bits=(8, 8, 16, 16), blank=True, null=True)
-    minimum_system_version = VersionField(help_text='Format: 255.255.255',
+    minimum_system_version = BigVersionField(help_text='Format: 255.255.255',
                                           number_bits=(8, 8, 8), blank=True, null=True)
     release_notes = models.TextField(blank=True, null=True)
     file = models.FileField(upload_to=version_upload_to, null=True,
