@@ -1,5 +1,5 @@
 language: python
-dist: xenial
+dist: trusty
 matrix:
   allow_failures:
     - env: TOX_ENV=py34
