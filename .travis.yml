@@ -6,21 +6,20 @@ matrix:
   include:
     - python: "2.7"
       env:
-        - TOX_ENV=py27
         - OMAHA_SERVER_PRIVATE=True
+        - PATH_TO_TEST=''
         - DJANGO_SETTINGS_MODULE=omaha_server.settings_test
     - python: "2.7"
       env:
-        - TOX_ENV=py27
         - OMAHA_SERVER_PRIVATE=False
+        - PATH_TO_TEST=''
         - DJANGO_SETTINGS_MODULE=omaha_server.settings_test
     - python: "2.7"
       env:
-        - TOX_ENV=py27
+        - PATH_TO_TEST=''
         - DJANGO_SETTINGS_MODULE=omaha_server.settings_test_postgres
     - python: "2.7"
       env:
-        - TOX_ENV=py27
         - PATH_TO_TEST=omaha.tests.test_public
         - DJANGO_SETTINGS_MODULE=omaha_server.settings_test_postgres
         - OMAHA_SERVER_PRIVATE=False
@@ -31,14 +30,12 @@ cache: pip
 sudo: false
 
 virtualenv:
-  system_site_packages: true
+  system_site_packages: false
 
 addons:
   apt:
     packages:
-    - python-lxml
-    - python-psycopg2
-    - python-dev
+     - python-dev
 
 env:
   global:
@@ -50,8 +47,9 @@ services:
   - redis-server
 
 install:
-  - pip install tox
+  - pip install -r omaha_server/requirements_dev.txt
 
 before_script: cd omaha_server
 script:
-  - tox -e $TOX_ENV
+  - ./manage.py test $PATH_TO_TEST
+# coveralls --skip_ssl_verify
