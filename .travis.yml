@@ -47,6 +47,7 @@ env:
 
 services:
   - redis-server
+  - postgresql
 
 install:
   - pip install -r omaha_server/requirements_dev.txt
