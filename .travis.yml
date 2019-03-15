@@ -45,6 +45,8 @@ env:
     - HOST_NAME: 'travis-ci'
     - SECRET_KEY: 'SECRET_KEY'
     - GRPC_PYTHON_BUILD_WITH_CYTHON: 1
+    - AWS_ACCESS_KEY_ID: 'fake'
+    - AWS_SECRET_ACCESS_KEY: 'fake'
 
 services:
   - redis-server
