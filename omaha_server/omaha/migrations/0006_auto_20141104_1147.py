@@ -3,11 +3,10 @@ from __future__ import unicode_literals
 
 from django.db import models, migrations
 import django.utils.timezone
-import versionfield
+from omaha.fields import BigVersionField
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('omaha', '0005_auto_20141030_0606'),
     ]
@@ -18,8 +17,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('appid', models.CharField(max_length=38, db_index=True)),
-                ('version', versionfield.VersionField(default=0, help_text=b'Format: 255.255.65535.65535', null=True, blank=True)),
-                ('nextversion', versionfield.VersionField(default=0, help_text=b'Format: 255.255.65535.65535', null=True, blank=True)),
+                ('version', BigVersionField(default=0, help_text=b'Format: 255.255.65535.65535', null=True, blank=True)),
+                ('nextversion', BigVersionField(default=0, help_text=b'Format: 255.255.65535.65535', null=True, blank=True)),
                 ('lang', models.CharField(max_length=40, null=True, blank=True)),
                 ('tag', models.CharField(max_length=40, null=True, blank=True)),
                 ('installage', models.SmallIntegerField(null=True, blank=True)),
@@ -87,7 +86,7 @@ class Migration(migrations.Migration):
             name='Request',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('version', versionfield.VersionField(help_text=b'Format: 255.255.65535.65535')),
+                ('version', BigVersionField(help_text=b'Format: 255.255.65535.65535')),
                 ('ismachine', models.PositiveSmallIntegerField(null=True, blank=True)),
                 ('sessionid', models.CharField(max_length=40, null=True, blank=True)),
                 ('userid', models.CharField(max_length=40, null=True, blank=True)),
