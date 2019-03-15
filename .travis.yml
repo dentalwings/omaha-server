@@ -24,7 +24,7 @@ matrix:
         - DJANGO_SETTINGS_MODULE=omaha_server.settings_test_postgres
         - OMAHA_SERVER_PRIVATE=False
     - python: "2.7"
-      env: TOX_ENV=coverage
+      env: COVERAGE=true
 
 cache: pip
 sudo: false
@@ -56,4 +56,4 @@ install:
 before_script: cd omaha_server
 script:
   - ./manage.py test $PATH_TO_TEST
-# coveralls --skip_ssl_verify
+  - if [ $COVERAGE = true ] ; then coveralls --skip_ssl_verify; fi
