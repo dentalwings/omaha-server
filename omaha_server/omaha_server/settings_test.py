@@ -28,7 +28,7 @@ NOSE_ARGS = [
     '--cover-package=omaha_server,omaha,crash,feedback,sparkle,healthcheck,downloads',
     '--cover-inclusive',
     '--nologcapture',
-    '-s'
+    '-s',
 ]
 
 MIGRATION_MODULES = DisableMigrations()
@@ -50,11 +50,10 @@ CELERY_ALWAYS_EAGER = True
 CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
 BROKER_BACKEND = 'memory'
 
-
 REDIS_STAT_DB = os.environ.get('REDIS_STAT_DB', 13)
 
 CACHES['default'] = {
-    'BACKEND': 'django.core.cache.backends.dummy.DummyCache'
+    'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
 }
 
 CACHES['statistics'] = {
