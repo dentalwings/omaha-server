@@ -192,7 +192,6 @@ def get_users_versions(app_id, date=None):
     return data
 
 
-
 def get_hourly_data_by_platform(app_id, end, n_hours, versions, platform, channel, tz='UTC'):
     def build_event_name(app_id, platform, channel, v):
         if channel:

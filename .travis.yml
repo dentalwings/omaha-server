@@ -55,5 +55,5 @@ install:
 
 before_script: cd omaha_server
 script:
-  - ./manage.py test $PATH_TO_TEST
+  - ./manage.py test -v 2 $PATH_TO_TEST
   - if [ $COVERAGE = true ] ; then coveralls --skip_ssl_verify; fi
