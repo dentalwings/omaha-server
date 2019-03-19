@@ -16,6 +16,8 @@ from django.core.urlresolvers import reverse_lazy
 
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
+from kombu import Queue
+
 
 sentry_sdk.init(integrations=[DjangoIntegration()])
 
@@ -241,9 +243,6 @@ BOWER_INSTALLED_APPS = (
 
 
 # Celery
-
-from kombu import Queue
-
 BROKER_URL = CELERY_RESULT_BACKEND = '{}{}:{}/{}'.format(REDIS_AUTH or 'redis://', REDIS_HOST, REDIS_PORT, 3)
 CELERY_DISABLE_RATE_LIMITS = True
 CELERY_RESULT_SERIALIZER = 'msgpack'

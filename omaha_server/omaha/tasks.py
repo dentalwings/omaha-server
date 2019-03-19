@@ -41,7 +41,7 @@ from feedback.models import Feedback
 
 @app.task(ignore_result=True)
 def collect_statistics(request, ip=None):
-    statistics.collect_statistics(parse_request(request), ip=ip)
+    statistics.collect_statistics(parse_request(bytes(bytearray(request, encoding='utf-8'))), ip=ip)
 
 
 @app.task(name='tasks.auto_delete_older_then', ignore_result=True)
