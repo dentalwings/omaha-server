@@ -34,6 +34,7 @@ SENTRY_ORG_SLUG = getattr(settings, 'SENTRY_STACKTRACE_ORG_SLUG', None)
 SENTRY_PROJ_SLUG = getattr(settings, 'SENTRY_STACKTRACE_PROJ_SLUG', None)
 CRASH_TRACKER = getattr(settings, 'CRASH_TRACKER', None)
 
+
 class BooleanFilter(admin.SimpleListFilter):
     title = None
     parameter_name = None
