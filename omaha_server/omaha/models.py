@@ -108,7 +108,8 @@ class Version(BaseModel):
     app = models.ForeignKey(Application)
     platform = models.ForeignKey(Platform, db_index=True)
     channel = models.ForeignKey(Channel, db_index=True)
-    version = BigVersionField(help_text='Format: 255.255.65535.65535', number_bits=(8, 8, 16, 16), db_index=True)
+    version = BigVersionField(help_text='Format: 255.255.65535.65535',
+                              number_bits=(8, 8, 16, 16), db_index=True)
     release_notes = models.TextField(blank=True, null=True)
     file = models.FileField(upload_to=_version_upload_to, null=True,
                             storage=public_read_storage)
@@ -271,7 +272,8 @@ class Hw(models.Model):
 class Request(models.Model):
     os = models.ForeignKey(Os, null=True, blank=True)
     hw = models.ForeignKey(Hw, null=True, blank=True)
-    version = BigVersionField(help_text='Format: 255.255.65535.65535', number_bits=(8, 8, 16, 16))
+    version = BigVersionField(help_text='Format: 255.255.65535.65535',
+                              number_bits=(8, 8, 16, 16), default=0, null=True, blank=True)
     ismachine = models.PositiveSmallIntegerField(null=True, blank=True)
     sessionid = models.CharField(max_length=40, null=True, blank=True)
     userid = models.CharField(max_length=40, null=True, blank=True)
