@@ -36,4 +36,4 @@ services:
       ELK_HOST: ''
       ELK_PORT: ''
       FILEBEAT_DESTINATION: ''
-      SENTRY_DSN: 'https://2b426b31861249db9e68d7ac755976b9:a562b533c3884fb5a0da8bc1b84af8f4@sentry.aws.dwos.com/3'
+      SENTRY_DSN: 'https://d22e416e3a414956a2cf22b15922bc0c@sentry.aws.dwos.com/3'
