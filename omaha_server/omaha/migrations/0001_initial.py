@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import models, migrations
 import jsonfield.fields
-import versionfield
+from omaha.fields import BigVersionField
 import django.utils.timezone
 import django_extensions.db.fields
 
@@ -78,7 +78,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('created', django_extensions.db.fields.CreationDateTimeField(default=django.utils.timezone.now, verbose_name='created', editable=False, blank=True)),
                 ('modified', django_extensions.db.fields.ModificationDateTimeField(default=django.utils.timezone.now, verbose_name='modified', editable=False, blank=True)),
-                ('version', versionfield.VersionField(help_text=b'Format: 255.255.65535.65535')),
+                ('version', BigVersionField(help_text=b'Format: 255.255.65535.65535')),
                 ('release_notes', models.TextField(null=True, blank=True)),
                 ('file', models.FileField(upload_to=b'')),
                 ('file_hash', models.CharField(max_length=140, null=True, verbose_name=b'Hash', blank=True)),

@@ -119,7 +119,7 @@ Parameters:
     Description: BucketName where the Application Zip is located
   AppS3Path:
     Type: String
-    Default: 'python-v1.zip'
+    Default: 'omaha_server/app-190319_123004.zip'
     Description: BucketPath where the Application Zip is located
   DBUsername:
     Type: String
@@ -170,7 +170,7 @@ Parameters:
   CrashTracker:
     Type: String
     Default: 'Sentry'
-    AllowedValues: ['Sentry', 'ELK']
+    AllowedValues: ['Sentry']
     Description: CRASH_TRACKER
   DjangoSettingsModule:
     Type: String

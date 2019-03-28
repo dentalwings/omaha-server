@@ -1,10 +1,8 @@
 # coding: utf8
 
-import os
-
-os.environ.setdefault('OMAHA_SERVER_PRIVATE', 'True')
-
 from .settings import *
+
+import os
 
 
 class DisableMigrations(object):
@@ -13,7 +11,7 @@ class DisableMigrations(object):
         return True
 
     def __getitem__(self, item):
-        return "notmigrations"
+        return None
 
 
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
@@ -26,11 +24,12 @@ INSTALLED_APPS += (
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 NOSE_ARGS = [
+    '--exe',
     '--with-coverage',
     '--cover-package=omaha_server,omaha,crash,feedback,sparkle,healthcheck,downloads',
     '--cover-inclusive',
     '--nologcapture',
-    '-s'
+    '-s',
 ]
 
 MIGRATION_MODULES = DisableMigrations()
@@ -52,16 +51,15 @@ CELERY_ALWAYS_EAGER = True
 CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
 BROKER_BACKEND = 'memory'
 
-
 REDIS_STAT_DB = os.environ.get('REDIS_STAT_DB', 13)
 
 CACHES['default'] = {
-    'BACKEND': 'django.core.cache.backends.dummy.DummyCache'
+    'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
 }
 
 CACHES['statistics'] = {
     'BACKEND': 'django_redis.cache.RedisCache',
-    'LOCATION': '{REDIS_HOST}:{REDIS_PORT}:{REDIS_DB}'.format(
+    'LOCATION': 'redis://{REDIS_HOST}:{REDIS_PORT}:{REDIS_DB}'.format(
         REDIS_PORT=REDIS_STAT_PORT,
         REDIS_HOST=REDIS_STAT_HOST,
         REDIS_DB=REDIS_STAT_DB),
@@ -82,5 +80,13 @@ AWS_SECRET_ACCESS_KEY = ''
 
 SENTRY_STACKTRACE_DOMAIN = 'test'
 SENTRY_STACKTRACE_ORG_SLUG = 'test'
-SENTRY_STACKTRACE_PROJ_SLUG ='test'
+SENTRY_STACKTRACE_PROJ_SLUG = 'test'
 SENTRY_STACKTRACE_API_KEY = 'test'
+
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'UTC'
+USE_I18N = True
+USE_L10N = True
+USE_TZ = True
+
+ALLOWED_HOSTS = [u'example.com']

@@ -21,6 +21,8 @@ the License.
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 
+from versionfield import VersionField
+
 
 class PercentField(models.FloatField):
     """
@@ -35,3 +37,8 @@ class PercentField(models.FloatField):
         MinValueValidator(0),
         MaxValueValidator(100),
     ]
+
+
+class BigVersionField(VersionField):
+    def db_type(self, connection):
+        return "bigint"

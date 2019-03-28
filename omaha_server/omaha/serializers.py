@@ -26,7 +26,17 @@ import pytz
 from omaha.models import Application, Platform, Channel, Version, Action, Data, PartialUpdate
 
 
-__all__ = ['AppSerializer', 'PlatformSerializer', 'ChannelSerializer', 'VersionSerializer']
+__all__ = [
+    'AppSerializer',
+    'PlatformSerializer',
+    'ChannelSerializer',
+    'VersionSerializer',
+    'DataSerializer',
+    'ActionSerializer',
+    'PartialUpdateSerializer',
+    'StatisticsMonthsSerializer',
+    'ServerVersionSerializer'
+]
 
 
 class TimeZoneAwareDateTimeField(serializers.DateTimeField):
@@ -125,11 +135,4 @@ class PartialUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PartialUpdate
-        filelds = (
-            'active_users',
-            'is_enabled',
-            'percent',
-            'version',
-            'start_date',
-            'exclude_new_users',
-        )
+        fields = '__all__'

@@ -22,10 +22,12 @@ import copy
 from django.contrib import admin
 from django.contrib.admin import utils
 from django.utils.encoding import smart_text
-from versionfield import VersionField
+
+from omaha.fields import BigVersionField
 
 from omaha.models import Channel, Platform, Application, Version, Action, PartialUpdate, Data
 from omaha.forms import ApplicationAdminForm, VersionAdminForm, ActionAdminForm, DataAdminForm
+
 
 @admin.register(Platform)
 class PlatformAdmin(admin.ModelAdmin):
@@ -49,6 +51,7 @@ class ApplicationAdmin(admin.ModelAdmin):
     form = ApplicationAdminForm
     inlines = (DataInline,)
 
+
 class ActionInline(admin.StackedInline):
     model = Action
     extra = 0
@@ -71,9 +74,10 @@ class VersionAdmin(admin.ModelAdmin):
 
 
 def my_display_for_field(value, field, *args, **kwargs):
-    if isinstance(field, VersionField):
+    if isinstance(field, BigVersionField):
         return smart_text(value)
     return django_display_for_field(value, field, *args, **kwargs)
+
 
 django_display_for_field = copy.deepcopy(utils.display_for_field)
 utils.display_for_field = my_display_for_field

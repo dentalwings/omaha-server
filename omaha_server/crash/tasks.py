@@ -42,10 +42,12 @@ from crash.utils import (
 
 
 logger = logging.getLogger(__name__)
+
 SENTRY_DOMAIN = getattr(settings, 'SENTRY_STACKTRACE_DOMAIN', None)
 SENTRY_ORG_SLUG = getattr(settings, 'SENTRY_STACKTRACE_ORG_SLUG', None)
 SENTRY_PROJ_SLUG = getattr(settings, 'SENTRY_STACKTRACE_PROJ_SLUG', None)
 SENTRY_API_KEY = getattr(settings, 'SENTRY_STACKTRACE_API_KEY', None)
+
 
 @app.task(name='tasks.processing_crash_dump', ignore_result=True, max_retries=12, bind=True)
 def processing_crash_dump(self, crash_pk):

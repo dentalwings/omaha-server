@@ -23,7 +23,6 @@ import uuid
 
 from django.db import models
 from django.db.models.signals import pre_delete, pre_save
-from django.dispatch import receiver
 from django.utils import timezone
 
 from jsonfield import JSONField
@@ -62,8 +61,8 @@ def attach_upload_to(obj, filename):
 
 class Feedback(BaseModel):
     description = models.TextField()
-    email = models.CharField(max_length=500, null=True, blank=True)
-    page_url = models.CharField(max_length=2048, null=True, blank=True)
+    email = models.CharField(max_length=500, null=False, blank=True, default='')
+    page_url = models.CharField(max_length=2048, null=False, blank=True, default='')
     screenshot = models.ImageField(upload_to=screenshot_upload_to, blank=True, null=True)
     screenshot_size = models.PositiveIntegerField(null=True, blank=True)
     blackbox = models.FileField(upload_to=blackbox_upload_to, blank=True, null=True)
@@ -125,6 +124,7 @@ def get_subclasses(cls):
                 result.append(subclass)
                 classes_to_inspect.append(subclass)
     return result
+
 
 for subclass in get_subclasses(Feedback):
     pre_delete.connect(pre_feedback_delete, subclass)

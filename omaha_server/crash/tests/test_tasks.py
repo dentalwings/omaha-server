@@ -22,15 +22,14 @@ import os
 
 from django import test
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.files.storage import DefaultStorage
 
+from override_storage import override_storage
 from clom.shell import CommandError
 from mock import patch
 from freezegun import freeze_time
 
 from crash.models import Crash
 from crash.tasks import processing_crash_dump, get_sentry_link
-from omaha.tests.utils import temporary_media_root
 
 
 BASE_DIR = os.path.dirname(__file__)
@@ -42,13 +41,14 @@ SYMBOLS_PATH = os.path.join(TEST_DATA_DIR, 'symbols')
 STACKTRACE_PATH = os.path.join(TEST_DATA_DIR, 'stacktrace.txt')
 
 
+@override_storage()
 class CrashModelTest(test.TestCase):
-    @temporary_media_root(
+    @test.override_settings(
         MEDIA_URL='http://omaha-test.s3.amazonaws.com/',
         CRASH_S3_MOUNT_PATH=TEST_DATA_DIR,
         CRASH_SYMBOLS_PATH=SYMBOLS_PATH,
+        CELERY_EAGER_PROPAGATES_EXCEPTIONS=False,
     )
-    @test.override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=False,)
     @freeze_time("2014-12-11")
     @patch('crash.utils.send_stacktrace')
     @patch('crash.utils.crash_sender')
@@ -84,7 +84,7 @@ class CrashModelTest(test.TestCase):
         self.assertEqual(crash.build_number, '1.0.0.1')
         self.assertEqual(crash.channel, 'alpha')
 
-    @temporary_media_root(
+    @test.override_settings(
         MEDIA_URL='http://omaha-test.s3.amazonaws.com/',
         CRASH_S3_MOUNT_PATH=TEST_DATA_DIR,
         CRASH_SYMBOLS_PATH=SYMBOLS_PATH,
@@ -109,12 +109,12 @@ class CrashModelTest(test.TestCase):
             )
             self.assertRaises(CommandError, Crash.objects.create, **obj)
 
-    @temporary_media_root(
+    @test.override_settings(
         MEDIA_URL='http://omaha-test.s3.amazonaws.com/',
         CRASH_S3_MOUNT_PATH=TEST_DATA_DIR,
         CRASH_SYMBOLS_PATH=SYMBOLS_PATH,
+        CELERY_ALWAYS_EAGER=False,
     )
-    @test.override_settings(CELERY_ALWAYS_EAGER=False,)
     @freeze_time("2014-12-11")
     @patch('crash.utils.send_stacktrace', lambda: None)
     @patch('crash.utils.crash_sender')

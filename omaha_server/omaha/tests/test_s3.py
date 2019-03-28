@@ -19,7 +19,6 @@ from omaha.tests import OverloadTestStorageMixin
 from sparkle.models import SparkleVersion
 from omaha_server.utils import storage_with_spaces_instance
 from omaha.limitation import bulk_delete
-from storages.backends.s3boto import S3BotoStorage
 from omaha.tasks import get_prefix
 
 
@@ -29,7 +28,7 @@ class BaseS3Test(object):
     file_fields = None
     files = None
 
-    @moto.mock_s3
+    @moto.mock_s3_deprecated
     def test_model_delete(self):
         conn = boto.connect_s3()
         conn.create_bucket('test')
@@ -44,7 +43,7 @@ class BaseS3Test(object):
         keys = conn.get_bucket('test').get_all_keys()
         self.assertFalse(keys)
 
-    @moto.mock_s3
+    @moto.mock_s3_deprecated
     def test_model_update(self):
         conn = boto.connect_s3()
         conn.create_bucket('test')
@@ -62,7 +61,7 @@ class BaseS3Test(object):
         new_keys = conn.get_bucket('test').get_all_keys()
         self.assertFalse(set(old_keys) & set(new_keys))
 
-    @moto.mock_s3
+    @moto.mock_s3_deprecated
     def test_bulk_delete(self):
         conn = boto.connect_s3()
         conn.create_bucket('test')
@@ -81,7 +80,7 @@ class BaseS3Test(object):
         keys = conn.get_bucket('test').get_all_keys()
         self.assertFalse(keys)
 
-    @moto.mock_s3
+    @moto.mock_s3_deprecated
     def test_dangling_delete_db(self):
         conn = boto.connect_s3()
         conn.create_bucket('test')
@@ -96,7 +95,7 @@ class BaseS3Test(object):
         )
         self.assertEqual(result['status'], 'Send notifications')
 
-    @moto.mock_s3
+    @moto.mock_s3_deprecated
     def test_dangling_delete_s3(self):
         # create bucket and send file in s3
         conn = boto.connect_s3()

@@ -3,6 +3,7 @@
 from .settings import *
 
 DEBUG = True
+IS_PRIVATE = True
 
 ALLOWED_HOSTS = ('*',)
 

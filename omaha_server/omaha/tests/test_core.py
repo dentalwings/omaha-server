@@ -217,7 +217,7 @@ class TestRequestScheme(TestCase, XmlTestMixin):
             protocol='3.0',
             date=datetime(2014, 1, 1, hour=15, minute=41, second=48),  # 56508 sec
             apps_list=[
-                App('{430FD4D0-B729-4F61-AA34-91526481799D}', updatecheck=Updatecheck_negative(), ping=True),
+                App('{DD13223F-AC0E-436E-B20D-85F7371A555D}', updatecheck=Updatecheck_negative(), ping=True),
                 App('{D0AB2EBC-931B-4013-9FEB-C9C4C2225C8C}', updatecheck=Updatecheck_negative(), ping=True),
             ]
         )
@@ -254,7 +254,7 @@ class TestRequestScheme(TestCase, XmlTestMixin):
             protocol='3.0',
             date=datetime(2014, 1, 1, hour=15, minute=41, second=48),  # 56508 sec
             apps_list=[
-                App('{430FD4D0-B729-4F61-AA34-91526481799D}', status='ok',
+                App('{DD13223F-AC0E-436E-B20D-85F7371A555D}', status='ok',
                     ping=True, updatecheck=Updatecheck_negative()),
                 app,
             ]

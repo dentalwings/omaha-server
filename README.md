@@ -1,7 +1,8 @@
 # omaha-server
 
-[![Build Status](https://travis-ci.org/dentalwings/omaha-server.svg?branch=master)](https://travis-ci.org/dentalwings/omaha-server)
-[![Coverage Status](https://coveralls.io/repos/dentalwings/omaha-server/badge.png?branch=master)](https://coveralls.io/r/dentalwings/omaha-server?branch=master)
+[![Build Status](https://travis-ci.com/dentalwings/omaha-server.svg?branch=master)](https://travis-ci.com/dentalwings/omaha-server)
+[![Coverage Status](https://coveralls.io/repos/github/dentalwings/omaha-server/badge.svg?branch=travis-tests)](https://coveralls.io/github/dentalwings/omaha-server?branch=travis-tests)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/dentalwings/omaha-server/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/dentalwings/omaha-server/?branch=master)
 [![Apache License, Version 2.0](https://img.shields.io/badge/license-Apache%202.0-red.svg)](https://github.com/dentalwings/omaha-server/blob/master/LICENSE)
 
 Google Omaha server implementation and Sparkle (mac) feed management.
@@ -26,6 +27,7 @@ sudo add-apt-repository \
    stable"
 sudo apt-get update
 sudo apt-get install docker-ce
+sudo usermod -aG docker $USER
 
 # checkout the code, assuming you're in your favorite source directory already
 git clone git@github.com:dentalwings/omaha-server.git
@@ -142,7 +144,6 @@ eb deploy {PrivateEnvironment|PublicEnvironment}
 | DB_PUBLIC_USER            |                      |                            |
 | DB_PUBLIC_PASSWORD        |                      |                            |
 | AWS_ROLE                  |                      |                            |
-| OMAHA_URL_PREFIX          | no trailing slash!   |                            |
 | SENTRY_DSN                | Sentry DSN           |                            |
 | OMAHA_ONLY_HTTPS          | HTTPS-only           | False                      |
 | CUP_REQUEST_VALIDATION    |                      | False                      |

@@ -32,20 +32,21 @@ from django.db.models.signals import pre_save, pre_delete
 from django.utils.timezone import now as datetime_now
 
 from omaha.managers import VersionManager
-from omaha.fields import PercentField
+from omaha.fields import PercentField, BigVersionField
 from omaha_server.s3utils import public_read_storage
 
 from django_extensions.db.fields import (
     CreationDateTimeField, ModificationDateTimeField,
 )
 from jsonfield import JSONField
-from versionfield import VersionField
 from furl import furl
 
 
 __all__ = ['Application', 'Channel', 'Platform', 'Version',
            'Action', 'EVENT_DICT_CHOICES', 'EVENT_CHOICES',
-           'Data']
+           'Data', 'AppRequest', 'Request', 'PartialUpdate',
+           'BaseModel', 'version_upload_to']
+
 
 class BaseModel(models.Model):
     created = CreationDateTimeField('created')
@@ -107,7 +108,8 @@ class Version(BaseModel):
     app = models.ForeignKey(Application)
     platform = models.ForeignKey(Platform, db_index=True)
     channel = models.ForeignKey(Channel, db_index=True)
-    version = VersionField(help_text='Format: 255.255.65535.65535', number_bits=(8, 8, 16, 16), db_index=True)
+    version = BigVersionField(help_text='Format: 255.255.65535.65535',
+                              number_bits=(8, 8, 16, 16), db_index=True)
     release_notes = models.TextField(blank=True, null=True)
     file = models.FileField(upload_to=_version_upload_to, null=True,
                             storage=public_read_storage)
@@ -134,7 +136,7 @@ class Version(BaseModel):
     def file_absolute_url(self):
         url = furl(self.file.url)
         if not url.scheme:
-            url = '%s%s' % (settings.OMAHA_URL_PREFIX, url)
+            url = '%s%s' % (settings.MEDIA_URL, url)
         return str(url)
 
     @property
@@ -145,14 +147,17 @@ class Version(BaseModel):
     @property
     def file_url(self):
         url = furl(self.file_absolute_url)
-        if url.port and url.port != 80:
-            return '%s://%s:%d%s/' % (url.scheme, url.host, url.port, os.path.dirname(url.pathstr))
-        else:
-            return '%s://%s%s/' % (url.scheme, url.host, os.path.dirname(url.pathstr))
+        if url.host:
+            if url.port and url.port != 80:
+                return '%s://%s:%d%s/' % (url.scheme, url.host, url.port, os.path.dirname(url.pathstr))
+            else:
+                return '%s://%s%s/' % (url.scheme, url.host, os.path.dirname(url.pathstr))
+        return '%s/' % os.path.dirname(url.pathstr)
 
     @property
     def size(self):
-         return self.file_size
+        return self.file_size
+
 
 EVENT_DICT_CHOICES = dict(
     preinstall=0,
@@ -252,6 +257,7 @@ class Os(models.Model):
             ('platform', 'version', 'sp', 'arch'),
         )
 
+
 class Hw(models.Model):
     sse = models.PositiveIntegerField(null=True, blank=True)
     sse2 = models.PositiveIntegerField(null=True, blank=True)
@@ -266,7 +272,8 @@ class Hw(models.Model):
 class Request(models.Model):
     os = models.ForeignKey(Os, null=True, blank=True)
     hw = models.ForeignKey(Hw, null=True, blank=True)
-    version = VersionField(help_text='Format: 255.255.65535.65535', number_bits=(8, 8, 16, 16))
+    version = BigVersionField(help_text='Format: 255.255.65535.65535',
+                              number_bits=(8, 8, 16, 16), default=0, null=True, blank=True)
     ismachine = models.PositiveSmallIntegerField(null=True, blank=True)
     sessionid = models.CharField(max_length=40, null=True, blank=True)
     userid = models.CharField(max_length=40, null=True, blank=True)
@@ -309,10 +316,10 @@ class Event(models.Model):
 class AppRequest(models.Model):
     request = models.ForeignKey(Request, db_index=True)
     appid = models.CharField(max_length=38, db_index=True)
-    version = VersionField(help_text='Format: 255.255.65535.65535',
-                           number_bits=(8, 8, 16, 16), default=0, null=True, blank=True)
-    nextversion = VersionField(help_text='Format: 255.255.65535.65535',
-                               number_bits=(8, 8, 16, 16), default=0, null=True, blank=True)
+    version = BigVersionField(help_text='Format: 255.255.65535.65535',
+                              number_bits=(8, 8, 16, 16), default=0, null=True, blank=True)
+    nextversion = BigVersionField(help_text='Format: 255.255.65535.65535',
+                                  number_bits=(8, 8, 16, 16), default=0, null=True, blank=True)
     lang = models.CharField(max_length=40, null=True, blank=True)
     tag = models.CharField(max_length=40, null=True, blank=True)
     installage = models.SmallIntegerField(null=True, blank=True)
@@ -337,8 +344,6 @@ def pre_version_save(sender, instance, *args, **kwargs):
         sha1.update(chunk)
     instance.file.seek(0)
     instance.file_hash = base64.b64encode(sha1.digest()).decode()
-
-
 
 
 @receiver(pre_delete, sender=Version)

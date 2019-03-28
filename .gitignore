@@ -3,7 +3,8 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-venv
+venv*
+.idea
 .elasticbeanstalk
 
 # Unit test / coverage reports

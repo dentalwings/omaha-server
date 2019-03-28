@@ -6,10 +6,15 @@
 
 # python pre compiled files
 __pycache__/
-*.py[cod]
+*.pyc
+*.pyo
+*.pyd
 
-# unittest files
+# Unit test / coverage reports
+htmlcov/
 .tox/
+.coverage
 .cache
 nosetests.xml
 coverage.xml
+test_db

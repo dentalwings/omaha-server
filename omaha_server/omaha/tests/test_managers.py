@@ -21,13 +21,14 @@ the License.
 from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
 
+from override_storage import override_storage
+
 from omaha.models import Version
 from omaha.factories import VersionFactory
-from omaha.tests.utils import temporary_media_root
 
 
 class VersionManagerTest(TestCase):
-    @temporary_media_root()
+    @override_storage()
     def test_filter_by_enabled(self):
         version = VersionFactory.create(
             version='37.0.2062.125',

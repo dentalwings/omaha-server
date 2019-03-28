@@ -51,6 +51,7 @@ event_updatecheck = b"""<?xml version="1.0" encoding="UTF-8"?>
     </app>
 </request>"""
 
+
 def generate_events(app_id, **options):
     versions = Version.objects.filter_by_enabled(app__id=app_id)
     n_hours = options['n_hours']
@@ -74,15 +75,20 @@ def generate_events(app_id, **options):
 
 
 class Command(BaseCommand):
-    args = '<app_id>'
     help = 'A command for generating fake live statistics'
-    option_list = BaseCommand.option_list + (
-        make_option('--hours',
-                    dest='n_hours',
-                    default='24',
-                    type=int,
-                    help='For how many hours will be generated fake data(default: 24)'),
-    )
 
-    def handle(self, app_id, *args, **options):
-        generate_events(app_id, **options)
+    def add_arguments(self, parser):
+        parser.add_argument(
+            'app_id',
+            help='<AppID>'
+        )
+        parser.add_argument(
+            '--hours',
+            dest='n_hours',
+            default='24',
+            type=int,
+            help='For how many hours will be generated fake data(default: 24)',
+        )
+
+    def handle(self, *args, **options):
+        generate_events(**options)

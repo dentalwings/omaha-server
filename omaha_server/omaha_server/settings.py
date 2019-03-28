@@ -16,6 +16,8 @@ from django.core.urlresolvers import reverse_lazy
 
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
+from kombu import Queue
+
 
 sentry_sdk.init(integrations=[DjangoIntegration()])
 
@@ -48,12 +50,13 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'absolute.context_processors.absolute',
                 'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.media',
             ],
         },
     },
 ]
 
-APP_VERSION = "0.7.1"
+APP_VERSION = "0.9.0"
 
 SUIT_CONFIG = {
     'ADMIN_NAME': 'Omaha Server [{}]'.format(APP_VERSION),
@@ -78,7 +81,6 @@ SUIT_CONFIG = {
 SECRET_KEY = 'qicy(##kk%%2%#5zyoz)&0*@2wlfis+6s*al2q3t!+#++(0%23'
 
 HOST_NAME = os.environ.get('HOST_NAME')
-OMAHA_URL_PREFIX = os.environ.get('OMAHA_URL_PREFIX') # no trailing slash!
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -241,9 +243,6 @@ BOWER_INSTALLED_APPS = (
 
 
 # Celery
-
-from kombu import Queue
-
 BROKER_URL = CELERY_RESULT_BACKEND = '{}{}:{}/{}'.format(REDIS_AUTH or 'redis://', REDIS_HOST, REDIS_PORT, 3)
 CELERY_DISABLE_RATE_LIMITS = True
 CELERY_RESULT_SERIALIZER = 'msgpack'
@@ -370,3 +369,5 @@ TINYMCE_DEFAULT_CONFIG = {
     'paste_text_sticky_default': True,
     'plugins': 'table,media'
 }
+
+AWS_DEFAULT_ACL = 'authenticated-read'

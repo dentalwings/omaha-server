@@ -22,10 +22,9 @@ from builtins import str
 
 import os
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.core.files.uploadedfile import SimpleUploadedFile
-
-from omaha.tests.utils import temporary_media_root
+from override_storage import override_storage
 
 from crash.models import Symbols, Crash
 from crash.serializers import SymbolsSerializer, CrashSerializer
@@ -36,6 +35,7 @@ TEST_DATA_DIR = os.path.join(BASE_DIR, 'testdata')
 SYM_FILE = os.path.join(TEST_DATA_DIR, 'BreakpadTestApp.sym')
 
 
+@override_storage()
 class SymbolsSerializerTest(TestCase):
     def test_serializer(self):
         data = dict(file=SimpleUploadedFile('./test.pdb', False),
@@ -51,7 +51,7 @@ class SymbolsSerializerTest(TestCase):
                                   created=symbols.created.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
                                   modified=symbols.modified.strftime('%Y-%m-%dT%H:%M:%S.%fZ'), ))
 
-    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_auto_fill_file_size(self):
         with open(SYM_FILE, 'rb') as f:
             data = dict(file=SimpleUploadedFile('./BreakpadTestApp.sym', f.read()))
@@ -64,10 +64,11 @@ class SymbolsSerializerTest(TestCase):
         self.assertEqual(symbols_instance.file_size, 68149)
 
 
+@override_storage()
 class CrashSerializerTest(TestCase):
     maxDiff = None
 
-    @temporary_media_root(
+    @override_settings(
         CELERY_ALWAYS_EAGER=False,
         CELERY_EAGER_PROPAGATES_EXCEPTIONS=False,
     )

@@ -28,7 +28,7 @@ request_update_check = b"""<?xml version="1.0" encoding="UTF-8"?>
          testsource="ossdev"
          requestid="{C8F6EDF3-B623-4ee6-B2DA-1D08A0B4C665}">
     <os platform="win" version="6.1" sp="" arch="x64"/>
-    <app appid="{430FD4D0-B729-4F61-AA34-91526481799D}" version="1.2.23.0" nextversion="" lang="en" brand="GGLS"
+    <app appid="{DD13223F-AC0E-436E-B20D-85F7371A555D}" version="1.2.23.0" nextversion="" lang="en" brand="GGLS"
          client="someclientid" installage="39">
         <updatecheck/>
         <ping r="1"/>
@@ -87,7 +87,7 @@ request_event_uninstall_success = b"""<?xml version="1.0" encoding="UTF-8"?>
 request_data = b"""<?xml version="1.0" encoding="UTF-8"?>
 <request protocol="3.0" version="1.3.23.0" ismachine="0" sessionid="{5FAD27D4-6BFA-4daa-A1B3-5A1F821FEE0F}" userid="{D0BBD725-742D-44ae-8D46-0231E881D58E}" installsource="scheduler" testsource="ossdev" requestid="{C8F6EDF3-B623-4ee6-B2DA-1D08A0B4C665}">
   <os platform="win" version="6.1" sp="" arch="x64"/>
-  <app appid="{430FD4D0-B729-4F61-AA34-91526481799D}" version="1.3.23.0" nextversion="" lang="en" brand="GGLS" client="someclientid" installage="39">
+  <app appid="{DD13223F-AC0E-436E-B20D-85F7371A555D}" version="1.3.23.0" nextversion="" lang="en" brand="GGLS" client="someclientid" installage="39">
     <updatecheck/>
     <data name="install" index="verboselogging"/>
     <data name="untrusted">Some untrusted data</data>
@@ -98,7 +98,7 @@ request_data = b"""<?xml version="1.0" encoding="UTF-8"?>
 response_update_check_negative = b"""<?xml version="1.0" encoding="UTF-8"?>
 <response protocol="3.0" server="prod">
   <daystart elapsed_seconds="56508" elapsed_days="2557"/>
-  <app appid="{430FD4D0-B729-4F61-AA34-91526481799D}" status="ok">
+  <app appid="{DD13223F-AC0E-436E-B20D-85F7371A555D}" status="ok">
     <updatecheck status="noupdate"/>
     <ping status="ok"/>
   </app>
@@ -111,7 +111,7 @@ response_update_check_negative = b"""<?xml version="1.0" encoding="UTF-8"?>
 response_update_check_positive = b"""<?xml version="1.0" encoding="UTF-8"?>
 <response protocol="3.0" server="prod">
   <daystart elapsed_seconds="56508" elapsed_days="2557"/>
-  <app appid="{430FD4D0-B729-4F61-AA34-91526481799D}" status="ok">
+  <app appid="{DD13223F-AC0E-436E-B20D-85F7371A555D}" status="ok">
     <updatecheck status="noupdate"/>
     <ping status="ok"/>
   </app>
@@ -137,7 +137,7 @@ response_update_check_positive = b"""<?xml version="1.0" encoding="UTF-8"?>
 response_update_check_postitive_critical = b"""<?xml version="1.0" encoding="UTF-8"?>
 <response protocol="3.0" server="prod">
   <daystart elapsed_seconds="56508" elapsed_days="2557"/>
-  <app appid="{430FD4D0-B729-4F61-AA34-91526481799D}" status="ok">
+  <app appid="{DD13223F-AC0E-436E-B20D-85F7371A555D}" status="ok">
     <updatecheck status="noupdate"/>
     <ping status="ok"/>
   </app>
@@ -180,7 +180,7 @@ response_data_doc = b"""<?xml version="1.0" encoding="UTF-8"?>
 response_data = b"""<?xml version="1.0" encoding="UTF-8"?>
 <response protocol="3.0" server="prod">
   <daystart elapsed_seconds="56754" elapsed_days="2557"/>
-  <app status="ok" appid="{430FD4D0-B729-4F61-AA34-91526481799D}">
+  <app status="ok" appid="{DD13223F-AC0E-436E-B20D-85F7371A555D}">
     <data status="ok" index="verboselogging" name="install">app-specific values here</data>
     <data status="ok" name="untrusted"/>
     <updatecheck status="ok">

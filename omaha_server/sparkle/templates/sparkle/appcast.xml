@@ -16,7 +16,7 @@
                 ]]>
                 </description>
                 <pubDate>{{ version.created|date:"r" }}</pubDate>
-                <enclosure url="{{ version.file.url }}"
+                <enclosure url="{{ MEDIA_URL }}{{ version.file_absolute_url }}"
                            sparkle:version="{{ version.version }}"
                            {% if version.short_version %}sparkle:shortVersionString="{{ version.short_version }}"{% endif %}
                            {% if version.dsa_signature %}sparkle:dsaSignature="{{ version.dsa_signature }}"{% endif %}

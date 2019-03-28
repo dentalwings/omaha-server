@@ -31,6 +31,7 @@ INSTALLED_APPS += (
 TEST_RUNNER = 'omaha_server.runner.PublicPrivateNoseTestSuiteRunner'
 
 NOSE_ARGS = [
+    '--exe',
     '--with-coverage',
     '--cover-package=omaha_server,omaha,crash,feedback,sparkle,healthcheck',
     '--cover-inclusive',
@@ -57,7 +58,7 @@ CACHES['default'] = {
 
 CACHES['statistics'] = {
     'BACKEND': 'django_redis.cache.RedisCache',
-    'LOCATION': '{REDIS_HOST}:{REDIS_PORT}:{REDIS_DB}'.format(
+    'LOCATION': 'redis://{REDIS_HOST}:{REDIS_PORT}:{REDIS_DB}'.format(
         REDIS_PORT=REDIS_STAT_PORT,
         REDIS_HOST=REDIS_STAT_HOST,
         REDIS_DB=REDIS_STAT_DB),
@@ -78,5 +79,13 @@ AWS_SECRET_ACCESS_KEY = ''
 
 SENTRY_STACKTRACE_DOMAIN = 'test'
 SENTRY_STACKTRACE_ORG_SLUG = 'test'
-SENTRY_STACKTRACE_PROJ_SLUG ='test'
+SENTRY_STACKTRACE_PROJ_SLUG = 'test'
 SENTRY_STACKTRACE_API_KEY = 'test'
+
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'UTC'
+USE_I18N = True
+USE_L10N = True
+USE_TZ = True
+
+ALLOWED_HOSTS = [u'example.com']

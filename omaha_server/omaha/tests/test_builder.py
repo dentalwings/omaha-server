@@ -24,8 +24,7 @@ from bitmapist import mark_event
 
 from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
-
-from omaha.tests.utils import temporary_media_root
+from override_storage import override_storage
 
 from omaha.factories import VersionFactory
 from omaha.builder import get_version
@@ -33,13 +32,13 @@ from omaha.models import PartialUpdate, Version, Channel, ACTIVE_USERS_DICT_CHOI
 from omaha.utils import redis, get_id
 
 
-@temporary_media_root()
+@override_storage()
 class BuilderTest(TestCase):
     def setUp(self):
-        redis.flushdb()
+        redis.flushall()
 
     def tearDown(self):
-        redis.flushdb()
+        redis.flushall()
 
     def test_get_version(self):
         userid = '{D0BBD725-742D-44ae-8D46-0231E881D58E}'
@@ -153,7 +152,6 @@ class BuilderTest(TestCase):
             channel=version.channel,
             version='39.0.0.0',
         )
-
 
         id = get_id(userid_beta)
         mark_event('request', id)

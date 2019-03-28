@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 from django.db import migrations
-import versionfield
+from omaha.fields import BigVersionField
 
 
 class Migration(migrations.Migration):
@@ -16,12 +16,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='sparkleversion',
             name='_short_version',
-            field=versionfield.VersionField(blank=True, help_text='Format: 255.255.65535.65535', null=True),
+            field=BigVersionField(blank=True, help_text='Format: 255.255.65535.65535', null=True),
         ),
         migrations.AddField(
             model_name='sparkleversion',
             name='_version',
-            field=versionfield.VersionField(db_index=True, default=0, help_text='Format: 65535.65535'),
+            field=BigVersionField(db_index=True, default=0, help_text='Format: 65535.65535'),
             preserve_default=False,
         ),
     ]

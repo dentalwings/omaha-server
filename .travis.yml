@@ -6,52 +6,54 @@ matrix:
   include:
     - python: "2.7"
       env:
-        - TOX_ENV=py27
         - OMAHA_SERVER_PRIVATE=True
+        - PATH_TO_TEST=''
+        - DJANGO_SETTINGS_MODULE=omaha_server.settings_test
     - python: "2.7"
       env:
-        - TOX_ENV=py27
         - OMAHA_SERVER_PRIVATE=False
+        - PATH_TO_TEST=''
+        - DJANGO_SETTINGS_MODULE=omaha_server.settings_test
     - python: "2.7"
       env:
-        - TOX_ENV=py27
+        - PATH_TO_TEST=''
         - DJANGO_SETTINGS_MODULE=omaha_server.settings_test_postgres
     - python: "2.7"
       env:
-        - TOX_ENV=py27
         - PATH_TO_TEST=omaha.tests.test_public
         - DJANGO_SETTINGS_MODULE=omaha_server.settings_test_postgres
         - OMAHA_SERVER_PRIVATE=False
-    - python: "3.4"
-      env: TOX_ENV=py34
     - python: "2.7"
-      env: TOX_ENV=coverage
+      env: COVERAGE=true
 
 cache: pip
 sudo: false
 
 virtualenv:
-  system_site_packages: true
+  system_site_packages: false
 
 addons:
   apt:
     packages:
-    - python-lxml
-    - python-psycopg2
-    - python-dev
+     - python-dev
+  postgresql: "9.4"
 
 env:
   global:
     - HOST_NAME: 'travis-ci'
     - SECRET_KEY: 'SECRET_KEY'
     - GRPC_PYTHON_BUILD_WITH_CYTHON: 1
+    - AWS_ACCESS_KEY_ID: 'fake'
+    - AWS_SECRET_ACCESS_KEY: 'fake'
 
 services:
   - redis-server
+  - postgresql
 
 install:
-  - pip install tox==2.2.1
-  - pip install google-compute-engine
+  - pip install -r omaha_server/requirements_dev.txt
 
+before_script: cd omaha_server
 script:
-  - tox -e $TOX_ENV
+  - ./manage.py test -v 2 $PATH_TO_TEST
+  - if [ $COVERAGE = true ] ; then coveralls --skip_ssl_verify; fi

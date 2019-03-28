@@ -154,6 +154,6 @@ def get_channel(build_number, os):
             version = SparkleVersion.objects.select_related('channel').get(short_version=build_number)
         else:                       # All other platforms will be related to Omaha
             version = Version.objects.select_related('channel').get(version=build_number)
-    except (MultipleObjectsReturned, ObjectDoesNotExist, ValidationError):
+    except (MultipleObjectsReturned, ObjectDoesNotExist, ValidationError, ValueError):
         return 'undefined'
     return version.channel.name

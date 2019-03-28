@@ -80,10 +80,10 @@ class GetIdTest(TestCase):
     def setUp(self):
         self.uid = '{8C65E04C-0383-4AE2-893F-4EC7C58F70DC}'
         self.redis = redis
-        self.redis.flushdb()
+        self.redis.flushall()
 
     def tearDown(self):
-        self.redis.flushdb()
+        self.redis.flushall()
 
     def test_get_id_new(self):
         id = get_id(self.uid)

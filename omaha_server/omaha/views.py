@@ -23,7 +23,6 @@ import logging
 from django.views.generic import View
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
-from django.conf import settings
 
 from django_select2.views import AutoResponseView
 from lxml.etree import XMLSyntaxError
@@ -33,6 +32,7 @@ from omaha_server.utils import get_client_ip
 from omaha.models import Request
 
 logger = logging.getLogger(__name__)
+
 
 class UpdateView(View):
     http_method_names = ['post']
@@ -82,7 +82,7 @@ class FilterByUserIDResponseView(AutoResponseView):
 
 
 class UsageStatsView(View):
-    http_method_names = ['post', 'get']
+    http_method_names = ['post']
 
     @csrf_exempt
     def dispatch(self, *args, **kwargs):

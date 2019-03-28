@@ -24,7 +24,7 @@ from crash.models import Symbols, Crash
 from crash.utils import parse_debug_meta_info
 
 
-__all__ = ['SymbolsSerializer']
+__all__ = ['SymbolsSerializer', 'CrashSerializer']
 
 
 class SymbolsSerializer(serializers.HyperlinkedModelSerializer):

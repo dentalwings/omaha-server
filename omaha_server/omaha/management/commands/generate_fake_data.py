@@ -24,7 +24,6 @@ from builtins import range, bytes
 import random
 from datetime import datetime
 from uuid import uuid4
-from optparse import make_option
 
 from django.core.management.base import BaseCommand
 
@@ -128,15 +127,20 @@ def generate_events(app_id, **options):
 
 
 class Command(BaseCommand):
-    args = '<app_id>'
     help = 'A command for generating fake data such as requests, events and statistics'
-    option_list = BaseCommand.option_list + (
-        make_option('--count',
-                    dest='count',
-                    default='100',
-                    type=int,
-                    help='Total number of data values (default: 100)'),
-    )
 
-    def handle(self, app_id, *args, **options):
-        generate_events(app_id, **options)
+    def add_arguments(self, parser):
+        parser.add_argument(
+            'app_id',
+            help='<AppID>'
+        )
+        parser.add_argument(
+            '--count',
+            dest='count',
+            default='100',
+            type=int,
+            help='Total number of data values (default: 100)',
+        )
+
+    def handle(self, *args, **options):
+        generate_events(**options)
