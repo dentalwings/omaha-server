@@ -1,59 +1,51 @@
+dist: xenial
 language: python
-dist: trusty
+python:
+  - "3.7"
+
 matrix:
-  allow_failures:
-    - env: TOX_ENV=py34
   include:
-    - python: "2.7"
-      env:
-        - OMAHA_SERVER_PRIVATE=True
-        - PATH_TO_TEST=''
-        - DJANGO_SETTINGS_MODULE=omaha_server.settings_test
-    - python: "2.7"
-      env:
-        - OMAHA_SERVER_PRIVATE=False
-        - PATH_TO_TEST=''
-        - DJANGO_SETTINGS_MODULE=omaha_server.settings_test
-    - python: "2.7"
-      env:
-        - PATH_TO_TEST=''
-        - DJANGO_SETTINGS_MODULE=omaha_server.settings_test_postgres
-    - python: "2.7"
-      env:
-        - PATH_TO_TEST=omaha.tests.test_public
-        - DJANGO_SETTINGS_MODULE=omaha_server.settings_test_postgres
-        - OMAHA_SERVER_PRIVATE=False
-    - python: "2.7"
-      env: COVERAGE=true
-
-cache: pip
-sudo: false
-
-virtualenv:
-  system_site_packages: false
+    - env:
+      - TOX_ENV=py37
+      - OMAHA_SERVER_PRIVATE=True
+    - env:
+      - TOX_ENV=py37
+      - OMAHA_SERVER_PRIVATE=False
+    - env:
+      - TOX_ENV=py37
+      - DJANGO_SETTINGS_MODULE=omaha_server.settings_test_postgres
+      - OMAHA_SERVER_PRIVATE=True
+    - env:
+      - TOX_ENV=py37
+      - PATH_TO_TEST=omaha.tests.test_public
+      - DJANGO_SETTINGS_MODULE=omaha_server.settings_test_postgres
+      - OMAHA_SERVER_PRIVATE=False
+    - env:
+      - TOX_ENV=coverage
 
 addons:
   apt:
     packages:
-     - python-dev
-  postgresql: "9.4"
+    - python-lxml
+    - python-psycopg2
+    - python-dev
 
 env:
   global:
     - HOST_NAME: 'travis-ci'
     - SECRET_KEY: 'SECRET_KEY'
     - GRPC_PYTHON_BUILD_WITH_CYTHON: 1
-    - AWS_ACCESS_KEY_ID: 'fake'
-    - AWS_SECRET_ACCESS_KEY: 'fake'
+
+cache: pip
+sudo: false
 
 services:
   - redis-server
   - postgresql
 
 install:
-  - pip install -r omaha_server/requirements_dev.txt
+  - pip install tox==3.9.0
+  - pip install google-compute-engine
 
-before_script: cd omaha_server
 script:
-  - ./manage.py test -v 2 $PATH_TO_TEST
-  - if [ $COVERAGE = true ] ; then coveralls --skip_ssl_verify; fi
+  - tox -e $TOX_ENV

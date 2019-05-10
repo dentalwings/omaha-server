@@ -268,10 +268,6 @@ class StatisticsVersionsLiveView(APIView):
         serializer = StatisticsMonthsSerializer(dict(data=dict(data)))
         return Response(serializer.data)
 
-    @classmethod
-    def get_extra_actions(cls):
-        return []
-
 
 class StatisticsChannelsView(APIView):
     def get_object(self, name):

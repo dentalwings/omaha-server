@@ -2,15 +2,11 @@
 
 """
 This software is licensed under the Apache 2 license, quoted below.
-
 Copyright 2014 Crystalnix Limited
-
 Licensed under the Apache License, Version 2.0 (the "License"); you may not
 use this file except in compliance with the License. You may obtain a copy of
 the License at
-
     http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -24,7 +20,8 @@ from bitmapist import mark_event
 
 from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
-from override_storage import override_storage
+
+from omaha.tests.utils import temporary_media_root
 
 from omaha.factories import VersionFactory
 from omaha.builder import get_version
@@ -32,13 +29,13 @@ from omaha.models import PartialUpdate, Version, Channel, ACTIVE_USERS_DICT_CHOI
 from omaha.utils import redis, get_id
 
 
-@override_storage()
+@temporary_media_root()
 class BuilderTest(TestCase):
     def setUp(self):
-        redis.flushall()
+        redis.flushdb()
 
     def tearDown(self):
-        redis.flushall()
+        redis.flushdb()
 
     def test_get_version(self):
         userid = '{D0BBD725-742D-44ae-8D46-0231E881D58E}'
@@ -152,6 +149,7 @@ class BuilderTest(TestCase):
             channel=version.channel,
             version='39.0.0.0',
         )
+
 
         id = get_id(userid_beta)
         mark_event('request', id)

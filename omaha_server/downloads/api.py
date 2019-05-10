@@ -55,3 +55,4 @@ class LatestVersionView(APIView):
         for v in mac_versions:
             data[v.app.name]['mac'][v.channel.name] = dict(version=str(v.short_version), url=v.file_absolute_url)
         return Response(data)
+

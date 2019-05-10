@@ -11,5 +11,6 @@ import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "omaha_server.settings")
 
 from django.core.wsgi import get_wsgi_application
+from raven.contrib.django.raven_compat.middleware.wsgi import Sentry
 
-application = get_wsgi_application()
+application = Sentry(get_wsgi_application())

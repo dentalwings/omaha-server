@@ -11,20 +11,18 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 from datetime import timedelta
-
-from django.core.urlresolvers import reverse_lazy
-
-import sentry_sdk
-from sentry_sdk.integrations.django import DjangoIntegration
+from django.urls import reverse_lazy
 from kombu import Queue
 
-
-sentry_sdk.init(integrations=[DjangoIntegration()])
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 PROJECT_DIR = BASE_DIR
 
 IS_PRIVATE = True if os.getenv('OMAHA_SERVER_PRIVATE', '').title() == 'True' else False
+
+RAVEN_CONFIG = {
+    'dsn': os.environ.get('RAVEN_DNS'),
+}
 
 if os.getenv('OMAHA_ONLY_HTTPS'):
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -47,16 +45,18 @@ TEMPLATES = [
         'OPTIONS': {
             'debug': True,
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
-                'absolute.context_processors.absolute',
-                'django.contrib.auth.context_processors.auth',
                 'django.template.context_processors.media',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+                'absolute.context_processors.absolute',
             ],
         },
     },
 ]
 
-APP_VERSION = "0.9.0"
+APP_VERSION = "0.9.1"
 
 SUIT_CONFIG = {
     'ADMIN_NAME': 'Omaha Server [{}]'.format(APP_VERSION),
@@ -81,6 +81,7 @@ SUIT_CONFIG = {
 SECRET_KEY = 'qicy(##kk%%2%#5zyoz)&0*@2wlfis+6s*al2q3t!+#++(0%23'
 
 HOST_NAME = os.environ.get('HOST_NAME')
+OMAHA_URL_PREFIX = os.environ.get('OMAHA_URL_PREFIX')  # no trailing slash!
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -124,23 +125,22 @@ INSTALLED_APPS = (
     'tinymce',
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'omaha_server.middlewares.CUP2Middleware',
-)
+]
 
 if IS_PRIVATE:
-    MIDDLEWARE_CLASSES = (
+    MIDDLEWARE = [
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
-        'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
         'django.contrib.messages.middleware.MessageMiddleware',
         'omaha_server.middlewares.LoggingMiddleware',
         'omaha_server.middlewares.TimezoneMiddleware',
-    ) + MIDDLEWARE_CLASSES
+        'omaha_server.middlewares.CUP2Middleware',
+     ] + MIDDLEWARE
 
 ROOT_URLCONF = 'omaha_server.urls'
 
@@ -187,7 +187,7 @@ STATIC_ROOT = os.path.join(PROJECT_DIR, 'static')
 MEDIA_ROOT = os.path.join(STATIC_ROOT, 'media')
 
 STATIC_URL = '/static/'
-MEDIA_URL = '/static/media/'
+MEDIA_URL = '/media/'
 
 STATICFILES_DIRS = (
     os.path.join(PROJECT_DIR, 'assets'),
@@ -246,11 +246,13 @@ BOWER_INSTALLED_APPS = (
 BROKER_URL = CELERY_RESULT_BACKEND = '{}{}:{}/{}'.format(REDIS_AUTH or 'redis://', REDIS_HOST, REDIS_PORT, 3)
 CELERY_DISABLE_RATE_LIMITS = True
 CELERY_RESULT_SERIALIZER = 'msgpack'
+CELERY_TASK_SERIALIZER = 'pickle'
 CELERY_MESSAGE_COMPRESSION = 'zlib'
 CELERY_QUEUES = (
     Queue('transient', routing_key='transient', delivery_mode=1),
     Queue('default', routing_key='default'),
 )
+CELERY_ACCEPT_CONTENT = ['pickle', 'msgpack']
 
 if IS_PRIVATE:
     CELERY_QUEUES += (
@@ -370,4 +372,4 @@ TINYMCE_DEFAULT_CONFIG = {
     'plugins': 'table,media'
 }
 
-AWS_DEFAULT_ACL = 'authenticated-read'
+AWS_DEFAULT_ACL = 'private'

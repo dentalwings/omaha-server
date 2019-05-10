@@ -1,13 +1,16 @@
 # coding: utf8
 
 import os
+from .settings import *
 
-os.environ.setdefault('DB_PUBLIC_USER', 'test_public_user')
-os.environ.setdefault('DB_PUBLIC_PASSWORD', 'test_public_password')
+ALLOWED_HOSTS = ('example.com',)
+
+os.environ.setdefault('DB_PUBLIC_USER', 'omaha_public')
+os.environ.setdefault('DB_PUBLIC_PASSWORD', 'omaha_public_password')
+
 
 os.environ.setdefault('OMAHA_SERVER_PRIVATE', 'True')
 
-from .settings import *
 DB_PUBLIC_ROLE = os.environ.get('DB_PUBLIC_ROLE', 'test_public_users')
 
 DATABASES = {
@@ -35,7 +38,6 @@ NOSE_ARGS = [
     '--with-coverage',
     '--cover-package=omaha_server,omaha,crash,feedback,sparkle,healthcheck',
     '--cover-inclusive',
-    '--nologcapture',
     '-s',
 ]
 
@@ -58,7 +60,7 @@ CACHES['default'] = {
 
 CACHES['statistics'] = {
     'BACKEND': 'django_redis.cache.RedisCache',
-    'LOCATION': 'redis://{REDIS_HOST}:{REDIS_PORT}:{REDIS_DB}'.format(
+    'LOCATION': 'redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}'.format(
         REDIS_PORT=REDIS_STAT_PORT,
         REDIS_HOST=REDIS_STAT_HOST,
         REDIS_DB=REDIS_STAT_DB),
@@ -73,6 +75,8 @@ OMAHA_UID_KEY_PREFIX = 'test:uid'
 CRASH_SYMBOLS_PATH = os.path.join(BASE_DIR, 'crash', 'tests', 'testdata', 'symbols')
 CRASH_S3_MOUNT_PATH = os.path.join(BASE_DIR, 'crash', 'tests', 'testdata')
 
+RAVEN_DSN_STACKTRACE = 'http://c5dc6f5ab74b4ab8a567f545b00cb138:c57ee00766cf497da102b7a83d731840@127.0.0.1/1'
+
 AWS_STORAGE_BUCKET_NAME = 'test'
 AWS_ACCESS_KEY_ID = ''
 AWS_SECRET_ACCESS_KEY = ''
@@ -81,11 +85,3 @@ SENTRY_STACKTRACE_DOMAIN = 'test'
 SENTRY_STACKTRACE_ORG_SLUG = 'test'
 SENTRY_STACKTRACE_PROJ_SLUG = 'test'
 SENTRY_STACKTRACE_API_KEY = 'test'
-
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
-USE_I18N = True
-USE_L10N = True
-USE_TZ = True
-
-ALLOWED_HOSTS = [u'example.com']

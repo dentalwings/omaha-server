@@ -23,11 +23,14 @@ from django.contrib import admin
 from django.contrib.admin import utils
 from django.utils.encoding import smart_text
 
-from omaha.fields import BigVersionField
+from dynamic_preferences.models import GlobalPreferenceModel
+from versionfield import VersionField
 
 from omaha.models import Channel, Platform, Application, Version, Action, PartialUpdate, Data
 from omaha.forms import ApplicationAdminForm, VersionAdminForm, ActionAdminForm, DataAdminForm
 
+
+admin.site.unregister(GlobalPreferenceModel)
 
 @admin.register(Platform)
 class PlatformAdmin(admin.ModelAdmin):
@@ -74,7 +77,7 @@ class VersionAdmin(admin.ModelAdmin):
 
 
 def my_display_for_field(value, field, *args, **kwargs):
-    if isinstance(field, BigVersionField):
+    if isinstance(field, VersionField):
         return smart_text(value)
     return django_display_for_field(value, field, *args, **kwargs)
 

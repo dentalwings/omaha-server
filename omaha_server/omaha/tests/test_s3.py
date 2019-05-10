@@ -104,7 +104,7 @@ class BaseS3Test(object):
         prefix = get_prefix(self.model)
         for f in self.files:
             k = Key(bucket, '%s/%s' % (f['prefix'], f['file_path']))
-            with open(f['file_path']) as test_file:
+            with open(f['file_path'], 'rb') as test_file:
                 k.send_file(test_file)
         # create 2 files in db
         self.factory.create_batch(2)

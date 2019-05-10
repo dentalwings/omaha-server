@@ -1,8 +1,10 @@
 # coding: utf8
 
-from .settings import *
-
 import os
+
+os.environ.setdefault('OMAHA_SERVER_PRIVATE', 'True')
+
+from .settings import *
 
 
 class DisableMigrations(object):
@@ -13,6 +15,8 @@ class DisableMigrations(object):
     def __getitem__(self, item):
         return None
 
+
+ALLOWED_HOSTS = ('example.com',)
 
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
@@ -59,7 +63,7 @@ CACHES['default'] = {
 
 CACHES['statistics'] = {
     'BACKEND': 'django_redis.cache.RedisCache',
-    'LOCATION': 'redis://{REDIS_HOST}:{REDIS_PORT}:{REDIS_DB}'.format(
+    'LOCATION': 'redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}'.format(
         REDIS_PORT=REDIS_STAT_PORT,
         REDIS_HOST=REDIS_STAT_HOST,
         REDIS_DB=REDIS_STAT_DB),
@@ -82,11 +86,3 @@ SENTRY_STACKTRACE_DOMAIN = 'test'
 SENTRY_STACKTRACE_ORG_SLUG = 'test'
 SENTRY_STACKTRACE_PROJ_SLUG = 'test'
 SENTRY_STACKTRACE_API_KEY = 'test'
-
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
-USE_I18N = True
-USE_L10N = True
-USE_TZ = True
-
-ALLOWED_HOSTS = [u'example.com']

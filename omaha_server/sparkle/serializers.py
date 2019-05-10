@@ -28,7 +28,6 @@ from sparkle.models import SparkleVersion
 __all__ = ['SparkleVersionSerializer']
 
 
-
 class SparkleVersionSerializer(serializers.HyperlinkedModelSerializer):
     is_enabled = serializers.BooleanField(default=True, required=False)
     app = serializers.PrimaryKeyRelatedField(queryset=Application.objects.all())

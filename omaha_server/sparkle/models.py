@@ -18,7 +18,7 @@ License for the specific language governing permissions and limitations under
 the License.
 """
 
-from __future__ import unicode_literals
+
 from django.utils.encoding import python_2_unicode_compatible
 
 import os
@@ -27,7 +27,8 @@ from django.db import models
 from django.dispatch import receiver
 from django.db.models.signals import pre_delete,pre_save
 
-from omaha.fields import BigVersionField
+from versionfield import VersionField
+
 from omaha.models import BaseModel, Application, Channel
 from sparkle.managers import VersionManager
 from omaha_server.s3utils import public_read_storage
@@ -41,13 +42,13 @@ def version_upload_to(obj, filename):
 class SparkleVersion(BaseModel):
     is_enabled = models.BooleanField(default=True)
     is_critical = models.BooleanField(default=False)
-    app = models.ForeignKey(Application)
-    channel = models.ForeignKey(Channel, db_index=True)
-    version = BigVersionField(help_text='Format: 65535.65535',
+    app = models.ForeignKey(Application, on_delete=models.CASCADE)
+    channel = models.ForeignKey(Channel, db_index=True, on_delete=models.CASCADE)
+    version = VersionField(help_text='Format: 65535.65535',
                            number_bits=(16, 16), db_index=True)
-    short_version = BigVersionField(help_text='Format: 255.255.65535.65535',
+    short_version = VersionField(help_text='Format: 255.255.65535.65535',
                                  number_bits=(8, 8, 16, 16), blank=True, null=True)
-    minimum_system_version = BigVersionField(help_text='Format: 255.255.255',
+    minimum_system_version = VersionField(help_text='Format: 255.255.255',
                                           number_bits=(8, 8, 8), blank=True, null=True)
     release_notes = models.TextField(blank=True, null=True)
     file = models.FileField(upload_to=version_upload_to, null=True,
@@ -76,6 +77,10 @@ class SparkleVersion(BaseModel):
     @property
     def file_package_name(self):
         return os.path.basename(self.file_absolute_url)
+
+    @property
+    def file_url(self):
+        return '%s/' % os.path.dirname(self.file_absolute_url)
 
     @property
     def size(self):

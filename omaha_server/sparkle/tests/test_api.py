@@ -18,13 +18,11 @@ License for the specific language governing permissions and limitations under
 the License.
 """
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import override_settings
 
 from rest_framework import status
 from rest_framework.test import APITestCase
-from override_storage import override_storage
 
 from omaha.factories import ApplicationFactory, ChannelFactory
 
@@ -32,33 +30,35 @@ from sparkle.serializers import SparkleVersionSerializer
 from sparkle.factories import SparkleVersionFactory
 from sparkle.models import SparkleVersion
 
+from omaha.tests.utils import temporary_media_root
+from omaha.tests import OverloadTestStorageMixin
 from omaha.tests.test_api import BaseTest
 from omaha_server.utils import is_private
 
 
-class VersionTest(BaseTest, APITestCase):
+class VersionTest(OverloadTestStorageMixin, BaseTest, APITestCase):
     url = 'sparkleversion-list'
     url_detail = 'sparkleversion-detail'
     factory = SparkleVersionFactory
     serializer = SparkleVersionSerializer
     model = SparkleVersion
 
-    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def setUp(self):
         super(VersionTest, self).setUp()
 
     @is_private()
-    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_detail(self):
         super(VersionTest, self).test_detail()
 
     @is_private()
-    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_list(self):
         super(VersionTest, self).test_list()
 
     @is_private()
-    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_create(self):
         data = dict(
             app=ApplicationFactory.create().id,
@@ -74,7 +74,7 @@ class VersionTest(BaseTest, APITestCase):
         self.assertTrue(version.is_enabled)
 
     @is_private()
-    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_update(self):
         data = dict(
             app=ApplicationFactory.create().id,

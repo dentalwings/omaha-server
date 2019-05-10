@@ -27,7 +27,6 @@ from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist, ValidationError
 
 from clom import clom
-from celery import signature
 
 from crash.settings import MINIDUMP_STACKWALK_PATH, SYMBOLS_PATH
 from crash.stacktrace_to_json import pipe_dump_to_json_dump
@@ -143,7 +142,7 @@ def parse_debug_meta_info(head, exception=Exception):
     head = head.decode()
     head_list = head.split(' ', 4)
     if head_list[0] != 'MODULE':
-        raise exception(u"The file contains invalid data.")
+        raise exception("The file contains invalid data.")
     return dict(debug_id=head_list[-2],
                 debug_file=head_list[-1])
 
