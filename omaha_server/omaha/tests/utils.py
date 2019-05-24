@@ -2,11 +2,15 @@
 
 """
 This software is licensed under the Apache 2 license, quoted below.
+
 Copyright 2014 Crystalnix Limited
+
 Licensed under the Apache License, Version 2.0 (the "License"); you may not
 use this file except in compliance with the License. You may obtain a copy of
 the License at
+
     http://www.apache.org/licenses/LICENSE-2.0
+
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -24,8 +28,11 @@ from lxml.builder import E
 
 class temporary_media_root(override_settings):
     """Temporarily override settings.MEDIA_ROOT with a temporary directory.
+
     The temporary directory is automatically created and destroyed.
+
     Use this function as a context manager:
+
     >>> from django_downloadview.test import temporary_media_root
     >>> from django.conf import settings  # NoQA
     >>> global_media_root = settings.MEDIA_ROOT
@@ -34,6 +41,7 @@ class temporary_media_root(override_settings):
     False
     >>> global_media_root == settings.MEDIA_ROOT
     True
+
     Or as a decorator:
     >>> @temporary_media_root()
     ... def use_temporary_media_root():
@@ -43,6 +51,7 @@ class temporary_media_root(override_settings):
     False
     >>> global_media_root == settings.MEDIA_ROOT
     True
+
     """
 
     def enable(self):

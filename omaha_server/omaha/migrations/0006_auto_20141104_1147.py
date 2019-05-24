@@ -7,6 +7,7 @@ import versionfield
 
 
 class Migration(migrations.Migration):
+
     dependencies = [
         ('omaha', '0005_auto_20141030_0606'),
     ]

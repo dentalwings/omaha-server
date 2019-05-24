@@ -27,7 +27,7 @@ from omaha.factories import (
     PlatformFactory, VersionFactory,
     ApplicationFactory,
 )
-from omaha.models import Version, Platform, Application
+from omaha.models import Version, Platform
 from omaha.settings import KEY_PREFIX, KEY_LAST_ID
 from omaha.utils import (
     get_sec_since_midnight,
@@ -39,6 +39,7 @@ from omaha.utils import (
 )
 from sparkle.factories import SparkleVersionFactory
 from sparkle.models import SparkleVersion
+
 
 class UtilsTest(TestCase):
     def test_get_seconds_since_midnight(self):
@@ -80,10 +81,10 @@ class GetIdTest(TestCase):
     def setUp(self):
         self.uid = '{8C65E04C-0383-4AE2-893F-4EC7C58F70DC}'
         self.redis = redis
-        self.redis.flushall()
+        self.redis.flushdb()
 
     def tearDown(self):
-        self.redis.flushall()
+        self.redis.flushdb()
 
     def test_get_id_new(self):
         id = get_id(self.uid)
@@ -126,6 +127,7 @@ class ChartsTest(TestCase):
                                         'tag_script_js': True,
                                         'x_axis_format': '',
                                         'x_is_date': False}})
+
 
 class GetPlatformTest(django.test.TestCase):
     def setUp(self):

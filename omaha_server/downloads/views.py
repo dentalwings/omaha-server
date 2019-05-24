@@ -56,8 +56,8 @@ class OmahaLatestVersionRedirectView(RedirectView):
         platform = self.kwargs['platform']
         try:
             version = self.model.objects.filter_by_enabled(app__name=app,
-                                                channel__name=channel,
-                                                platform__name=platform).latest('version')
+                                                           channel__name=channel,
+                                                           platform__name=platform).latest('version')
         except self.model.DoesNotExist:
             raise Http404
         return version.file.url

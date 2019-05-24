@@ -36,10 +36,10 @@ class StatisticsTest(TestCase):
     request_factory = RequestFactory()
 
     def setUp(self):
-        redis.flushall()
+        redis.flushdb()
 
     def tearDown(self):
-        redis.flushall()
+        redis.flushdb()
 
     @freeze_time('2016-1-1')
     def test_add_app_statistics(self):
