@@ -26,7 +26,6 @@ from io import BytesIO
 from django import forms
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import widgets
-from django.forms.widgets import TextInput
 from django.core.files.uploadedfile import UploadedFile
 
 from django_ace import AceWidget
@@ -131,12 +130,13 @@ class SymbolsAdminForm(forms.ModelForm):
             return _file.size
         return self.initial["file_size"]
 
+
 class TextInputForm(forms.Form):
     def __init__(self, *args, **kwargs):
         field_name = kwargs.pop('field_name')
         super(TextInputForm, self).__init__(*args, **kwargs)
         self.fields[field_name] = forms.CharField(
-            widget=TextInput(attrs={'placeholder': 'Filter by ID'}),
+            widget=widgets.TextInput(attrs={'placeholder': 'Filter by ID'}),
             label='',
             required=False)
 

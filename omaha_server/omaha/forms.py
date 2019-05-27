@@ -20,8 +20,7 @@ the License.
 
 from collections import OrderedDict
 
-from django import forms
-from django.forms import widgets, ValidationError
+from django.forms import widgets, ValidationError, ModelForm, Form, IntegerField, ChoiceField
 
 from django_ace import AceWidget
 from suit.widgets import LinkedSelect
@@ -34,7 +33,7 @@ from omaha.models import Application, Version, Action, Data
 __all__ = ['ApplicationAdminForm', 'VersionAdminForm', 'ActionAdminForm', 'DataAdminForm']
 
 
-class ApplicationAdminForm(forms.ModelForm):
+class ApplicationAdminForm(ModelForm):
     def clean_id(self):
         return self.cleaned_data["id"].upper()
 
@@ -43,7 +42,7 @@ class ApplicationAdminForm(forms.ModelForm):
         exclude = []
 
 
-class DataAdminForm(forms.ModelForm):
+class DataAdminForm(ModelForm):
     class Meta:
         model = Data
         exclude = []
@@ -52,7 +51,7 @@ class DataAdminForm(forms.ModelForm):
         }
 
 
-class VersionAdminForm(forms.ModelForm):
+class VersionAdminForm(ModelForm):
     class Meta:
         model = Version
         exclude = []
@@ -70,23 +69,23 @@ class VersionAdminForm(forms.ModelForm):
         return _file.size
 
 
-class ActionAdminForm(forms.ModelForm):
+class ActionAdminForm(ModelForm):
     ONSUCCESS_CHOICES = (
         ('default', 'default'),
         ('exitsilently', 'exitsilently'),
         ('exitsilentlyonlaunchcmd', 'exitsilentlyonlaunchcmd')
     )
-    onsuccess = forms.ChoiceField(choices=ONSUCCESS_CHOICES)
+    onsuccess = ChoiceField(choices=ONSUCCESS_CHOICES)
 
     class Meta:
         model = Action
         exclude = []
 
 
-class ManualCleanupForm(forms.Form):
-    limit_days = forms.IntegerField(min_value=1, required=False, label='Maximum age (days)',
+class ManualCleanupForm(Form):
+    limit_days = IntegerField(min_value=1, required=False, label='Maximum age (days)',
                                     help_text=' - remove objects older than X days')
-    limit_size = forms.IntegerField(min_value=1, required=False, label='Purge used space (Gb)',
+    limit_size = IntegerField(min_value=1, required=False, label='Purge used space (Gb)',
                                     help_text=" - remove old objects until total size won't reach X GB")
 
     def cleanup(self):
@@ -103,7 +102,7 @@ class ManualCleanupForm(forms.Form):
 
 
 class CrashManualCleanupForm(ManualCleanupForm):
-    limit_duplicated = forms.IntegerField(min_value=1, required=False, label='Maximum amount of duplicates',
+    limit_duplicated = IntegerField(min_value=1, required=False, label='Maximum amount of duplicates',
                                           help_text=" - remove old duplicate crashes until their number won't equal X ")
 
     def __init__(self, *args, **kwargs):
