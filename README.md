@@ -33,7 +33,7 @@ sudo usermod -aG docker $USER
 git clone git@github.com:dentalwings/omaha-server.git
 
 # start dev environment
-./startp.sh
+./startup.sh
 
 # stop server
 docker-compose stop
