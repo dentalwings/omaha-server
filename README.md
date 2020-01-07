@@ -15,7 +15,7 @@ Currently, Crystalnix's implementation is integrated into the updating processes
 
 **Requirements:**
 
-- [docker](docker.com)
+- [docker](https://docker.com)
   or [docker-machine](https://docs.docker.com/machine/install-machine/)
   or [docker-for-windows](https://docs.docker.com/docker-for-windows/install/)
   or [docker-for-mac](https://docs.docker.com/docker-for-mac/install/)
@@ -134,6 +134,8 @@ eb deploy {PrivateEnvironment|PublicEnvironment}
 | AWS_ACCESS_KEY_ID         | AWS Access Key       |                            |
 | AWS_SECRET_ACCESS_KEY     | AWS Secret Key       |                            |
 | AWS_STORAGE_BUCKET_NAME   | S3 storage bucket    |                            |
+| RAVEN_DNS                 | Sentry url           |                            |
+| RAVEN_DSN_STACKTRACE      | Sentry url           | RAVEN_DNS                  |
 | REDIS_HOST                | Redis host           | 127.0.0.1                  |
 | REDIS_PORT                | Redis port           | 6379                       |
 | REDIS_DB                  | Redis db             | 1                          |
