@@ -552,7 +552,7 @@ Resources:
     Properties:
       ApplicationName: !Ref OmahaApplication
       Description: AWS ElasticBeanstalk Sample Configuration Template
-      SolutionStackName: "64bit Amazon Linux 2018.03 v2.8.3 running Python 3.6"
+      SolutionStackName: "64bit Amazon Linux 2018.03 v2.9.4 running Python 3.6"
       OptionSettings:
       - Namespace: aws:ec2:vpc
         OptionName: VPCId

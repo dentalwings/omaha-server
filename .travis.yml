@@ -1,27 +1,7 @@
-dist: xenial
 language: python
+dist: xenial
 python:
   - "3.6"
-
-matrix:
-  include:
-    - env:
-      - TOX_ENV=py36
-      - OMAHA_SERVER_PRIVATE=True
-    - env:
-      - TOX_ENV=py36
-      - OMAHA_SERVER_PRIVATE=False
-    - env:
-      - TOX_ENV=py36
-      - DJANGO_SETTINGS_MODULE=omaha_server.settings_test_postgres
-      - OMAHA_SERVER_PRIVATE=True
-    - env:
-      - TOX_ENV=py36
-      - PATH_TO_TEST=omaha.tests.test_public
-      - DJANGO_SETTINGS_MODULE=omaha_server.settings_test_postgres
-      - OMAHA_SERVER_PRIVATE=False
-    - env:
-      - TOX_ENV=coverage
 
 addons:
   apt:
@@ -47,5 +27,46 @@ install:
   - pip install tox==3.9.0
   - pip install google-compute-engine
 
-script:
-  - tox -e $TOX_ENV
+stages:
+  - name: test
+  - name: deploy
+    if: branch = master
+
+jobs:
+  include:
+    - stage: test
+      script:
+        - tox -e py36
+      env:
+        - OMAHA_SERVER_PRIVATE=True
+    - stage: test
+      script:
+        - tox -e py36
+      env:
+        - OMAHA_SERVER_PRIVATE=False
+    - stage: test
+      script:
+        - tox -e py36
+        - if [ $COVERAGE = true ] ; then coveralls --skip_ssl_verify; fi
+      env:
+        - OMAHA_SERVER_PRIVATE=True
+        - DJANGO_SETTINGS_MODULE=omaha_server.settings_test_postgres
+    - stage: test
+      script:
+        - tox -e py36
+      env:
+        - OMAHA_SERVER_PRIVATE=False
+        - DJANGO_SETTINGS_MODULE=omaha_server.settings_test_postgres
+        - PATH_TO_TEST=omaha.tests.test_public
+    - stage: deploy
+      script: skip     # usually you do not want to rerun any tests
+      deploy:
+        provider: elasticbeanstalk
+        region: us-west-1
+        app: omaha-OmahaApplication-J0D8XDXWEVNM
+        env: Development-private
+        bucket_name: dentalwings-elasticbeanstalk-samples-us-west-1
+        bucket_path: omaha-server
+        skip_cleanup: true
+        on:
+          branch: master
