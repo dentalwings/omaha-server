@@ -29,8 +29,6 @@ install:
 
 stages:
   - name: test
-  - name: deploy
-    if: branch = master
 
 jobs:
   include:
@@ -58,15 +56,4 @@ jobs:
         - OMAHA_SERVER_PRIVATE=False
         - DJANGO_SETTINGS_MODULE=omaha_server.settings_test_postgres
         - PATH_TO_TEST=omaha.tests.test_public
-    - stage: deploy
-      script: skip     # usually you do not want to rerun any tests
-      deploy:
-        provider: elasticbeanstalk
-        region: us-west-1
-        app: omaha-OmahaApplication-J0D8XDXWEVNM
-        env: Development-private
-        bucket_name: dentalwings-elasticbeanstalk-samples-us-west-1
-        bucket_path: omaha-server
-        skip_cleanup: true
-        on:
-          branch: master
+
