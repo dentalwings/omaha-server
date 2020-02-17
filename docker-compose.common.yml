@@ -1,9 +1,13 @@
 version: '2'
 services:
   db:
+    restart: always
     image: postgres:9.4
+    environment:
+      POSTGRES_PASSWORD: postgres
 
   redis:
+    restart: always
     image: redis:5
 
   django:
