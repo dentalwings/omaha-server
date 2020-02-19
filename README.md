@@ -33,13 +33,17 @@ Currently, Crystalnix's implementation is integrated into the updating processes
   pip3 install pipenv
   
   # docker-compose
-  sudo curl -L "https://github.com/docker/compose/releases/download/1.23.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  sudo curl -L "https://github.com/docker/compose/releases/download/1.25.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
   sudo chmod +x /usr/local/bin/docker-compose
+  sudo curl -L https://raw.githubusercontent.com/docker/compose/1.25.3/contrib/completion/bash/docker-compose -o /etc/bash_completion.d/docker-compose
   
   # kubernetes
   sudo snap install kubectl --classic
   source <(kubectl completion bash)
   echo "source <(kubectl completion bash)" >> ~/.bashrc
+  
+  # aws cli auto completion
+  echo "complete -C '/usr/local/bin/aws_completer' aws" >> ~/.bashrc
   ```
 * Generate an ssh key (please set a passphrase!)
   ```shell
@@ -53,7 +57,8 @@ Currently, Crystalnix's implementation is integrated into the updating processes
   ```shell
   git config --global user.name "Your Name"
   git config --global user.email you@example.com
-  git config --global core.editor vim
+  # fix cloud9 git editor bug on Ubuntu host
+  sudo ln -s /bin/nano /usr/bin/nano
   ```
 * Clone this repository and change working directory
   ```shell
@@ -161,22 +166,35 @@ Currently, Crystalnix's implementation is integrated into the updating processes
         }
     },
   ```
-* Start Postgres and Redis containers
+* Click on `AWS Cloud9`in the menu -> `Preferences` -> `AWS Settings` -> `Credentials`, disable `AWS managed temporary credentials`
+  > This is required since AWS EKS does not support temporary credentials as authentication.
+* Configure your own [API Keys](https://console.aws.amazon.com/iam/home#/security_credentials)
+  ```shell
+  aws configure
+  ```
+* Let aws create your kubectl configuration for you
+  ```shell
+  aws eks update-kubeconfig --name {ClusterName}
+  ```
+* Start Postgres and Redis containers in the Cloud9 environment
   ```shell
   docker-compose up -d db redis
   ```
   > After first creation these two containers will autostart with your Cloud9 environment. To destroy them execute `docker-compose down db redis -v`.
+* Start the initial db schema creation/migration from the menu `Run` -> `Run configurations` -> `OmahaServer migrate`
+* Create the admin user from the menu `Run` -> `Run configurations` -> `OmahaServer create admin`
+* Finally start the development server from the menu `Run` -> `Run configurations` -> `OmahaServer run server`
 
+## Omaha Server development commands
 
-
-## Statistics
+### Statistics
 
 All statistics are stored in Redis. In order not to lose all data, we recommend to set up the backing up process. The proposed solution uses ElastiCache which supports [automatic backups](https://aws.amazon.com/en/blogs/aws/backup-and-restore-elasticache-redis-nodes/).
 In the case of a self-hosted solution do not forget to set up backups.
 
 Required `userid`. [Including user id into request](https://github.com/Crystalnix/omaha/wiki/Omaha-Client-working-with-protocol#including-user-id-into-request)
 
-## Utils
+### Utils
 
 A command for generating fake data such as requests, events and statistics:
 
@@ -212,7 +230,7 @@ A command for generating fake live data for Mac:
 python manage.py generate_fake_mac_live_data Application alpha
 ```
 
-#### Enable Client Update Protocol v2
+### Enable Client Update Protocol v2
 
 1. Use [Omaha eckeytool](https://github.com/google/omaha/tree/master/omaha/tools/eckeytool) to generate private.pem key and cup_ecdsa_pubkey.{KEYID}.h files.
 2. Add cup_ecdsa_pubkey.{KEYID}.h to Omaha source directory /path/to/omaha/omaha/net/, set CupEcdsaRequestImpl::kCupProductionPublicKey in /path/to/omaha/omaha/net/cup_ecdsa_request.cc to new key and build Omaha client.

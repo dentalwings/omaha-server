@@ -1,0 +1,174 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: omaha-server-dev
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::712964028200:role/eksOmahaDev
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: omaha-config-private
+data:
+  DB_HOST: "postgres"
+  SECRET_KEY: "asdfghjklqwertzuiop"
+  DJANGO_SETTINGS_MODULE: "omaha_server.settings_dev"
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  OMAHA_SERVER_PRIVATE: "True"
+  AWS_DEFAULT_REGION: "ca-central-1"
+  AWS_REGION: "ca-central-1"
+  AWS_STORAGE_BUCKET_NAME: "ca-central-1-omaha-s3bucket"
+  DB_PUBLIC_USER: "omaha_public"
+  DB_PUBLIC_PASSWORD: "omaha_public_password"
+  SENTRY_DSN: "https://d22e416e3a414956a2cf22b15922bc0c@sentry.aws.dwos.com/3"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: omaha-config-public
+data:
+  DB_HOST: "postgres"
+  SECRET_KEY: "asdfghjklqwertzuiop"
+  DJANGO_SETTINGS_MODULE: "omaha_server.settings_dev"
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  OMAHA_SERVER_PRIVATE: "False"
+  AWS_DEFAULT_REGION: "ca-central-1"
+  AWS_REGION: "ca-central-1"
+  AWS_STORAGE_BUCKET_NAME: "ca-central-1-omaha-s3bucket"
+  DB_PUBLIC_USER: "omaha_public"
+  DB_PUBLIC_PASSWORD: "omaha_public_password"
+  SENTRY_DSN: "https://d22e416e3a414956a2cf22b15922bc0c@sentry.aws.dwos.com/3"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: omaha-server-public-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: omaha-server-public-dev
+  template:
+    metadata:
+      labels:
+        app: omaha-server-public-dev
+    spec:
+      serviceAccountName: omaha-server-dev
+      containers:
+      - image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:latest
+        imagePullPolicy: Always
+        name: omaha-server-public-dev
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - configMapRef:
+            name: omaha-config-public
+      securityContext:
+        fsGroup: 65534 # For ExternalDNS to be able to read Kubernetes and AWS token files
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: omaha-server-private-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: omaha-server-private-dev
+  template:
+    metadata:
+      labels:
+        app: omaha-server-private-dev
+    spec:
+      serviceAccountName: omaha-server-dev
+      containers:
+      - image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:latest
+        imagePullPolicy: Always
+        name: omaha-server-private-dev
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - configMapRef:
+            name: omaha-config-private
+      securityContext:
+        fsGroup: 65534 # For ExternalDNS to be able to read Kubernetes and AWS token files
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: omaha-server-public-dev
+spec:
+  ports:
+    - port: 80
+      targetPort: 8000
+      protocol: TCP
+  type: NodePort
+  selector:
+    app: omaha-server-public-dev
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: omaha-server-private-dev
+spec:
+  ports:
+    - port: 80
+      targetPort: 8000
+      protocol: TCP
+  type: NodePort
+  selector:
+    app: omaha-server-private-dev
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/ip-address-type: dualstack
+    alb.ingress.kubernetes.io/healthcheck-path: /healthcheck/status/
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ca-central-1:712964028200:certificate/16d48101-28ec-4819-a771-4f4f826c06bb
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+    alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
+  name: omaha-server-private-dev
+spec:
+  rules:
+  - host: omaha-server-private-dev.aws.dwos.com
+    http:
+      paths:
+      - path: /*
+        backend:
+          serviceName: ssl-redirect
+          servicePort: use-annotation
+      - path: /*
+        backend:
+          serviceName: omaha-server-private-dev
+          servicePort: 80
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/ip-address-type: dualstack
+    alb.ingress.kubernetes.io/healthcheck-path: /healthcheck/status/
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ca-central-1:712964028200:certificate/16d48101-28ec-4819-a771-4f4f826c06bb
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+    alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
+  name: omaha-server-public-dev
+spec:
+  rules:
+  - host: omaha-server-public-dev.aws.dwos.com
+    http:
+      paths:
+      - path: /*
+        backend:
+          serviceName: ssl-redirect
+          servicePort: use-annotation
+      - path: /*
+        backend:
+          serviceName: omaha-server-public-dev
+          servicePort: 80

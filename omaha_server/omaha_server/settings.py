@@ -86,7 +86,7 @@ OMAHA_URL_PREFIX = os.environ.get('OMAHA_URL_PREFIX')  # no trailing slash!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -142,6 +142,13 @@ if IS_PRIVATE:
         'omaha_server.middlewares.CUP2Middleware',
      ] + MIDDLEWARE
 
+
+if not IS_PRIVATE:
+    SILENCED_SYSTEM_CHECKS = [
+        'admin.E408',
+        'admin.E409',
+    ]
+
 ROOT_URLCONF = 'omaha_server.urls'
 
 WSGI_APPLICATION = 'omaha_server.wsgi.application'
@@ -193,7 +200,7 @@ STATICFILES_DIRS = (
     os.path.join(PROJECT_DIR, 'assets'),
 )
 
-REDIS_PORT = os.environ.get('REDIS_PORT', '6379')
+REDIS_PORT = os.environ.get('REDIS_PORT', 6379)
 REDIS_HOST = os.environ.get('REDIS_HOST', '127.0.0.1')
 REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', None)
 REDIS_AUTH = 'redis://:{}@'.format(REDIS_PASSWORD) if REDIS_PASSWORD else 'redis://'

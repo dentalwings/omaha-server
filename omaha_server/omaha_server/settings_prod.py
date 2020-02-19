@@ -11,7 +11,6 @@ from omaha_server.utils import get_sentry_organization_slug, get_sentry_project_
 
 DEBUG = False
 
-ALLOWED_HOSTS = (os.environ.get('HOST_NAME'), '*')
 SECRET_KEY = os.environ.get('SECRET_KEY') or crypto.get_random_string(50)
 
 STATICFILES_STORAGE = 'omaha_server.s3utils.StaticS3Storage'
