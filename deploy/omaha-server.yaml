@@ -12,7 +12,7 @@ metadata:
 data:
   DB_HOST: "postgres"
   SECRET_KEY: "asdfghjklqwertzuiop"
-  DJANGO_SETTINGS_MODULE: "omaha_server.settings_dev"
+  DJANGO_SETTINGS_MODULE: "omaha_server.settings_prod"
   REDIS_HOST: "redis"
   REDIS_PORT: "6379"
   OMAHA_SERVER_PRIVATE: "True"
@@ -23,6 +23,7 @@ data:
   DB_PUBLIC_USER: "omaha_public"
   DB_PUBLIC_PASSWORD: "omaha_public_password"
   SENTRY_DSN: "https://d22e416e3a414956a2cf22b15922bc0c@sentry.aws.dwos.com/3"
+  C_FORCE_ROOT: "True" # celery specific
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -31,7 +32,7 @@ metadata:
 data:
   DB_HOST: "postgres"
   SECRET_KEY: "asdfghjklqwertzuiop"
-  DJANGO_SETTINGS_MODULE: "omaha_server.settings_dev"
+  DJANGO_SETTINGS_MODULE: "omaha_server.settings_prod"
   REDIS_HOST: "redis"
   REDIS_PORT: "6379"
   OMAHA_SERVER_PRIVATE: "False"
@@ -75,7 +76,7 @@ spec:
           secret:
             secretName: cup-pem-keys-secret
       securityContext:
-        fsGroup: 65534 # For ExternalDNS to be able to read Kubernetes and AWS token files
+        fsGroup: 65534 # To be able to read Kubernetes and AWS token files
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -109,7 +110,34 @@ spec:
           secret:
             secretName: cup-pem-keys-secret
       securityContext:
-        fsGroup: 65534 # For ExternalDNS to be able to read Kubernetes and AWS token files
+        fsGroup: 65534 # To be able to read Kubernetes and AWS token files
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: omaha-server-celery-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: omaha-server-celery-dev
+  template:
+    metadata:
+      labels:
+        app: omaha-server-celery-dev
+    spec:
+      serviceAccountName: omaha-server-dev
+      containers:
+      - image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:latest
+        imagePullPolicy: Always
+        name: omaha-server-celery-dev
+        envFrom:
+        - configMapRef:
+            name: omaha-config-private
+        command: ["celery"]
+        args: ["worker", "-B", "-A", "omaha_server", "--loglevel=INFO"]
+      securityContext:
+        fsGroup: 65534 # To be able to read Kubernetes and AWS token files
 ---
 apiVersion: v1
 kind: Service
