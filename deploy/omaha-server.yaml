@@ -93,6 +93,40 @@ spec:
         app: omaha-server-private-dev
     spec:
       serviceAccountName: omaha-server-dev
+      initContainers:
+      - name: init-migrate-db
+        image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:latest
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: omaha-config-private
+        volumeMounts:
+          - name: cup-pem-keys-volume
+            mountPath: /usr/src/app/cup_pem_keys
+        command: ["python"]
+        args: ["manage.py", "migrate"]
+      - name: init-create-admin
+        image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:latest
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: omaha-config-private
+        volumeMounts:
+          - name: cup-pem-keys-volume
+            mountPath: /usr/src/app/cup_pem_keys
+        command: ["python"]
+        args: ["createadmin.py"]
+      - name: init-collect-static
+        image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:latest
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: omaha-config-private
+        volumeMounts:
+          - name: cup-pem-keys-volume
+            mountPath: /usr/src/app/cup_pem_keys
+        command: ["python"]
+        args: ["manage.py", "collectstatic", "--noinput"]
       containers:
       - image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:latest
         imagePullPolicy: Always

@@ -46,8 +46,8 @@ ipaddress = "*"
 funcsigs = "*"
 psycopg2 = "==2.7.3.2"
 boto = "==2.49.0"
-boto3 = "==1.9.77"
-botocore = "==1.12.133"
+boto3 = "==1.12.1"
+botocore = "*"
 celery = {extras = ["redis"],version = "==4.3.0"}
 redis = "*"
 raven = "*"
@@ -71,4 +71,4 @@ paver = "==1.2.4"
 Pillow = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3.6"
