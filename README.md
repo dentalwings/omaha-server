@@ -234,7 +234,8 @@ python manage.py generate_fake_mac_live_data Application alpha
 
 1. Use [Omaha eckeytool](https://github.com/google/omaha/tree/master/omaha/tools/eckeytool) to generate private.pem key and cup_ecdsa_pubkey.{KEYID}.h files.
 2. Add cup_ecdsa_pubkey.{KEYID}.h to Omaha source directory /path/to/omaha/omaha/net/, set CupEcdsaRequestImpl::kCupProductionPublicKey in /path/to/omaha/omaha/net/cup_ecdsa_request.cc to new key and build Omaha client.
-3. Add private.pem keyid and path to omaha CUP_PEM_KEYS dictionary in the [settings.py](https://github.com/Crystalnix/omaha-server/blob/master/omaha_server/omaha_server/settings.py). If you run the server on AWS, create a `cups_pem_keys` folder in the S3 Bucket (AWS_STORAGE_BUCKET_NAME) and put the keys with the index as filename (e.g.: `1.pem`) in there.
+3. Add private.pem keyid and path to omaha CUP_PEM_KEYS dictionary in the [settings.py](https://github.com/DentalWings/omaha-server/blob/master/omaha_server/omaha_server/settings.py).
+  On Kubernetes you will need to create it manually using `kubectl create secret generic cup-pem-keys-secret --from-file={KEY_ID}.pem=private.pem`
 
 ## Contributors
 

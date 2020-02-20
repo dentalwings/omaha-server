@@ -33,11 +33,14 @@ AWS_PRELOAD_METADATA = True
 AWS_IS_GZIPPED = True
 AWS_DEFAULT_ACL = 'private'
 
-
 RAVEN_CONFIG = {
     'dsn': os.environ.get('RAVEN_DNS'),
     'name': HOST_NAME,
     'release': APP_VERSION,
+}
+
+CUP_PEM_KEYS = {
+    '1': 'cup_pem_keys/1.pem',
 }
 
 RAVEN_DSN_STACKTRACE = os.environ.get('RAVEN_DSN_STACKTRACE', RAVEN_CONFIG['dsn'])
