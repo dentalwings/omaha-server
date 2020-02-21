@@ -185,12 +185,37 @@ Currently, Crystalnix's implementation is integrated into the updating processes
 * Create the admin user from the menu `Run` -> `Run configurations` -> `OmahaServer create admin`
 * Finally start the development server from the menu `Run` -> `Run configurations` -> `OmahaServer run server`
 
-## Omaha Server development commands
+## Deployment to Kubernetes (AWS EKS)
+
+### Prerequisites
+
+* [AWS EKS Cluster](https://ca-central-1.console.aws.amazon.com/eks/home)
+* [aws-alb-ingress-controller](https://kubernetes-sigs.github.io/aws-alb-ingress-controller/guide/controller/setup/#kubectl) running in the cluster
+* [external-dns](https://kubernetes-sigs.github.io/aws-alb-ingress-controller/guide/external-dns/setup/) running in the cluster
+* [Route53](https://console.aws.amazon.com/route53/home) Hosted Zone manageable by external-dns
+* (optional) SSL Certificate in [AWC Certificate Manager](https://ca-central-1.console.aws.amazon.com/acm)
+
+Already installed in/during Cloud9 IDE setup:
+* [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
+* [kubectl](#cloud9-environment-configuration)
+
+### Deployment
+
+    # kubectl config
+    $(aws eks --region {REGION} update-kubeconfig --name {CLUSTER_NAME} --no-include-email)
+
+    # deploy redis and postgres first (only needs to be done once)
+    kubectl [-n {NAMESPACE}] apply -f deploy/redis.yaml deploy/postgres.yaml
+
+    # /!\ modify the configuration to your needs first: deploy/omaha-server.yaml /!\
+    kubectl [-n {NAMESPACE}] apply -f deploy/omaha-server.yaml
+    
+
+## Omaha Server commands/tools
 
 ### Statistics
 
-All statistics are stored in Redis. In order not to lose all data, we recommend to set up the backing up process. The proposed solution uses ElastiCache which supports [automatic backups](https://aws.amazon.com/en/blogs/aws/backup-and-restore-elasticache-redis-nodes/).
-In the case of a self-hosted solution do not forget to set up backups.
+All statistics are stored in Redis. In order not to lose all data, we recommend to set up the backing up process.
 
 Required `userid`. [Including user id into request](https://github.com/Crystalnix/omaha/wiki/Omaha-Client-working-with-protocol#including-user-id-into-request)
 
