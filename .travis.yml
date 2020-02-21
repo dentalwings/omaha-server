@@ -1,4 +1,5 @@
 language: python
+os: linux
 dist: xenial
 python:
   - "3.6"
@@ -17,18 +18,19 @@ env:
     - GRPC_PYTHON_BUILD_WITH_CYTHON: 1
 
 cache: pip
-sudo: false
 
 services:
-  - redis-server
+  - redis
   - postgresql
+  - docker
 
 install:
   - pip install tox==3.9.0
   - pip install google-compute-engine
 
 stages:
-  - name: test
+  - test
+  - deploy
 
 jobs:
   include:
@@ -56,4 +58,21 @@ jobs:
         - OMAHA_SERVER_PRIVATE=False
         - DJANGO_SETTINGS_MODULE=omaha_server.settings_test_postgres
         - PATH_TO_TEST=omaha.tests.test_public
-
+    - stage: deploy
+      if: type != pull_request AND branch = master
+      script:
+        - REGISTRY=712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server
+        - VERSION=$(grep -m 1 APP_VERSION omaha_server/omaha_server/settings.py | cut -d'"' -f2)
+        - docker build -t ${REGISTRY}:${VERSION}-${TRAVIS_BUILD_NUMBER} -t ${REGISTRY}:${VERSION} -t ${REGISTRY}:latest .
+        - pyenv global 3.7.1 && pip install -U pip && pip install awscli
+        - $(aws --region ca-central-1 ecr get-login --no-include-email)
+        - docker push ${REGISTRY}:latest && docker push ${REGISTRY}:${VERSION}
+    - stage: deploy
+      if: type != pull_request AND branch != master
+      script:
+        - REGISTRY=712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server
+        - VERSION=$(grep -m 1 APP_VERSION omaha_server/omaha_server/settings.py | cut -d'"' -f2)-${TRAVIS_BRANCH}
+        - docker build -t ${REGISTRY}:${VERSION}-${TRAVIS_BUILD_NUMBER} -t ${REGISTRY}:${VERSION} .
+        - pyenv global 3.7.1 && pip install -U pip && pip install awscli
+        - $(aws --region ca-central-1 ecr get-login --no-include-email)
+        - docker push ${REGISTRY}:${VERSION}
