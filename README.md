@@ -187,13 +187,46 @@ Currently, Crystalnix's implementation is integrated into the updating processes
 
 ## Deployment to Kubernetes (AWS EKS)
 
-### Prerequisites
+### Requirements
 
 * [AWS EKS Cluster](https://ca-central-1.console.aws.amazon.com/eks/home)
 * [aws-alb-ingress-controller](https://kubernetes-sigs.github.io/aws-alb-ingress-controller/guide/controller/setup/#kubectl) running in the cluster
 * [external-dns](https://kubernetes-sigs.github.io/aws-alb-ingress-controller/guide/external-dns/setup/) running in the cluster
 * [Route53](https://console.aws.amazon.com/route53/home) Hosted Zone manageable by external-dns
-* (optional) SSL Certificate in [AWC Certificate Manager](https://ca-central-1.console.aws.amazon.com/acm)
+* [AWC Certificate Manager](https://ca-central-1.console.aws.amazon.com/acm) SSL Certificate, modify `alb.ingress.kubernetes.io/certificate-arn` or delete in `deploy/omaha_server.yaml`
+* [AWS ECR](https://ca-central-1.console.aws.amazon.com/ecr/repositories) registry to store your django container, prefereable in the same region as the EKS Cluster. Modify all `image:` in `deploy/omaha_server.yaml` to match your container registry.
+* [AWS S3 Bucket](https://s3.console.aws.amazon.com/s3/home) where Django static content and media files will be hosted
+* [Enable IAM Roles for Kubernetes Service Accounts](https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html)
+* [Create IAM Policy to access S3 Bucket](https://docs.aws.amazon.com/eks/latest/userguide/create-service-account-iam-policy-and-role.html#create-service-account-iam-policy) and use the following policy:
+    ```
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Action": [
+                    "s3:PutObject",
+                    "s3:GetObject",
+                    "s3:DeleteObject"
+                ],
+                "Resource": [
+                    "arn:aws:s3:::${YOUR_BUCKET_NAME}/*"
+                ],
+                "Effect": "Allow"
+            }
+        ]
+    }
+    ```
+* [Create and IAM Role](https://docs.aws.amazon.com/eks/latest/userguide/create-service-account-iam-policy-and-role.html#create-service-account-iam-role) linked to policy above. The `SERVICE_ACCOUNT_NAMESPACE` should be the Kubernetes namespace you plan to deploy the server later on. The `SERVICE_ACCOUNT_NAME` is `metadata.name` of the first resource definition in `deploy/omaha-server.yaml`:
+  ```
+  apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: omaha-server
+      annotations:
+        eks.amazonaws.com/role-arn: ${IAM_ROLE_ARN}
+  ```
+  You need to adjust the annotation of the IAM role after creation of your role.
+* Upload [CUP_PEM_KEYS](#enable-client-update-protocol-v2)
 
 Already installed in/during Cloud9 IDE setup:
 * [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
@@ -209,7 +242,6 @@ Already installed in/during Cloud9 IDE setup:
 
     # /!\ modify the configuration to your needs first: deploy/omaha-server.yaml /!\
     kubectl [-n {NAMESPACE}] apply -f deploy/omaha-server.yaml
-    
 
 ## Omaha Server commands/tools
 
@@ -260,7 +292,7 @@ python manage.py generate_fake_mac_live_data Application alpha
 1. Use [Omaha eckeytool](https://github.com/google/omaha/tree/master/omaha/tools/eckeytool) to generate private.pem key and cup_ecdsa_pubkey.{KEYID}.h files.
 2. Add cup_ecdsa_pubkey.{KEYID}.h to Omaha source directory /path/to/omaha/omaha/net/, set CupEcdsaRequestImpl::kCupProductionPublicKey in /path/to/omaha/omaha/net/cup_ecdsa_request.cc to new key and build Omaha client.
 3. Add private.pem keyid and path to omaha CUP_PEM_KEYS dictionary in the [settings.py](https://github.com/DentalWings/omaha-server/blob/master/omaha_server/omaha_server/settings.py).
-  On Kubernetes you will need to create it manually using `kubectl create secret generic cup-pem-keys-secret --from-file={KEY_ID}.pem=private.pem`
+  On Kubernetes you will need to create it manually using `kubectl -n ${NAMESPACE} create secret generic cup-pem-keys-secret --from-file={KEY_ID}.pem=private.pem`
 
 ## Contributors
 
