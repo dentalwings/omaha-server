@@ -217,7 +217,7 @@ Currently, Crystalnix's implementation is integrated into the updating processes
         ]
     }
     ```
-* [Create and IAM Role](https://docs.aws.amazon.com/eks/latest/userguide/create-service-account-iam-policy-and-role.html#create-service-account-iam-role) linked to policy above. The `SERVICE_ACCOUNT_NAMESPACE` should be the Kubernetes namespace you plan to deploy the server later on. The `SERVICE_ACCOUNT_NAME` is `metadata.name` of the first resource definition in `deploy/omaha-server.yaml`:
+* [Create an IAM Role](https://docs.aws.amazon.com/eks/latest/userguide/create-service-account-iam-policy-and-role.html#create-service-account-iam-role) linked to policy above. The `SERVICE_ACCOUNT_NAMESPACE` should be the Kubernetes namespace you plan to deploy the server later on. The `SERVICE_ACCOUNT_NAME` is `metadata.name` of the first resource definition in `deploy/omaha-server.yaml`:
   ```
   apiVersion: v1
     kind: ServiceAccount
