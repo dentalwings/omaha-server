@@ -206,15 +206,15 @@ metadata:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/ip-address-type: dualstack
     alb.ingress.kubernetes.io/healthcheck-path: /healthcheck/status/
-    alb.ingress.kubernetes.io/inbound-cidrs: 67.212.85.162/32,77.245.44.50/32
+    alb.ingress.kubernetes.io/inbound-cidrs: 67.212.85.162/32,77.245.44.50/32,172.110.76.70/32
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ca-central-1:712964028200:certificate/16d48101-28ec-4819-a771-4f4f826c06bb
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
     alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
-  name: omaha-server-private-dev
+  name: omaha-server-private-ingress
 spec:
   rules:
-  - host: omaha-server-private-dev.aws.dwos.com
+  - host: omaha-dev.aws.dwos.com
     http:
       paths:
       - path: /*
@@ -237,10 +237,10 @@ metadata:
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ca-central-1:712964028200:certificate/16d48101-28ec-4819-a771-4f4f826c06bb
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
     alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
-  name: omaha-server-public-dev
+  name: omaha-server-public-ingress
 spec:
   rules:
-  - host: omaha-server-public-dev.aws.dwos.com
+  - host: updates-dev.aws.dwos.com
     http:
       paths:
       - path: /*
