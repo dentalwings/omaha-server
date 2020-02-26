@@ -192,6 +192,7 @@ Currently, Crystalnix's implementation is integrated into the updating processes
 * [AWS EKS Cluster](https://ca-central-1.console.aws.amazon.com/eks/home)
 * [aws-alb-ingress-controller](https://kubernetes-sigs.github.io/aws-alb-ingress-controller/guide/controller/setup/#kubectl) running in the cluster
 * [external-dns](https://kubernetes-sigs.github.io/aws-alb-ingress-controller/guide/external-dns/setup/) running in the cluster
+* [Amazon EBS CSI Driver](https://docs.aws.amazon.com/eks/latest/userguide/ebs-csi.html)
 * [Route53](https://console.aws.amazon.com/route53/home) Hosted Zone manageable by external-dns
 * [AWC Certificate Manager](https://ca-central-1.console.aws.amazon.com/acm) SSL Certificate, modify `alb.ingress.kubernetes.io/certificate-arn` or delete in `deploy/omaha_server.yaml`
 * [AWS ECR](https://ca-central-1.console.aws.amazon.com/ecr/repositories) registry to store your django container, prefereable in the same region as the EKS Cluster. Modify all `image:` in `deploy/omaha_server.yaml` to match your container registry.

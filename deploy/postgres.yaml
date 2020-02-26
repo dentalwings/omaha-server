@@ -30,8 +30,9 @@ spec:
             - name: POSTGRES_HOST_AUTH_METHOD
               value: trust
           volumeMounts:
-            - mountPath: /var/lib/postgresql
+            - mountPath: /var/lib/postgresql/data
               name: pg-data
+              subPath: pgdata
       volumes:
         - name: pg-data
           persistentVolumeClaim:
