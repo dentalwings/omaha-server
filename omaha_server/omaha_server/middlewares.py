@@ -83,7 +83,7 @@ class CUP2Middleware(MiddlewareMixin):
         message = sha256(request_hash + response_hash + cup2key.encode()).digest()
         signature = self.sk[keyid].sign(message, hashfunc=sha256, sigencode=sigencode_der, k=int(k))
 
-        response['ETag'] = '%s:%s' % (signature.encode('hex'), request_hash.encode('hex'))
+        response['ETag'] = '%s:%s' % (signature.hex(), request_hash.hex())
 
 
 class LoggingMiddleware(MiddlewareMixin):
