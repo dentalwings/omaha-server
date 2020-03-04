@@ -23,6 +23,7 @@ Currently, Crystalnix's implementation is integrated into the updating processes
     * Instance type: t2.micro (1 GiB RAM + 1 vCPU)
     * Platform: Ubuntu Server 18.04 LTS
     * Network settings (advanced): select the same VPC and one subnet you [EKS cluster](https://ca-central-1.console.aws.amazon.com/eks/home?region=ca-central-1#/clusters) use
+    * (optional) add appropiate Tags
 
 ### Cloud9 environment configuration
 

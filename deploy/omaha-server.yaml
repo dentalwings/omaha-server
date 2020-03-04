@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: omaha-server-dev
+  name: omaha-server
   annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::712964028200:role/eksOmahaDev
+    eks.amazonaws.com/role-arn: arn:aws:iam::712964028200:role/eksOmaha
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -47,22 +47,22 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: omaha-server-public-dev
+  name: omaha-server-public
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: omaha-server-public-dev
+      app: omaha-server-public
   template:
     metadata:
       labels:
-        app: omaha-server-public-dev
+        app: omaha-server-public
     spec:
-      serviceAccountName: omaha-server-dev
+      serviceAccountName: omaha-server
       containers:
       - image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:latest
         imagePullPolicy: Always
-        name: omaha-server-public-dev
+        name: omaha-server-public
         ports:
         - containerPort: 8000
         envFrom:
@@ -81,18 +81,18 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: omaha-server-private-dev
+  name: omaha-server-private
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: omaha-server-private-dev
+      app: omaha-server-private
   template:
     metadata:
       labels:
-        app: omaha-server-private-dev
+        app: omaha-server-private
     spec:
-      serviceAccountName: omaha-server-dev
+      serviceAccountName: omaha-server
       initContainers:
       - name: init-migrate-db
         image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:latest
@@ -130,7 +130,7 @@ spec:
       containers:
       - image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:latest
         imagePullPolicy: Always
-        name: omaha-server-private-dev
+        name: omaha-server-private
         ports:
         - containerPort: 8000
         envFrom:
@@ -149,22 +149,22 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: omaha-server-celery-dev
+  name: omaha-server-celery
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: omaha-server-celery-dev
+      app: omaha-server-celery
   template:
     metadata:
       labels:
-        app: omaha-server-celery-dev
+        app: omaha-server-celery
     spec:
-      serviceAccountName: omaha-server-dev
+      serviceAccountName: omaha-server
       containers:
       - image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:latest
         imagePullPolicy: Always
-        name: omaha-server-celery-dev
+        name: omaha-server-celery
         envFrom:
         - configMapRef:
             name: omaha-config-private
@@ -176,7 +176,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: omaha-server-public-dev
+  name: omaha-server-public
 spec:
   ports:
     - port: 80
@@ -184,12 +184,12 @@ spec:
       protocol: TCP
   type: NodePort
   selector:
-    app: omaha-server-public-dev
+    app: omaha-server-public
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: omaha-server-private-dev
+  name: omaha-server-private
 spec:
   ports:
     - port: 80
@@ -197,7 +197,7 @@ spec:
       protocol: TCP
   type: NodePort
   selector:
-    app: omaha-server-private-dev
+    app: omaha-server-private
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
@@ -211,10 +211,10 @@ metadata:
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ca-central-1:712964028200:certificate/16d48101-28ec-4819-a771-4f4f826c06bb
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
     alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
-  name: omaha-server-private-ingress
+  name: omaha-server-ingress-private
 spec:
   rules:
-  - host: omaha-dev.aws.dwos.com
+  - host: omaha.aws.dwos.com
     http:
       paths:
       - path: /*
@@ -223,7 +223,7 @@ spec:
           servicePort: use-annotation
       - path: /*
         backend:
-          serviceName: omaha-server-private-dev
+          serviceName: omaha-server-private
           servicePort: 80
 ---
 apiVersion: extensions/v1beta1
@@ -237,10 +237,10 @@ metadata:
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ca-central-1:712964028200:certificate/16d48101-28ec-4819-a771-4f4f826c06bb
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
     alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
-  name: omaha-server-public-ingress
+  name: omaha-server-ingress-public
 spec:
   rules:
-  - host: updates-dev.aws.dwos.com
+  - host: updates.aws.dwos.com
     http:
       paths:
       - path: /*
@@ -249,5 +249,5 @@ spec:
           servicePort: use-annotation
       - path: /*
         backend:
-          serviceName: omaha-server-public-dev
+          serviceName: omaha-server-public
           servicePort: 80
