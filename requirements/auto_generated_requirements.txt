@@ -128,7 +128,7 @@ s3transfer==0.1.13
 six==1.10.0
 sqlparse==0.3.0
 text-unidecode==1.2
-tox==2.5.0
+tox==3.14.5
 urllib3==1.24.2 ; python_version >= '3.4'
 virtualenv==16.5.0
 websocket-client==0.56.0
