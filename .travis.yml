@@ -25,7 +25,7 @@ services:
   - docker
 
 install:
-  - pip install tox==3.9.0
+  - pip install tox
   - pip install google-compute-engine
 
 stages:
