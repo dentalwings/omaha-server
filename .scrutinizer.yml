@@ -1,3 +1,9 @@
 build:
   environment:
     python: 3.6.9
+
+filter:
+  dependency_paths:
+    - "omaha_server/assets/components/bower_components/"
+  excluded_paths:
+    - "*/migrations/*"
