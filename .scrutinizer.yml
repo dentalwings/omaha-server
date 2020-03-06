@@ -1,9 +1,8 @@
 build:
   environment:
     python: 3.7.1
-  nodes:
-    tests:
-      false
+  tests:
+    false
 
 filter:
   dependency_paths:
