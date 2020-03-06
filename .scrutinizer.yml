@@ -5,7 +5,7 @@ build:
     tests:
       dependencies:
         before:
-          - apt-get update sqlite3
+          - apt-get update
 
 filter:
   dependency_paths:
