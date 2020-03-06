@@ -1,14 +1,14 @@
 build:
   environment:
     python: 3.7.1
+  nodes:
+    tests:
+      dependencies:
+        before:
+          - pip install pysqlite3
 
 filter:
   dependency_paths:
     - "omaha_server/assets/components/bower_components/"
   excluded_paths:
     - "*/migrations/*"
-nodes:
-  tests:
-    dependencies:
-      before:
-        - pip install pysqlite3
