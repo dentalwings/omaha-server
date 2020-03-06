@@ -7,6 +7,8 @@ filter:
     - "omaha_server/assets/components/bower_components/"
   excluded_paths:
     - "*/migrations/*"
-dependencies:
-  before:
-    - pip install pysqlite3
+nodes:
+  tests:
+    dependencies:
+      before:
+        - pip install pysqlite3
