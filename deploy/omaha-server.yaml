@@ -214,7 +214,7 @@ metadata:
   name: omaha-server-ingress-private
 spec:
   rules:
-  - host: omaha-prod.aws.dwos.com
+  - host: omaha.aws.dwos.com
     http:
       paths:
       - path: /*
@@ -240,7 +240,7 @@ metadata:
   name: omaha-server-ingress-public
 spec:
   rules:
-  - host: updates-prod.aws.dwos.com
+  - host: updates.aws.dwos.com
     http:
       paths:
       - path: /*
