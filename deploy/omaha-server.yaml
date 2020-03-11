@@ -60,7 +60,7 @@ spec:
     spec:
       serviceAccountName: omaha-server
       containers:
-      - image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:0.9.1-python3.6
+      - image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:0.9.2
         imagePullPolicy: Always
         name: omaha-server-public
         ports:
@@ -95,7 +95,7 @@ spec:
       serviceAccountName: omaha-server
       initContainers:
       - name: init-migrate-db
-        image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:0.9.1-python3.6
+        image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:0.9.2
         imagePullPolicy: Always
         envFrom:
         - configMapRef:
@@ -106,7 +106,7 @@ spec:
         command: ["python"]
         args: ["manage.py", "migrate"]
       - name: init-create-admin
-        image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:0.9.1-python3.6
+        image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:0.9.2
         imagePullPolicy: Always
         envFrom:
         - configMapRef:
@@ -117,7 +117,7 @@ spec:
         command: ["python"]
         args: ["createadmin.py"]
       - name: init-collect-static
-        image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:0.9.1-python3.6
+        image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:0.9.2
         imagePullPolicy: Always
         envFrom:
         - configMapRef:
@@ -128,7 +128,7 @@ spec:
         command: ["python"]
         args: ["manage.py", "collectstatic", "--noinput"]
       containers:
-      - image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:0.9.1-python3.6
+      - image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:0.9.2
         imagePullPolicy: Always
         name: omaha-server-private
         ports:
@@ -162,7 +162,7 @@ spec:
     spec:
       serviceAccountName: omaha-server
       containers:
-      - image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:0.9.1-python3.6
+      - image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:0.9.2
         imagePullPolicy: Always
         name: omaha-server-celery
         envFrom:
