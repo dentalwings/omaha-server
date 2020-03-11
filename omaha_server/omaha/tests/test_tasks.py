@@ -44,6 +44,7 @@ from omaha_server.utils import add_extra_to_log_message
 from sparkle.models import SparkleVersion
 from sparkle.factories import SparkleVersionFactory
 
+
 class DuplicatedCrashesTest(TestCase):
     @freeze_time("2012-12-21 12:00:00")
     @patch('logging.getLogger')
@@ -321,10 +322,10 @@ class ManualCleanupTest(TestCase):
 
 
 class DeleteDanglingTest(TestCase):
-
+    @patch('omaha.limitation.raven.captureMessage')
     @patch('logging.getLogger')
     @patch('omaha.tasks.handle_dangling_files')
-    def test_dangling_delete_db(self, mock_obj, mocked_get_logger):
+    def test_dangling_delete_db(self, mock_obj, mocked_get_logger, mocked_raven):
         mocked_logger = mocked_get_logger.return_value
         mock_obj.return_value = {
             'mark': 'db',
@@ -335,14 +336,16 @@ class DeleteDanglingTest(TestCase):
         }
         auto_delete_dangling_files()
         self.assertEqual(mocked_logger.info.call_count, 5)
+        self.assertEqual(mocked_raven.call_count, 5)
         log_msg = 'Dangling files detected in db [%d], files path: %s' % (
             mock_obj.return_value['count'], mock_obj.return_value['data']
         )
         mocked_logger.info.assert_any_call(log_msg)
 
+    @patch('omaha.limitation.raven.captureMessage')
     @patch('logging.getLogger')
     @patch('omaha.tasks.handle_dangling_files')
-    def test_dangling_delete_s3(self, mock_obj, mocked_get_logger):
+    def test_dangling_delete_s3(self, mock_obj, mocked_get_logger, mocked_get_raven):
         mocked_logger = mocked_get_logger.return_value
         file_path = os.path.abspath('crash/tests/testdata/7b05e196-7e23-416b-bd13-99287924e214.dmp')
         mock_obj.return_value = {
@@ -354,6 +357,7 @@ class DeleteDanglingTest(TestCase):
         }
         auto_delete_dangling_files()
         self.assertEqual(mocked_logger.info.call_count, 5)
+        self.assertEqual(mocked_get_raven.call_count, 5)
         log_msg = 'Dangling files deleted from s3 [%d], files path: %s' % (
             mock_obj.return_value['count'], mock_obj.return_value['data']
         )

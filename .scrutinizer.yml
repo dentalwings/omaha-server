@@ -1,0 +1,12 @@
+build:
+  environment:
+    python: 3.7.1
+  tests:
+     override:
+      - command: "python --version"
+
+filter:
+  dependency_paths:
+    - "omaha_server/assets/components/bower_components/"
+  excluded_paths:
+    - "*/migrations/*"

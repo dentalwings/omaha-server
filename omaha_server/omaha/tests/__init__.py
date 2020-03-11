@@ -3,6 +3,7 @@ from django.core.files.storage import DefaultStorage
 
 class OverloadTestStorageMixin(object):
     """Mixin allows to overload FileField's storage.
+
     It can be useful when we use custom storages.
     For using setup the model attribute.
     """

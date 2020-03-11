@@ -4,8 +4,6 @@
 __pycache__/
 *.py[cod]
 venv*
-.idea
-.elasticbeanstalk
 
 # Unit test / coverage reports
 htmlcov/
@@ -21,21 +19,9 @@ docs/_build/
 target/
 
 # Static files
-
 omaha_server/static
 omaha_server/media
 *.zip
-ebs.config
 
-deploy/*.zip
-deploy/ebs.config
-deploy/settings.yml
-
-deploy/google/app.yaml
-!deploy/google/app.yaml.example
-
-### Vagrant ###
-.vagrant/
-
-### PyCharm ###
-.idea/
+# CUP_PEM_KEYS
+cups_pem_keys/

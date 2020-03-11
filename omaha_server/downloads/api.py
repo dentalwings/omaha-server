@@ -18,17 +18,10 @@ License for the specific language governing permissions and limitations under
 the License.
 """
 from collections import defaultdict
-from django.conf import settings
-
-from rest_framework import viewsets
-from rest_framework import mixins
-from rest_framework import pagination
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from omaha.api import BaseView
 from omaha.models import Version
-from sparkle.serializers import SparkleVersionSerializer
 from sparkle.models import SparkleVersion
 
 
@@ -55,3 +48,4 @@ class LatestVersionView(APIView):
         for v in mac_versions:
             data[v.app.name]['mac'][v.channel.name] = dict(version=str(v.short_version), url=v.file_absolute_url)
         return Response(data)
+

@@ -26,7 +26,6 @@ from io import BytesIO
 from django import forms
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import widgets
-from django.forms.widgets import TextInput
 from django.core.files.uploadedfile import UploadedFile
 
 from django_ace import AceWidget
@@ -67,7 +66,7 @@ class CrashFrom(forms.ModelForm):
                 except StopIteration:
                     return None
             except tarfile.TarError as err:
-                raise forms.ValidationError('The tar file is broken, error: {0}'.format(err.message))
+                raise forms.ValidationError('The tar file is broken, error: {0}'.format(err))
         return file
 
     def clean_minidump_size(self):
@@ -120,7 +119,7 @@ class SymbolsAdminForm(forms.ModelForm):
             meta = parse_debug_meta_info(head, exception=forms.ValidationError)
             self.cleaned_data.update(meta)
         except:
-            raise forms.ValidationError(u"The file contains invalid data.")
+            raise forms.ValidationError("The file contains invalid data.")
         return file
 
     def clean_file_size(self):
@@ -131,12 +130,13 @@ class SymbolsAdminForm(forms.ModelForm):
             return _file.size
         return self.initial["file_size"]
 
+
 class TextInputForm(forms.Form):
     def __init__(self, *args, **kwargs):
         field_name = kwargs.pop('field_name')
         super(TextInputForm, self).__init__(*args, **kwargs)
         self.fields[field_name] = forms.CharField(
-            widget=TextInput(attrs={'placeholder': 'Filter by ID'}),
+            widget=widgets.TextInput(attrs={'placeholder': 'Filter by ID'}),
             label='',
             required=False)
 

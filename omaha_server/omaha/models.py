@@ -18,7 +18,7 @@ License for the specific language governing permissions and limitations under
 the License.
 """
 
-from __future__ import unicode_literals
+
 from django.utils.encoding import python_2_unicode_compatible
 
 import os
@@ -32,20 +32,21 @@ from django.db.models.signals import pre_save, pre_delete
 from django.utils.timezone import now as datetime_now
 
 from omaha.managers import VersionManager
-from omaha.fields import PercentField, BigVersionField
+from omaha.fields import PercentField
 from omaha_server.s3utils import public_read_storage
 
 from django_extensions.db.fields import (
     CreationDateTimeField, ModificationDateTimeField,
 )
 from jsonfield import JSONField
+from versionfield import VersionField
 from furl import furl
 
 
 __all__ = ['Application', 'Channel', 'Platform', 'Version',
            'Action', 'EVENT_DICT_CHOICES', 'EVENT_CHOICES',
            'Data', 'AppRequest', 'Request', 'PartialUpdate',
-           'BaseModel', 'version_upload_to']
+           'BaseModel', 'version_upload_to', 'NAME_DATA_DICT_CHOICES']
 
 
 class BaseModel(models.Model):
@@ -105,11 +106,10 @@ def _version_upload_to(*args, **kwargs):
 class Version(BaseModel):
     is_enabled = models.BooleanField(default=True)
     is_critical = models.BooleanField(default=False)
-    app = models.ForeignKey(Application)
-    platform = models.ForeignKey(Platform, db_index=True)
-    channel = models.ForeignKey(Channel, db_index=True)
-    version = BigVersionField(help_text='Format: 255.255.65535.65535',
-                              number_bits=(8, 8, 16, 16), db_index=True)
+    app = models.ForeignKey(Application, on_delete=models.CASCADE)
+    platform = models.ForeignKey(Platform, db_index=True, on_delete=models.CASCADE)
+    channel = models.ForeignKey(Channel, db_index=True, on_delete=models.CASCADE)
+    version = VersionField(help_text='Format: 255.255.65535.65535', number_bits=(8, 8, 16, 16), db_index=True)
     release_notes = models.TextField(blank=True, null=True)
     file = models.FileField(upload_to=_version_upload_to, null=True,
                             storage=public_read_storage)
@@ -136,7 +136,7 @@ class Version(BaseModel):
     def file_absolute_url(self):
         url = furl(self.file.url)
         if not url.scheme:
-            url = '%s%s' % (settings.MEDIA_URL, url)
+            url = '%s%s' % (settings.OMAHA_URL_PREFIX, url)
         return str(url)
 
     @property
@@ -147,12 +147,10 @@ class Version(BaseModel):
     @property
     def file_url(self):
         url = furl(self.file_absolute_url)
-        if url.host:
-            if url.port and url.port != 80:
-                return '%s://%s:%d%s/' % (url.scheme, url.host, url.port, os.path.dirname(url.pathstr))
-            else:
-                return '%s://%s%s/' % (url.scheme, url.host, os.path.dirname(url.pathstr))
-        return '%s/' % os.path.dirname(url.pathstr)
+        if url.port and url.port != 80:
+            return '%s://%s:%d%s/' % (url.scheme, url.host, url.port, os.path.dirname(url.pathstr))
+        else:
+            return '%s://%s%s/' % (url.scheme, url.host, os.path.dirname(url.pathstr))
 
     @property
     def size(self):
@@ -166,11 +164,11 @@ EVENT_DICT_CHOICES = dict(
     update=3,
 )
 
-EVENT_CHOICES = zip(EVENT_DICT_CHOICES.values(), EVENT_DICT_CHOICES.keys())
+EVENT_CHOICES = list(zip(list(EVENT_DICT_CHOICES.values()), list(EVENT_DICT_CHOICES.keys())))
 
 
 class Action(BaseModel):
-    version = models.ForeignKey(Version, db_index=True, related_name='actions')
+    version = models.ForeignKey(Version, db_index=True, related_name='actions', on_delete=models.CASCADE)
     event = models.PositiveSmallIntegerField(
         choices=EVENT_CHOICES,
         help_text='Contains a fixed string denoting when this action should be run.')
@@ -216,12 +214,12 @@ ACTIVE_USERS_DICT_CHOICES = dict(
     month=2,
 )
 
-ACTIVE_USERS_CHOICES = zip(ACTIVE_USERS_DICT_CHOICES.values(), ACTIVE_USERS_DICT_CHOICES.keys())
+ACTIVE_USERS_CHOICES = list(zip(list(ACTIVE_USERS_DICT_CHOICES.values()), list(ACTIVE_USERS_DICT_CHOICES.keys())))
 
 
 class PartialUpdate(models.Model):
     is_enabled = models.BooleanField(default=True, db_index=True)
-    version = models.OneToOneField(Version, db_index=True)
+    version = models.OneToOneField(Version, db_index=True, on_delete=models.CASCADE)
     percent = PercentField()
     start_date = models.DateField(db_index=True)
     end_date = models.DateField(db_index=True)
@@ -236,11 +234,11 @@ NAME_DATA_DICT_CHOICES = dict(
     untrusted=1,
 )
 
-NAME_DATA_CHOICES = zip(NAME_DATA_DICT_CHOICES.values(), NAME_DATA_DICT_CHOICES.keys())
+NAME_DATA_CHOICES = list(zip(list(NAME_DATA_DICT_CHOICES.values()), list(NAME_DATA_DICT_CHOICES.keys())))
 
 
 class Data(BaseModel):
-    app = models.ForeignKey(Application, db_index=True)
+    app = models.ForeignKey(Application, db_index=True, on_delete=models.CASCADE)
     name = models.PositiveSmallIntegerField(choices=NAME_DATA_CHOICES)
     index = models.CharField(max_length=255, null=True, blank=True)
     value = models.TextField(null=True, blank=True)
@@ -270,10 +268,9 @@ class Hw(models.Model):
 
 
 class Request(models.Model):
-    os = models.ForeignKey(Os, null=True, blank=True)
-    hw = models.ForeignKey(Hw, null=True, blank=True)
-    version = BigVersionField(help_text='Format: 255.255.65535.65535',
-                              number_bits=(8, 8, 16, 16), default=0, null=True, blank=True)
+    os = models.ForeignKey(Os, null=True, blank=True, on_delete=models.CASCADE)
+    hw = models.ForeignKey(Hw, null=True, blank=True, on_delete=models.CASCADE)
+    version = VersionField(help_text='Format: 255.255.65535.65535', number_bits=(8, 8, 16, 16))
     ismachine = models.PositiveSmallIntegerField(null=True, blank=True)
     sessionid = models.CharField(max_length=40, null=True, blank=True)
     userid = models.CharField(max_length=40, null=True, blank=True)
@@ -282,7 +279,7 @@ class Request(models.Model):
     testsource = models.CharField(max_length=40, null=True, blank=True)
     updaterchannel = models.CharField(max_length=10, null=True, blank=True)
     created = models.DateTimeField(db_index=True, default=datetime_now, editable=False, blank=True)
-    ip = models.GenericIPAddressField(blank=True, null=True)
+    ip = models.GenericIPAddressField(blank=True, null=True, protocol='IPv4')
 
 
 class Event(models.Model):
@@ -314,12 +311,12 @@ class Event(models.Model):
 
 
 class AppRequest(models.Model):
-    request = models.ForeignKey(Request, db_index=True)
+    request = models.ForeignKey(Request, db_index=True, on_delete=models.CASCADE)
     appid = models.CharField(max_length=38, db_index=True)
-    version = BigVersionField(help_text='Format: 255.255.65535.65535',
-                              number_bits=(8, 8, 16, 16), default=0, null=True, blank=True)
-    nextversion = BigVersionField(help_text='Format: 255.255.65535.65535',
-                                  number_bits=(8, 8, 16, 16), default=0, null=True, blank=True)
+    version = VersionField(help_text='Format: 255.255.65535.65535',
+                           number_bits=(8, 8, 16, 16), default=0, null=True, blank=True)
+    nextversion = VersionField(help_text='Format: 255.255.65535.65535',
+                               number_bits=(8, 8, 16, 16), default=0, null=True, blank=True)
     lang = models.CharField(max_length=40, null=True, blank=True)
     tag = models.CharField(max_length=40, null=True, blank=True)
     installage = models.SmallIntegerField(null=True, blank=True)

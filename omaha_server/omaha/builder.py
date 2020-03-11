@@ -22,7 +22,7 @@ from builtins import filter
 from functools import partial, reduce
 from uuid import UUID
 
-from django.utils import timezone
+from django.utils.timezone import now
 from django.db.models import Q
 
 from lxml import etree
@@ -78,7 +78,7 @@ def is_new_user(version):
 
 @cached_as(Version, timeout=60)
 def _get_version(partialupdate, app_id, platform, channel, version, date=None):
-    date = date or timezone.now()
+    date = date or now()
 
     qs = Version.objects.select_related('app')
     qs = qs.filter_by_enabled(app=app_id,
@@ -180,5 +180,5 @@ def build_response(request, pretty_print=True, ip=None):
     userid = obj.get('userid')
     apps = obj.findall('app')
     apps_list = reduce(partial(on_app, os=obj.os, userid=userid), apps, [])
-    response = Response(apps_list, date=timezone.now())
+    response = Response(apps_list, date=now())
     return etree.tostring(response, pretty_print=pretty_print, xml_declaration=True, encoding='UTF-8')

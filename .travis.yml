@@ -1,59 +1,78 @@
 language: python
-dist: trusty
-matrix:
-  allow_failures:
-    - env: TOX_ENV=py34
-  include:
-    - python: "2.7"
-      env:
-        - OMAHA_SERVER_PRIVATE=True
-        - PATH_TO_TEST=''
-        - DJANGO_SETTINGS_MODULE=omaha_server.settings_test
-    - python: "2.7"
-      env:
-        - OMAHA_SERVER_PRIVATE=False
-        - PATH_TO_TEST=''
-        - DJANGO_SETTINGS_MODULE=omaha_server.settings_test
-    - python: "2.7"
-      env:
-        - PATH_TO_TEST=''
-        - DJANGO_SETTINGS_MODULE=omaha_server.settings_test_postgres
-    - python: "2.7"
-      env:
-        - PATH_TO_TEST=omaha.tests.test_public
-        - DJANGO_SETTINGS_MODULE=omaha_server.settings_test_postgres
-        - OMAHA_SERVER_PRIVATE=False
-    - python: "2.7"
-      env: COVERAGE=true
-
-cache: pip
-sudo: false
-
-virtualenv:
-  system_site_packages: false
+os: linux
+dist: xenial
+python:
+  - "3.7"
 
 addons:
   apt:
     packages:
-     - python-dev
-  postgresql: "9.4"
+    - python-lxml
+    - python-psycopg2
+    - python-dev
 
 env:
   global:
     - HOST_NAME: 'travis-ci'
     - SECRET_KEY: 'SECRET_KEY'
     - GRPC_PYTHON_BUILD_WITH_CYTHON: 1
-    - AWS_ACCESS_KEY_ID: 'fake'
-    - AWS_SECRET_ACCESS_KEY: 'fake'
+
+cache: pip
 
 services:
-  - redis-server
+  - redis
   - postgresql
+  - docker
 
 install:
-  - pip install -r omaha_server/requirements_dev.txt
+  - pip install tox
+  - pip install google-compute-engine
 
-before_script: cd omaha_server
-script:
-  - ./manage.py test -v 2 $PATH_TO_TEST
-  - if [ $COVERAGE = true ] ; then coveralls --skip_ssl_verify; fi
+stages:
+  - test
+  - deploy
+
+jobs:
+  include:
+    - stage: test
+      script:
+        - tox -e py37
+      env:
+        - OMAHA_SERVER_PRIVATE=True
+    - stage: test
+      script:
+        - tox -e py37
+      env:
+        - OMAHA_SERVER_PRIVATE=False
+    - stage: test
+      script:
+        - tox -e py37
+        - if [ $COVERAGE = true ] ; then coveralls --skip_ssl_verify; fi
+      env:
+        - OMAHA_SERVER_PRIVATE=True
+        - DJANGO_SETTINGS_MODULE=omaha_server.settings_test_postgres
+    - stage: test
+      script:
+        - tox -e py37
+      env:
+        - OMAHA_SERVER_PRIVATE=False
+        - DJANGO_SETTINGS_MODULE=omaha_server.settings_test_postgres
+        - PATH_TO_TEST=omaha.tests.test_public
+    - stage: deploy
+      if: type != pull_request AND branch = master
+      script:
+        - REGISTRY=712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server
+        - VERSION=$(grep -m 1 APP_VERSION omaha_server/omaha_server/settings.py | cut -d'"' -f2)
+        - docker build -t ${REGISTRY}:${VERSION}-${TRAVIS_BUILD_NUMBER} -t ${REGISTRY}:${VERSION} -t ${REGISTRY}:latest .
+        - pyenv global 3.7.1 && pip install -U pip && pip install awscli
+        - $(aws --region ca-central-1 ecr get-login --no-include-email)
+        - docker push ${REGISTRY}:latest && docker push ${REGISTRY}:${VERSION}
+    - stage: deploy
+      if: type != pull_request AND branch != master
+      script:
+        - REGISTRY=712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server
+        - VERSION=$(grep -m 1 APP_VERSION omaha_server/omaha_server/settings.py | cut -d'"' -f2)-${TRAVIS_BRANCH}
+        - docker build -t ${REGISTRY}:${VERSION}-${TRAVIS_BUILD_NUMBER} -t ${REGISTRY}:${VERSION} .
+        - pyenv global 3.7.1 && pip install -U pip && pip install awscli
+        - $(aws --region ca-central-1 ecr get-login --no-include-email)
+        - docker push ${REGISTRY}:${VERSION}

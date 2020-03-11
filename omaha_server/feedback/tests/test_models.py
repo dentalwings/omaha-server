@@ -23,9 +23,8 @@ import os
 from django import test
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from override_storage import override_storage
-
 from feedback.models import Feedback
+from omaha.tests.utils import temporary_media_root
 
 
 BASE_DIR = os.path.dirname(__file__)
@@ -34,7 +33,7 @@ SCREENSHOT_FILE = os.path.join(TEST_DATA_DIR, 'screenshot.png')
 
 
 class FeedbackModelTest(test.TestCase):
-    @override_storage()
+    @temporary_media_root()
     def test_model(self):
         description = 'Test description'
         email = 'me@example.com'

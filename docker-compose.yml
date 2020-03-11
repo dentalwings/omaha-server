@@ -23,9 +23,7 @@ services:
     links:
       - db
       - redis
-    volumes:
-      - ./omaha_server/:/usr/src/app
     ports:
-        - "8000:8000"
+        - "8080:8000"
 volumes:
   postgres-data:

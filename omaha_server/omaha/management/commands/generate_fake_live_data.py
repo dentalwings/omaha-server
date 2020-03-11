@@ -18,7 +18,7 @@ License for the specific language governing permissions and limitations under
 the License.
 """
 
-from __future__ import print_function
+
 from builtins import range, bytes
 
 import random
@@ -75,20 +75,17 @@ def generate_events(app_id, **options):
 
 
 class Command(BaseCommand):
+    args = '<app_id>'
     help = 'A command for generating fake live statistics'
 
+    def handle(self, app_id, *args, **options):
+        generate_events(app_id, **options)
+
     def add_arguments(self, parser):
-        parser.add_argument(
-            'app_id',
-            help='<AppID>'
-        )
         parser.add_argument(
             '--hours',
             dest='n_hours',
             default='24',
             type=int,
-            help='For how many hours will be generated fake data(default: 24)',
+            help='For how many hours will be generated fake data(default: 24)'
         )
-
-    def handle(self, *args, **options):
-        generate_events(**options)

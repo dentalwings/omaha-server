@@ -18,13 +18,12 @@ License for the specific language governing permissions and limitations under
 the License.
 """
 
-from django import forms
-from django.forms import widgets, ValidationError
+from django.forms import widgets, ValidationError, ModelForm
 from django.core.files.uploadedfile import UploadedFile
 
 
 from suit.widgets import LinkedSelect
-from tinymce.widgets import TinyMCE
+from omaha.widgets import CustomTinyMCE
 
 from sparkle.models import SparkleVersion
 
@@ -32,14 +31,17 @@ from sparkle.models import SparkleVersion
 __all__ = ['SparkleVersionAdminForm']
 
 
-class SparkleVersionAdminForm(forms.ModelForm):
+class SparkleVersionAdminForm(ModelForm):
     class Meta:
         model = SparkleVersion
         exclude = []
         widgets = {
             'app': LinkedSelect,
-            'release_notes': TinyMCE(),
+            'release_notes': CustomTinyMCE(),
             'file_size': widgets.TextInput(attrs=dict(disabled='disabled')),
+            'version': widgets.TextInput(),
+            'short_version': widgets.TextInput(),
+            'minimum_system_version': widgets.TextInput()
         }
 
     def clean_file_size(self):

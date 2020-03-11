@@ -1,4 +1,5 @@
-from django.conf.urls import include, url
+from django.conf.urls import url
+from django.urls import include, path
 from django.conf import settings
 from django.contrib import admin
 
@@ -21,7 +22,8 @@ router.register(r'action', omaha.api.ActionViewSet)
 router.register(r'sparkle/version', sparkle.api.SparkleVersionViewSet)
 router.register(r'symbols', crash.api.SymbolsViewSet)
 router.register(r'crash_report', crash.api.CrashViewSet)
-router.register(r'feedback', feedback.api.FeedbackViewSet)
+router.register(r'feedback/description', feedback.api.FeedbackDescriptionViewSet, 'api-feedback-description')
+router.register(r'feedback', feedback.api.FeedbackViewSet, 'api-feedback')
 router.register(r'partialupdate', omaha.api.PartialUpdateViewSet)
 router.register(r'statistics/live', omaha.api.StatisticsVersionsLiveView, 'api-statistics-live')
 
@@ -38,7 +40,7 @@ urlpatterns = [
 if settings.IS_PRIVATE:
     urlpatterns += [
         url(r'', include('downloads.urls')),
-        url(r'^admin/', include(admin.site.urls)),
+        url(r'^admin/', admin.site.urls),
         url(r'^api/statistics/channels/(?P<app_name>[a-zA-Z0-9_ -]+)/$', omaha.api.StatisticsChannelsView.as_view(),
             name="api-statistics-channels"),
         url(r'^api/statistics/versions/(?P<app_name>[a-zA-Z0-9_ -]+)/$', omaha.api.StatisticsVersionsView.as_view(),
@@ -54,12 +56,13 @@ if settings.IS_PRIVATE:
             name='select2_userid_filter'),
     ]
 
-if settings.DEBUG:
-    try:
-        import debug_toolbar
+# if settings.DEBUG:
+#     try:
+#         import debug_toolbar
 
-        urlpatterns += [
-            url(r'^__debug__/', include(debug_toolbar.urls)),
-        ]
-    except ImportError:
-        pass
+#         urlpatterns += [
+#             path('__debug__/', include(debug_toolbar.urls)),
+#             # url(r'^__debug__/', debug_toolbar.urls),
+#         ]
+#     except ImportError:
+#         pass

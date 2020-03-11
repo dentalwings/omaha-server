@@ -18,10 +18,11 @@ License for the specific language governing permissions and limitations under
 the License.
 """
 
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from override_storage import override_storage
+from omaha.tests.utils import temporary_media_root
+
 from sparkle.factories import SparkleVersionFactory
 from sparkle.serializers import SparkleVersionSerializer
 
@@ -29,8 +30,7 @@ from sparkle.serializers import SparkleVersionSerializer
 class SparkleVersionSerializerTest(TestCase):
     maxDiff = None
 
-    @override_storage()
-    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_serializer(self):
         version = SparkleVersionFactory.create(file=SimpleUploadedFile('./chrome_installer.exe', False))
         self.assertDictEqual(SparkleVersionSerializer(version).data, dict(
@@ -41,6 +41,7 @@ class SparkleVersionSerializerTest(TestCase):
             channel=version.channel.id,
             version=version.version,
             short_version=version.short_version,
+            minimum_system_version=version.minimum_system_version,
             release_notes=version.release_notes,
             file=version.file.url,
             file_size=version.file_size,
@@ -49,8 +50,7 @@ class SparkleVersionSerializerTest(TestCase):
             modified=version.modified.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
         ))
 
-    @override_storage()
-    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     def test_auto_fill_file_size(self):
         version = SparkleVersionFactory.create(file=SimpleUploadedFile('./chrome_installer.exe', b' ' * 10))
         data = dict(

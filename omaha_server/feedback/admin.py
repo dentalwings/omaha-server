@@ -49,6 +49,9 @@ class AttachedFileFilter(BooleanFilter):
 def short_url(obj):
     limit = 60
     res = obj.page_url
+    if res is None:
+        return ""
+
     return res if len(res) < limit else res[:limit] + '...'
 short_url.short_description = 'Page URL'
 
@@ -62,7 +65,7 @@ class FeedbackAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = super(FeedbackAdmin, self).get_queryset(request)
-        return qs.filter(description__startswith='BlackBox')
+        return qs.get_feedbacks()
 
 
 @admin.register(FeedbackDescription)
@@ -75,4 +78,4 @@ class FeedbackDescriptionAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = super(FeedbackDescriptionAdmin, self).get_queryset(request)
-        return qs.exclude(description__startswith='BlackBox')
+        return qs.get_feedbacks_description()

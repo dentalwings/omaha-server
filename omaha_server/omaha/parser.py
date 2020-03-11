@@ -23,7 +23,7 @@ import os
 from lxml import etree, objectify
 from omaha.settings import DEFAULT_CHANNEL
 
-__all__ = ['parser', 'parse_request']
+__all__ = ['parser', 'parse_request', 'get_channel']
 
 
 BASE_DIR = os.path.dirname(__file__)
@@ -46,7 +46,7 @@ def parse_request(request):
         ...          testsource="ossdev"
         ...          requestid="{C8F6EDF3-B623-4ee6-B2DA-1D08A0B4C665}">
         ...     <os platform="win" version="6.1" sp="" arch="x64"/>
-        ...     <app appid="{DD13223F-AC0E-436E-B20D-85F7371A555D}" version="1.2.23.0" nextversion="" lang="en" brand="GGLS"
+        ...     <app appid="{430FD4D0-B729-4F61-AA34-91526481799D}" version="1.2.23.0" nextversion="" lang="en" brand="GGLS"
         ...          client="someclientid" installage="39">
         ...         <updatecheck/>
         ...         <ping r="1"/>
@@ -63,7 +63,7 @@ def parse_request(request):
         >>> request_obj.os.get('platform')
         'win'
         >>> request_obj.app.get('appid')
-        '{DD13223F-AC0E-436E-B20D-85F7371A555D}'
+        '{430FD4D0-B729-4F61-AA34-91526481799D}'
         >>> request_obj.app.find('updatecheck')
         ''
         >>> request_obj.keys()
@@ -75,7 +75,7 @@ def parse_request(request):
         >>> for app in request_obj.find('app'):
         ...     app.get('appid')
         ...
-        '{DD13223F-AC0E-436E-B20D-85F7371A555D}'
+        '{430FD4D0-B729-4F61-AA34-91526481799D}'
         '{D0AB2EBC-931B-4013-9FEB-C9C4C2225C8C}'
     """
 
@@ -84,6 +84,10 @@ def parse_request(request):
     # Check if this is coming from update_engine, which handles machines not applications
     if obj.get('userid') is None and obj.app.get('machineid') is not None:
         obj.set('userid', obj.app.get('machineid'))
+
+    # implement old behavior for new xsd field updaterversion
+    if obj.get('version') is None and obj.get('updaterversion') is not None:
+        obj.set('version', obj.get('updaterversion'))
 
     return obj
 

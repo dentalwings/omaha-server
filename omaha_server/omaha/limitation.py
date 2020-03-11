@@ -11,7 +11,8 @@ from django.core.cache import cache
 from django.template import defaultfilters as filters
 
 import boto
-from sentry_sdk import capture_message
+from raven import Client
+
 
 from omaha.models import Version as OmahaVersion
 from omaha.utils import valuedispatch
@@ -19,7 +20,14 @@ from sparkle.models import SparkleVersion
 from crash.models import Crash, Symbols
 from feedback.models import Feedback
 
-from dynamic_preferences_registry import global_preferences_manager as gpm
+from .dynamic_preferences_registry import global_preferences_manager as gpm
+from functools import reduce
+
+dsn = getattr(settings, 'RAVEN_CONFIG', None)
+if dsn:
+    dsn = dsn['dsn']
+raven = Client(dsn, name=getattr(settings, 'HOST_NAME', None), release=getattr(settings, 'APP_VERSION', None))
+
 
 @valuedispatch
 def bulk_delete(cls, qs):
@@ -36,8 +44,8 @@ def _(cls, qs):
     result['count'] = qs.count()
     result['size'] = qs.get_size()
     elements = list(qs.values_list('id', 'created', 'signature', 'userid', 'appid'))
-    result['elements'] = map(lambda x: dict(id=x[0], element_created=x[1].strftime("%d. %B %Y %I:%M%p"), signature=x[2],
-                                            userid=x[3], appid=x[4]), elements)
+    result['elements'] = [dict(id=x[0], element_created=x[1].strftime("%d. %B %Y %I:%M%p"), signature=x[2],
+                                            userid=x[3], appid=x[4]) for x in elements]
     qs.delete()
     return result
 
@@ -52,7 +60,7 @@ def _(cls, qs):
     result['count'] = qs.count()
     result['size'] = qs.get_size()
     elements = list(qs.values_list('id', 'created'))
-    result['elements'] = map(lambda x: dict(id=x[0], element_created=x[1].strftime("%d. %B %Y %I:%M%p")), elements)
+    result['elements'] = [dict(id=x[0], element_created=x[1].strftime("%d. %B %Y %I:%M%p")) for x in elements]
     qs.delete()
     return result
 
@@ -66,7 +74,7 @@ def _(cls, qs):
     result['count'] = qs.count()
     result['size'] = qs.get_size()
     elements = list(qs.values_list('id', 'created'))
-    result['elements'] = map(lambda x: dict(id=x[0], element_created=x[1].strftime("%d. %B %Y %I:%M%p")), elements)
+    result['elements'] = [dict(id=x[0], element_created=x[1].strftime("%d. %B %Y %I:%M%p")) for x in elements]
     qs.delete()
     return result
 
@@ -80,7 +88,7 @@ def _(cls, qs):
     result['count'] = qs.count()
     result['size'] = qs.get_size()
     elements = list(qs.values_list('id', 'created'))
-    result['elements'] = map(lambda x: dict(id=x[0], element_created=x[1].strftime("%d. %B %Y %I:%M%p")), elements)
+    result['elements'] = [dict(id=x[0], element_created=x[1].strftime("%d. %B %Y %I:%M%p")) for x in elements]
     qs.delete()
     return result
 
@@ -95,26 +103,26 @@ def _(cls, qs):
     result['size'] = qs.get_size()
     result['elements'] = list(qs.values_list('id', 'created'))
     elements = list(qs.values_list('id', 'created'))
-    result['elements'] = map(lambda x: dict(id=x[0], element_created=x[1].strftime("%d. %B %Y %I:%M%p")), elements)
+    result['elements'] = [dict(id=x[0], element_created=x[1].strftime("%d. %B %Y %I:%M%p")) for x in elements]
     qs.delete()
     return result
 
 
 def s3_bulk_delete(qs, file_fields, s3_fields):
-    conn = boto.connect_s3()
+    conn = boto.connect_s3(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
     bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
 
     file_keys = qs.values_list(*file_fields)
     file_keys = [key for key in chain(*file_keys) if key]
     bucket.delete_keys(file_keys)
     s3_keys = [x for x in chain(*[bucket.list(prefix="%s/" % field) for field in s3_fields])]
-    error_keys = filter(lambda key: key in s3_keys, file_keys)
+    error_keys = [key for key in file_keys if key in s3_keys]
     if error_keys:
         logging.error("Files were not deleted from s3: %r" % error_keys)
         exclude_fields = [qs.exclude(**{"%s__in" % key: error_keys}) for key in file_fields]
         qs = reduce(operator.and_, exclude_fields)
 
-    update_kwargs = dict(zip(file_fields, [None for x in file_fields]))
+    update_kwargs = dict(list(zip(file_fields, [None for x in file_fields])))
     qs.update(**update_kwargs)
     return qs
 
@@ -140,7 +148,7 @@ def delete_duplicate_crashes(limit=None):
         preference_key = '__'.join(['Crash', 'duplicate_number'])
         limit = gpm[preference_key]
     duplicated = Crash.objects.values('signature').annotate(count=Count('signature'))
-    duplicated = filter(lambda x: x['count'] > limit, duplicated)
+    duplicated = [x for x in duplicated if x['count'] > limit]
     logger.info('Duplicated signatures: %r' % duplicated)
     for group in duplicated:
         qs = Crash.objects.filter(signature=group['signature']).order_by('created')
@@ -197,52 +205,42 @@ def delete_size_is_exceeded(app, model_name, limit=None):
 def monitoring_size():
     size = OmahaVersion.objects.get_size()
     if size > gpm['Version__limit_size'] * 1024 * 1024 * 1024:
-        capture_message(
-            "[Limitation]Size limit of omaha versions is exceeded. Current size is %s [%d]"
-            % (filters.filesizeformat(size).replace(u'\xa0', u' '), time.time()),
-            level='error'
-        )
+        raven.captureMessage("[Limitation]Size limit of omaha versions is exceeded. Current size is %s [%d]" %
+                             (filters.filesizeformat(size).replace('\xa0', ' '), time.time()),
+                             data={'level': 30, 'logger': 'limitation'})
     cache.set('omaha_version_size', size)
 
     size = SparkleVersion.objects.get_size()
     if size > gpm['SparkleVersion__limit_size'] * 1024 * 1024 * 1024:
-        capture_message(
-            "[Limitation]Size limit of sparkle versions is exceeded. Current size is %s [%d]"
-            % (filters.filesizeformat(size).replace(u'\xa0', u' '), time.time()),
-            level='error'
-        )
+        raven.captureMessage("[Limitation]Size limit of sparkle versions is exceeded. Current size is %s [%d]" %
+                             (filters.filesizeformat(size).replace('\xa0', ' '), time.time()),
+                             data={'level': 30, 'logger': 'limitation'})
     cache.set('sparkle_version_size', size)
 
     size = Feedback.objects.get_size()
     if size > gpm['Feedback__limit_size'] * 1024 * 1024 * 1024:
-        capture_message(
-            "[Limitation]Size limit of feedbacks is exceeded. Current size is %s [%d]"
-            % (filters.filesizeformat(size).replace(u'\xa0', u' '), time.time()),
-            level='error'
-        )
+        raven.captureMessage("[Limitation]Size limit of feedbacks is exceeded. Current size is %s [%d]" %
+                             (filters.filesizeformat(size).replace('\xa0', ' '), time.time()),
+                             data={'level': 30, 'logger': 'limitation'})
     cache.set('feedbacks_size', size)
 
     size = Crash.objects.get_size()
     if size > gpm['Crash__limit_size'] * 1024 * 1024 * 1024:
-        capture_message(
-            "[Limitation]Size limit of crashes is exceeded. Current size is %s [%d]"
-            % (filters.filesizeformat(size).replace(u'\xa0', u' '), time.time()),
-            level='error'
-        )
+        raven.captureMessage("[Limitation]Size limit of crashes is exceeded. Current size is %s [%d]" %
+                             (filters.filesizeformat(size).replace('\xa0', ' '), time.time()),
+                             data={'level': 30, 'logger': 'limitation'})
     cache.set('crashes_size', size)
 
     size = Symbols.objects.get_size()
     if size > gpm['Symbols__limit_size'] * 1024 * 1024 * 1024:
-        capture_message(
-            "[Limitation]Size limit of symbols is exceeded. Current size is %s [%d]"
-            % (filters.filesizeformat(size).replace(u'\xa0', u' '), time.time()),
-            level='error'
-        )
+        raven.captureMessage("[Limitation]Size limit of symbols is exceeded. Current size is %s [%d]" %
+                             (filters.filesizeformat(size).replace('\xa0', ' '), time.time()),
+                             data={'level': 30, 'logger': 'limitation'})
     cache.set('symbols_size', size)
 
 
 def handle_dangling_files(model, prefix, file_fields):
-    conn = boto.connect_s3()
+    conn = boto.connect_s3(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
     bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
     result = dict()
     dangling_files_in_db, dangling_files_in_s3 = check_dangling_files(model, prefix, file_fields, bucket)
@@ -279,7 +277,7 @@ def check_dangling_files(model, prefix, file_fields, bucket):
     for obj in obj_from_s3:
         urls_from_s3.append(obj.key)
     all_objects = model.objects.all()
-    urls = list(filter(None, [filed for filed in chain(*all_objects.values_list(*file_fields))]))
+    urls = list([_f for _f in [filed for filed in chain(*all_objects.values_list(*file_fields))] if _f])
     dangling_files_in_db = list(set(urls) - set(urls_from_s3))
     dangling_files_in_s3 = list(set(urls_from_s3) - set(urls))
     return dangling_files_in_db, dangling_files_in_s3

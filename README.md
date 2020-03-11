@@ -5,59 +5,255 @@
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/dentalwings/omaha-server/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/dentalwings/omaha-server/?branch=master)
 [![Apache License, Version 2.0](https://img.shields.io/badge/license-Apache%202.0-red.svg)](https://github.com/dentalwings/omaha-server/blob/master/LICENSE)
 
+**Omaha server no longer supports Python version 2 and Django 1.11 or lower version. If you need the old version of the application, then check the old_master branch.**
+
 Google Omaha server implementation and Sparkle (mac) feed management.
 
 Currently, Crystalnix's implementation is integrated into the updating processes of several organizations for products that require sophisticated update logic and advanced usage statistics. Crystalnix provide additional support and further enhancement on a contract basis. For a case study and enquiries please refer to [Crystalnix website](https://www.crystalnix.com/case-study/google-omaha)
 
-## Setting up a development server
+## Setting up a development environment at AWS Cloud9
 
-**Requirements:**
+### Cloud9 environment creation
 
-- [docker](docker.com)
-  or [docker-machine](https://docs.docker.com/machine/install-machine/)
-  or [docker-for-windows](https://docs.docker.com/docker-for-windows/install/)
-  or [docker-for-mac](https://docs.docker.com/docker-for-mac/install/)
-- [docker-compose](https://docs.docker.com/compose/install/)
+* Open the [AWS Cloud9 Console](https://ca-central-1.console.aws.amazon.com/cloud9/home?region=ca-central-1)
+  * Create an environment and give it a name which identify you as the owner.
+    > Cloud9 IDE environment can be shared with others for pair programming, but it is bound to your account and personalized to you!
+  * Use the following environment settings:
+    * Environment type: Create a new instance for environment (EC2)
+    * Instance type: t2.micro (1 GiB RAM + 1 vCPU)
+    * Platform: Ubuntu Server 18.04 LTS
+    * Network settings (advanced): select the same VPC and one subnet you [EKS cluster](https://ca-central-1.console.aws.amazon.com/eks/home?region=ca-central-1#/clusters) use
+    * (optional) add appropiate Tags
 
-```shell
-# docker install on ubuntu
-sudo add-apt-repository \
-   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-   $(lsb_release -cs) \
-   stable"
-sudo apt-get update
-sudo apt-get install docker-ce
-sudo usermod -aG docker $USER
+### Cloud9 environment configuration
 
-# checkout the code, assuming you're in your favorite source directory already
-git clone git@github.com:dentalwings/omaha-server.git
+* install tools
+  ```shell
+  # update pip3 and pipenv
+  sudo pip3 install --upgrade pip
+  pip3 install pipenv
+  
+  # docker-compose
+  sudo curl -L "https://github.com/docker/compose/releases/download/1.25.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  sudo chmod +x /usr/local/bin/docker-compose
+  sudo curl -L https://raw.githubusercontent.com/docker/compose/1.25.3/contrib/completion/bash/docker-compose -o /etc/bash_completion.d/docker-compose
+  
+  # kubernetes
+  sudo snap install kubectl --classic
+  source <(kubectl completion bash)
+  echo "source <(kubectl completion bash)" >> ~/.bashrc
+  
+  # aws cli auto completion
+  echo "complete -C '/usr/local/bin/aws_completer' aws" >> ~/.bashrc
+  ```
+* Generate an ssh key (please set a passphrase!)
+  ```shell
+  ssh-keygen
+  ```
+* add your public key to your [GitHub account](https://github.com/settings/keys)
+  ```shell
+  cat ~/.ssh/id_rsa.pub
+  ```
+* Configure your git user and editor settings:
+  ```shell
+  git config --global user.name "Your Name"
+  git config --global user.email you@example.com
+  # fix cloud9 git editor bug on Ubuntu host
+  sudo ln -s /bin/nano /usr/bin/nano
+  ```
+* Clone this repository and change working directory
+  ```shell
+  git clone git@github.com:dentalwings/omaha-server.git
+  cd omaha-server
+  
+  # checkout the appropiate branch, e.g.:
+  git checkout python3.6
+  ```
+* Install python project specific modules
+  ```shell
+  pipenv install --system --dev
+  ```
+* Click on `AWS Cloud9`in the menu -> `Open Your Project Settings` and replace the `run` section with the following code block
+  > Cloud9 may be overwrite your changes, so maybe you should hard reload the IDE (CRTL+SHIFT+R in Chrome) after saving the file. Repeat this step if its not working the first time.
+  ```javascript
+  "run": {
+        "configs": {
+            "@inited": true,
+            "json()": {
+                "OmahaServer create admin": {
+                    "command": "omaha-server/omaha_server/createadmin.py",
+                    "cwd": "/omaha-server/omaha_server",
+                    "debug": false,
+                    "env": {
+                        "DJANGO_SETTINGS_MODULE": "omaha_server.settings_cloud9",
+                        "OMAHA_SERVER_PRIVATE": "True"
+                    },
+                    "name": "OmahaServer createadmin",
+                    "runner": "Python 3",
+                    "toolbar": true
+                },
+                "OmahaServer migrate": {
+                    "command": "omaha-server/omaha_server/manage.py migrate",
+                    "cwd": "/omaha-server/omaha_server",
+                    "debug": false,
+                    "env": {
+                        "DJANGO_SETTINGS_MODULE": "omaha_server.settings_cloud9",
+                        "OMAHA_SERVER_PRIVATE": "True"
+                    },
+                    "name": "OmahaServer migrate",
+                    "runner": "Python 3",
+                    "toolbar": true
+                },
+                "OmahaServer run server": {
+                    "command": "omaha-server/omaha_server/manage.py runserver 8080",
+                    "cwd": "/omaha-server/omaha_server",
+                    "debug": true,
+                    "env": {
+                        "DJANGO_SETTINGS_MODULE": "omaha_server.settings_cloud9",
+                        "OMAHA_SERVER_PRIVATE": "True"
+                    },
+                    "name": "OmahaServer run server",
+                    "runner": "Python 3",
+                    "toolbar": true
+                },
+                "OmahaServer test private": {
+                    "command": "omaha-server/omaha_server/manage.py test -v 2",
+                    "cwd": "/omaha-server/omaha_server",
+                    "debug": false,
+                    "env": {
+                        "OMAHA_SERVER_PRIVATE": "True"
+                    },
+                    "name": "OmahaServer test private",
+                    "runner": "Python 3",
+                    "toolbar": true
+                },
+                "OmahaServer test private db": {
+                    "command": "omaha-server/omaha_server/manage.py test -v 2",
+                    "cwd": "/omaha-server/omaha_server",
+                    "debug": false,
+                    "env": {
+                        "DJANGO_SETTINGS_MODULE": "omaha_server.settings_test_postgres",
+                        "OMAHA_SERVER_PRIVATE": "True"
+                    },
+                    "name": "OmahaServer test private db",
+                    "runner": "Python 3",
+                    "toolbar": true
+                },
+                "OmahaServer test public": {
+                    "command": "omaha-server/omaha_server/manage.py test -v 2",
+                    "cwd": "/omaha-server/omaha_server",
+                    "debug": false,
+                    "env": {
+                        "OMAHA_SERVER_PRIVATE": "False"
+                    },
+                    "name": "OmahaServer test public",
+                    "runner": "Python 3",
+                    "toolbar": true
+                },
+                "OmahaServer test public db": {
+                    "command": "omaha-server/omaha_server/manage.py test -v 2",
+                    "cwd": "/omaha-server/omaha_server",
+                    "debug": false,
+                    "env": {
+                        "DJANGO_SETTINGS_MODULE": "omaha_server.settings_test_postgres",
+                        "OMAHA_SERVER_PRIVATE": "False",
+                        "PATH_TO_TEST": "omaha.tests.test_public"
+                    },
+                    "name": "OmahaServer test public db",
+                    "runner": "Python 3",
+                    "toolbar": true
+                }
+            }
+        }
+    },
+  ```
+* Click on `AWS Cloud9`in the menu -> `Preferences` -> `AWS Settings` -> `Credentials`, disable `AWS managed temporary credentials`
+  > This is required since AWS EKS does not support temporary credentials as authentication.
+* Configure your own [API Keys](https://console.aws.amazon.com/iam/home#/security_credentials)
+  ```shell
+  aws configure
+  ```
+* Let aws create your kubectl configuration for you
+  ```shell
+  aws eks update-kubeconfig --name {ClusterName}
+  ```
+* Start Postgres and Redis containers in the Cloud9 environment
+  ```shell
+  docker-compose up -d db redis
+  ```
+  > After first creation these two containers will autostart with your Cloud9 environment. To destroy them execute `docker-compose down db redis -v`.
+* Start the initial db schema creation/migration from the menu `Run` -> `Run configurations` -> `OmahaServer migrate`
+* Create the admin user from the menu `Run` -> `Run configurations` -> `OmahaServer create admin`
+* Finally start the development server from the menu `Run` -> `Run configurations` -> `OmahaServer run server`
 
-# start dev environment
-./startup.sh
+## Deployment to Kubernetes (AWS EKS)
 
-# stop server
-docker-compose stop
+### Requirements
 
-# destroy containers and db storage volume
-docker-compose down -v
+* [AWS EKS Cluster](https://ca-central-1.console.aws.amazon.com/eks/home)
+* [aws-alb-ingress-controller](https://kubernetes-sigs.github.io/aws-alb-ingress-controller/guide/controller/setup/#kubectl) running in the cluster
+* [external-dns](https://kubernetes-sigs.github.io/aws-alb-ingress-controller/guide/external-dns/setup/) running in the cluster
+* [Amazon EBS CSI Driver](https://docs.aws.amazon.com/eks/latest/userguide/ebs-csi.html)
+* [Route53](https://console.aws.amazon.com/route53/home) Hosted Zone manageable by external-dns
+* [AWC Certificate Manager](https://ca-central-1.console.aws.amazon.com/acm) SSL Certificate, modify `alb.ingress.kubernetes.io/certificate-arn` or delete in `deploy/omaha_server.yaml`
+* [AWS ECR](https://ca-central-1.console.aws.amazon.com/ecr/repositories) registry to store your django container, prefereable in the same region as the EKS Cluster. Modify all `image:` in `deploy/omaha_server.yaml` to match your container registry.
+* [AWS S3 Bucket](https://s3.console.aws.amazon.com/s3/home) where Django static content and media files will be hosted
+* [Enable IAM Roles for Kubernetes Service Accounts](https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html)
+* [Create IAM Policy to access S3 Bucket](https://docs.aws.amazon.com/eks/latest/userguide/create-service-account-iam-policy-and-role.html#create-service-account-iam-policy) and use the following policy:
+    ```
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Action": [
+                    "s3:PutObject",
+                    "s3:GetObject",
+                    "s3:DeleteObject"
+                ],
+                "Resource": [
+                    "arn:aws:s3:::${YOUR_BUCKET_NAME}/*"
+                ],
+                "Effect": "Allow"
+            }
+        ]
+    }
+    ```
+* [Create an IAM Role](https://docs.aws.amazon.com/eks/latest/userguide/create-service-account-iam-policy-and-role.html#create-service-account-iam-role) linked to policy above. The `SERVICE_ACCOUNT_NAMESPACE` should be the Kubernetes namespace you plan to deploy the server later on. The `SERVICE_ACCOUNT_NAME` is `metadata.name` of the first resource definition in `deploy/omaha-server.yaml`:
+  ```
+  apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: omaha-server
+      annotations:
+        eks.amazonaws.com/role-arn: ${IAM_ROLE_ARN}
+  ```
+  You need to adjust the annotation of the IAM role after creation of your role.
+* Upload [CUP_PEM_KEYS](#enable-client-update-protocol-v2)
 
-# rebuild web container (when python dependencies change)
-docker-compose build
-```
+Already installed in/during Cloud9 IDE setup:
+* [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
+* [kubectl](#cloud9-environment-configuration)
 
-Open `http://{DOCKER_HOST}:8000/admin/`
+### Deployment
 
-- username: `admin`
-- password: `admin`
+    # kubectl config
+    $(aws eks --region {REGION} update-kubeconfig --name {CLUSTER_NAME} --no-include-email)
 
-## Statistics
+    # deploy redis and postgres first (only needs to be done once)
+    kubectl [-n {NAMESPACE}] apply -f deploy/redis.yaml deploy/postgres.yaml
 
-All statistics are stored in Redis. In order not to lose all data, we recommend to set up the backing up process. The proposed solution uses ElastiCache which supports [automatic backups](https://aws.amazon.com/en/blogs/aws/backup-and-restore-elasticache-redis-nodes/).
-In the case of a self-hosted solution do not forget to set up backups.
+    # /!\ modify the configuration to your needs first: deploy/omaha-server.yaml /!\
+    kubectl [-n {NAMESPACE}] apply -f deploy/omaha-server.yaml
+
+## Omaha Server commands/tools
+
+### Statistics
+
+All statistics are stored in Redis. In order not to lose all data, we recommend to set up the backing up process.
 
 Required `userid`. [Including user id into request](https://github.com/Crystalnix/omaha/wiki/Omaha-Client-working-with-protocol#including-user-id-into-request)
 
-## Utils
+### Utils
 
 A command for generating fake data such as requests, events and statistics:
 
@@ -65,7 +261,7 @@ A command for generating fake data such as requests, events and statistics:
 # Usage: ./manage.py generate_fake_data [options] <app_id>
 # Options:
 #     --count=COUNT         Total number of data values (default: 100)
-docker-compose exec django python manage.py generate_fake_data {F07B3878-CD6F-4B96-B52F-95C4D2} --count=20
+python manage.py generate_fake_data {F07B3878-CD6F-4B96-B52F-95C4D2} --count=20
 ```
 
 A command for generating fake statistics:
@@ -74,7 +270,7 @@ A command for generating fake statistics:
 # Usage: ./manage.py generate_fake_statistics [options]
 # Options:
 #     --count=COUNT         Total number of data values (default: 100)
-docker-compose exec django python manage.py generate_fake_statistics --count=3000
+python manage.py generate_fake_statistics --count=3000
 ```
 
 A command for generating fake live data:
@@ -82,7 +278,7 @@ A command for generating fake live data:
 ```shell
 # Usage: ./manage.py generate_fake_live_data <app_id>
 #
-docker-compose exec django python manage.py generate_fake_live_data {c00b6344-038f-4e51-bcb1-33ffdd812d81}
+python manage.py generate_fake_live_data {c00b6344-038f-4e51-bcb1-33ffdd812d81}
 ```
 
 A command for generating fake live data for Mac:
@@ -90,80 +286,15 @@ A command for generating fake live data for Mac:
 ```shell
 # Usage: ./manage.py generate_fake_mac_live_data <app_name> <channel>
 #
-docker-compose exec django python manage.py generate_fake_mac_live_data Application alpha
+python manage.py generate_fake_mac_live_data Application alpha
 ```
 
-## Deploying Omaha-Server to AWS Elastic Beanstalk
-
-**Requirements:**
-- [Setup a Route53 HostedZone](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/CreatingHostedZone.html)
-- Launch this CloudFormation Template [![Launch Stack](assets/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=omaha&templateURL=https%3A%2F%2Fs3.ca-central-1.amazonaws.com%2Fdentalwings-cloudformation-templates%2Fomaha-server%2Fcloudformation_omaha.yml)
-- [Elastic Beanstalk command line tools](https://docs.aws.amazon.com/de_de/elasticbeanstalk/latest/dg/eb-cli3-install.html)
-
-**Optional:**
-- [Sentry](https://github.com/getsentry/sentry) for getting stacktraces of the omaha server django app itself [![Launch Stack](assets/launch-stack.png)](https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=sentry&templateURL=https%3A%2F%2Fs3.ca-central-1.amazonaws.com%2Fdentalwings-cloudformation-templates%2Faws-cloudformation-sentry%2Fcloudformation_sentry.yml)
-
-### Deploy your application
-
-look up the following output of the cloudformation stack
-* BeanstalkApplicationName
-* PrivateEnvironment
-* PublicEnvironment
-
-```shell
-cd omaha_server # where the manage.py is located
-eb init --region {AWS::Region} {BeanstalkApplicationName}
-eb deploy {PrivateEnvironment|PublicEnvironment}
-```
-
-#### Environment variables
-
-| Environment variable name |    Description       |       Default value        |
-|---------------------------|----------------------|----------------------------|
-| APP_VERSION               | App version          | DEV                        |
-| DJANGO_SETTINGS_MODULE    |                      | omaha_server.settings_prod |
-| SECRET_KEY                | Django SECRET_KEY    |                            |
-| HOST_NAME                 | Eb app host name     |                            |
-| DB_HOST                   | DB Host              | 127.0.0.1                  |
-| DB_USER                   | DB User              | postgres                   |
-| DB_NAME                   | DB Name              | postgres                   |
-| DB_PASSWORD               | DB Password          | ''                         |
-| DB_PORT                   | DB port              | 5432                       |
-| AWS_ACCESS_KEY_ID         | AWS Access Key       |                            |
-| AWS_SECRET_ACCESS_KEY     | AWS Secret Key       |                            |
-| AWS_STORAGE_BUCKET_NAME   | S3 storage bucket    |                            |
-| REDIS_HOST                | Redis host           | 127.0.0.1                  |
-| REDIS_PORT                | Redis port           | 6379                       |
-| REDIS_DB                  | Redis db             | 1                          |
-| REDIS_STAT_PORT           | For statistics       | REDIS_PORT                 |
-| REDIS_STAT_HOST           |                      | REDIS_HOST                 |
-| REDIS_STAT_DB             |                      | 15                         |
-| UWSGI_PROCESSES           |                      |                            |
-| UWSGI_THREADS             |                      |                            |
-| OMAHA_SERVER_PRIVATE      | Is private server    | False                      |
-| DB_PUBLIC_USER            |                      |                            |
-| DB_PUBLIC_PASSWORD        |                      |                            |
-| AWS_ROLE                  |                      |                            |
-| SENTRY_DSN                | Sentry DSN           |                            |
-| OMAHA_ONLY_HTTPS          | HTTPS-only           | False                      |
-| CUP_REQUEST_VALIDATION    |                      | False                      |
-| CRASH_TRACKER             | Sentry, ELK          | Sentry                     |
-| LOGSTASH_HOST             | Logstash host        |                            |
-| LOGSTASH_PORT             | Logstash TCP port    |                            |
-| FILEBEAT_HOST             | Filebeat host        | 127.0.0.1                  |
-| FILEBEAT_PORT             | Filebeat UDP port    | 9021                       |
-| ELK_HOST                  | Logstash host        | ''                         |
-| ELK_PORT                  | Logstash TCP port    | ''                         |
-| FILEBEAT_DESTINATION      | filebeat output type | ''                         |
-| LOG_NGINX_TO_FILEBEAT     | Send logs to filebeat| 'True'                     |
-| EMAIL_SENDER              | Verified SES email   | ''                         |
-| EMAIL_RECIPIENTS          | Feedback recepients  | ''                         |
-
-#### Enable Client Update Protocol v2
+### Enable Client Update Protocol v2
 
 1. Use [Omaha eckeytool](https://github.com/google/omaha/tree/master/omaha/tools/eckeytool) to generate private.pem key and cup_ecdsa_pubkey.{KEYID}.h files.
 2. Add cup_ecdsa_pubkey.{KEYID}.h to Omaha source directory /path/to/omaha/omaha/net/, set CupEcdsaRequestImpl::kCupProductionPublicKey in /path/to/omaha/omaha/net/cup_ecdsa_request.cc to new key and build Omaha client.
-3. Add private.pem keyid and path to omaha CUP_PEM_KEYS dictionary in the [settings.py](https://github.com/Crystalnix/omaha-server/blob/master/omaha_server/omaha_server/settings.py). If you run the server on AWS, create a `cups_pem_keys` folder in the S3 Bucket (AWS_STORAGE_BUCKET_NAME) and put the keys with the index as filename (e.g.: `1.pem`) in there.
+3. Add private.pem keyid and path to omaha CUP_PEM_KEYS dictionary in the [settings.py](https://github.com/DentalWings/omaha-server/blob/master/omaha_server/omaha_server/settings.py).
+  On Kubernetes you will need to create it manually using `kubectl -n ${NAMESPACE} create secret generic cup-pem-keys-secret --from-file={KEY_ID}.pem=private.pem`
 
 ## Contributors
 

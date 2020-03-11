@@ -30,7 +30,6 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from mock import patch
 from freezegun import freeze_time
 from bitmapist import DayEvents, HourEvents, mark_event
-from override_storage import override_storage
 
 from omaha.tests import fixtures
 from omaha.parser import parse_request
@@ -51,7 +50,7 @@ from omaha.statistics import (
     get_users_live_versions,
 )
 
-from omaha.tests.utils import create_app_xml
+from omaha.tests.utils import temporary_media_root, create_app_xml
 from omaha.utils import redis, get_id
 from omaha.settings import DEFAULT_CHANNEL
 from omaha.models import (
@@ -72,10 +71,10 @@ from sparkle.statistics import userid_counting as mac_userid_counting
 
 class StatisticsTest(TestCase):
     def setUp(self):
-        redis.flushall()
+        redis.flushdb()
 
     def tearDown(self):
-        redis.flushall()
+        redis.flushdb()
 
     def generate_version(self, is_enabled):
         app = Application.objects.create(id='{D0AB2EBC-931B-4013-9FEB-C9C4C2225C8C}', name='app')
@@ -103,11 +102,11 @@ class StatisticsTest(TestCase):
 
     def test_get_live_statistics_with_enabled_version(self):
         data = self.generate_version(is_enabled=True)
-        assert len(data['win'].keys()) == 1
+        assert len(list(data['win'].keys())) == 1
 
     def test_get_live_statistics_with_disabled_version(self):
         data = self.generate_version(is_enabled=False)
-        assert len(data['win'].keys()) == 1
+        assert len(list(data['win'].keys())) == 1
 
     @patch('omaha.statistics.add_app_statistics')
     def test_userid_counting(self, mock_add_app_statistics):
@@ -165,18 +164,14 @@ class StatisticsTest(TestCase):
 
         events_request_appid = lambda date=now: DayEvents.from_date('request:%s' % appid, date)
         events_new_appid = lambda date=now: DayEvents.from_date('new_install:%s' % appid, date)
-        events_request_appid_version =\
-            lambda date=now: DayEvents.from_date('request:{}:{}'.format(appid, version), date)
-        events_request_appid_platform =\
-            lambda date=now: DayEvents.from_date('request:{}:{}'.format(appid, platform), date)
-        events_new_appid_platform =\
-            lambda date=now: DayEvents.from_date('new_install:{}:{}'.format(appid, platform), date)
-        events_request_appid_channel =\
-            lambda date=now: DayEvents.from_date('request:{}:{}'.format(appid, channel), date)
-        events_request_appid_platform_version =\
-            lambda date=now: DayEvents.from_date('request:{}:{}:{}'.format(appid, platform, version), date)
-        events_request_appid_platform_channel_version =\
-            lambda date=now: DayEvents.from_date('request:{}:{}:{}:{}'.format(appid, platform, channel, version), date)
+        events_request_appid_version = lambda date=now: DayEvents.from_date('request:{}:{}'.format(appid, version), date)
+        events_request_appid_platform = lambda date=now: DayEvents.from_date('request:{}:{}'.format(appid, platform), date)
+        events_new_appid_platform = lambda date=now: DayEvents.from_date('new_install:{}:{}'.format(appid, platform), date)
+        events_request_appid_channel = lambda date=now: DayEvents.from_date('request:{}:{}'.format(appid, channel), date)
+        events_request_appid_platform_version = lambda date=now: DayEvents.from_date(
+            'request:{}:{}:{}'.format(appid, platform, version), date)
+        events_request_appid_platform_channel_version = lambda date=now: DayEvents.from_date(
+            'request:{}:{}:{}:{}'.format(appid, platform, channel, version), date)
 
         self.assertEqual(len(events_new_appid()), 0)
         self.assertEqual(len(events_request_appid()), 0)
@@ -424,13 +419,9 @@ class StatisticsTest(TestCase):
         appid = app.get('appid')
         version_1 = '0.0.0.1'
         version_2 = '0.0.0.2'
-        events_appid_version =\
-            lambda version: HourEvents('request:{}:{}'.format(appid, version), now.year, now.month, now.day, now.hour)
-        events_appid_platform_version =\
-            lambda version: HourEvents('request:{}:{}:{}'.format(appid, platform, version),
-                                       now.year, now.month, now.day, now.hour)
-        events_appid_platform_channel_version =\
-            lambda version: HourEvents(
+        events_appid_version = lambda version: HourEvents('request:{}:{}'.format(appid, version), now.year, now.month, now.day, now.hour)
+        events_appid_platform_version = lambda version: HourEvents('request:{}:{}:{}'.format(appid, platform, version), now.year, now.month, now.day, now.hour)
+        events_appid_platform_channel_version = lambda version: HourEvents(
             'request:{}:{}:{}:{}'.format(appid, platform, channel, version), now.year, now.month, now.day, now.hour)
 
         self.assertEqual(len(events_appid_version(version_1)), 0)
@@ -474,10 +465,8 @@ class StatisticsTest(TestCase):
         appid = app.get('appid')
         version = app.get('version')
 
-        events_appid_version =\
-            HourEvents('request:{}:{}'.format(appid, version), now.year, now.month, now.day, now.hour)
-        events_appid_platform_version =\
-            HourEvents('request:{}:{}:{}'.format(appid, platform, version), now.year, now.month, now.day, now.hour)
+        events_appid_version = HourEvents('request:{}:{}'.format(appid, version), now.year, now.month, now.day, now.hour)
+        events_appid_platform_version = HourEvents('request:{}:{}:{}'.format(appid, platform, version), now.year, now.month, now.day, now.hour)
         events_appid_platform_channel_version = HourEvents(
             'request:{}:{}:{}:{}'.format(appid, platform, channel, version), now.year, now.month, now.day, now.hour)
 
@@ -496,7 +485,7 @@ class GetStatisticsTest(TestCase):
     maxDiff = None
 
     def _generate_fake_statistics(self):
-        now = timezone.now()
+        now = datetime.now()
         year = now.year
         n_users = 12
 
@@ -509,9 +498,9 @@ class GetStatisticsTest(TestCase):
                 mac_userid_counting(user_id, self.mac_app, 'mac', now=date)
             userid_counting(UUID(int=i), self.uninstall_app_list, self.platform.name, now=date)
 
-    @override_storage()
+    @temporary_media_root()
     def setUp(self):
-        redis.flushall()
+        redis.flushdb()
         self.app = Application.objects.create(id='app', name='app')
         self.channel = Channel.objects.create(name='stable')
         self.platform = Platform.objects.create(name='win')
@@ -551,14 +540,14 @@ class GetStatisticsTest(TestCase):
         uninstalls = [(datetime(now.year, x, 1).strftime("%Y-%m"), 1) for x in range(1, 13)]
         mac_updates = [(datetime(now.year, x, 1).strftime("%Y-%m"), x - 1) for x in range(1, 13)]
         mac_installs = [(datetime(now.year, x, 1).strftime("%Y-%m"), 1) for x in range(1, 13)]
-        total_installs = map(lambda x, y: (x[0], x[1] + y[1]), win_installs, mac_installs)
-        total_updates = map(lambda x, y: (x[0], x[1] + y[1]), win_updates, mac_updates)
+        total_installs = list(map(lambda x, y: (x[0], x[1] + y[1]), win_installs, mac_installs))
+        total_updates = list(map(lambda x, y: (x[0], x[1] + y[1]), win_updates, mac_updates))
         self.users_statistics = dict(new=total_installs, updates=total_updates, uninstalls=uninstalls)
         self.win_users_statistics = dict(new=win_installs, updates=win_updates, uninstalls=uninstalls)
         self.mac_users_statistics = dict(new=mac_installs, updates=mac_updates)
 
     def tearDown(self):
-        redis.flushall()
+        redis.flushdb()
 
     def test_get_users_statistics_months(self):
         self.assertDictEqual(get_users_statistics_months(app_id=self.app.id), self.users_statistics)

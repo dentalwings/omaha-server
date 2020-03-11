@@ -23,10 +23,9 @@ import os
 from django import test
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from override_storage import override_storage
-
 from crash.models import Crash, CrashDescription, Symbols, symbols_upload_to
 from crash.factories import CrashFactory
+from omaha.tests.utils import temporary_media_root
 
 
 BASE_DIR = os.path.dirname(__file__)
@@ -35,8 +34,7 @@ SYM_FILE = os.path.join(TEST_DATA_DIR, 'BreakpadTestApp.sym')
 
 
 class CrashModelTest(test.TestCase):
-    @override_storage()
-    @test.override_settings(
+    @temporary_media_root(
         CELERY_ALWAYS_EAGER=False,
         CELERY_EAGER_PROPAGATES_EXCEPTIONS=False,
     )
@@ -59,8 +57,7 @@ class CrashModelTest(test.TestCase):
         self.assertEqual(obj.appid, app_id)
         self.assertEqual(obj.userid, user_id)
 
-    @override_storage()
-    @test.override_settings(
+    @temporary_media_root(
         CELERY_ALWAYS_EAGER=False,
         CELERY_EAGER_PROPAGATES_EXCEPTIONS=False,
     )
@@ -75,7 +72,6 @@ class CrashModelTest(test.TestCase):
             archive_size=1234,
         )
         self.assertEqual(obj.size, 123+1234)
-
 
 class CrashDescriptionModelTest(test.TestCase):
     def test_model(self):
@@ -96,7 +92,7 @@ class CrashDescriptionModelTest(test.TestCase):
 
 
 class SymbolsModelTest(test.TestCase):
-    @override_storage()
+    @temporary_media_root()
     def test_model(self):
         with open(SYM_FILE, 'rb') as f:
             obj = Symbols.objects.create(
@@ -106,7 +102,7 @@ class SymbolsModelTest(test.TestCase):
             )
         self.assertTrue(obj)
 
-    @override_storage()
+    @temporary_media_root()
     def test_property(self):
         with open(SYM_FILE, 'rb') as f:
             obj = Symbols.objects.create(
@@ -117,8 +113,7 @@ class SymbolsModelTest(test.TestCase):
             )
         self.assertEqual(obj.size, 123)
 
-    @override_storage()
-    @test.override_settings()
+    @temporary_media_root()
     def test_symbols_upload_to(self):
         with open(SYM_FILE, 'rb') as f:
             obj = Symbols.objects.create(

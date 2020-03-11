@@ -4,10 +4,9 @@ from hashlib import sha256
 from django.conf import settings
 from django.http import HttpResponse
 from django.utils import timezone
+from django.utils.deprecation import MiddlewareMixin
 
 import pytz
-import boto
-import os
 from omaha.dynamic_preferences_registry import global_preferences_manager as gpm
 from ecdsa import SigningKey
 from ecdsa.util import sigencode_der
@@ -19,7 +18,7 @@ class CUP2Exception(Exception):
     pass
 
 
-class TimezoneMiddleware(object):
+class TimezoneMiddleware(MiddlewareMixin):
     def process_request(self, request):
         tzname = gpm['Timezone__timezone']
         if tzname:
@@ -28,24 +27,16 @@ class TimezoneMiddleware(object):
             timezone.deactivate()
 
 
-class CUP2Middleware(object):
+class CUP2Middleware(MiddlewareMixin):
     """Support CUP2 protocol of Omaha Client.
     """
 
-    def __init__(self):
+    def __init__(self, get_response, *args, **kwargs):
+        self.get_response = get_response
         self.sk = {}
         # Loading signature keys to memory
-        for keyid, private_key in settings.CUP_PEM_KEYS.iteritems():
+        for keyid, private_key in settings.CUP_PEM_KEYS.items():
             self.sk[keyid] = SigningKey.from_pem(open(private_key).read())
-
-        # try to load keys from AWS S3 bucket, use filename as keyid
-        if os.getenv('AWS_STORAGE_BUCKET_NAME'):
-            conn = boto.connect_s3()
-            bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
-            for key in bucket.list(prefix='cups_pem_keys/'):
-                if key.name.endswith(".pem"):
-                    keyid = os.path.splitext(os.path.basename(key.name))[0]
-                    self.sk[keyid] = SigningKey.from_pem(key.read())
 
     def process_request(self, request):
         if getattr(settings, 'CUP_REQUEST_VALIDATION', False) and self.is_cup2_request(request):
@@ -74,7 +65,7 @@ class CUP2Middleware(object):
         cup2hreq = request.GET.get('cup2hreq')
 
         keyid, k = cup2key.split(':')
-        if keyid not in self.sk.keys():
+        if keyid not in list(self.sk.keys()):
             raise CUP2Exception('There is no key with id %s' % keyid)
 
         request_hash = sha256(request.body).hexdigest()
@@ -92,10 +83,11 @@ class CUP2Middleware(object):
         message = sha256(request_hash + response_hash + cup2key.encode()).digest()
         signature = self.sk[keyid].sign(message, hashfunc=sha256, sigencode=sigencode_der, k=int(k))
 
-        response['ETag'] = '%s:%s' % (signature.encode('hex'), request_hash.encode('hex'))
+        response['ETag'] = '%s:%s' % (signature.hex(), request_hash.hex())
 
 
-class LoggingMiddleware(object):
+class LoggingMiddleware(MiddlewareMixin):
+
     def process_request(self, request):
         if 'live' in request.path:
             logging.info('process_request')

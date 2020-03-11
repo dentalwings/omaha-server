@@ -19,11 +19,10 @@ the License.
 """
 
 from copy import copy
-import StringIO
+import io
 
 from google.protobuf.descriptor import FieldDescriptor
 from protobuf_to_dict import protobuf_to_dict, TYPE_CALLABLE_MAP
-from sentry_sdk import capture_message
 from celery import signature
 
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -35,7 +34,11 @@ from django.conf import settings
 from feedback.forms import FeedbackForm
 from feedback.proto_gen.extension_pb2 import ExtensionSubmit
 from omaha_server.utils import get_client_ip
-from utils import get_file_extension
+from .utils import get_file_extension
+
+dsn = getattr(settings, 'RAVEN_CONFIG', None)
+if dsn:
+    dsn = dsn['dsn']
 
 
 class FeedbackFormView(FormView):
@@ -53,7 +56,6 @@ class FeedbackFormView(FormView):
         }
         submit = ExtensionSubmit()
         submit.ParseFromString(self.request.body)
-
         type_callable_map = copy(TYPE_CALLABLE_MAP)
         type_callable_map[FieldDescriptor.TYPE_BYTES] = lambda x: '[binary content]'
         pb_dict = protobuf_to_dict(
@@ -77,7 +79,7 @@ class FeedbackFormView(FormView):
             )
         if submit.blackbox.data:
             blackbox_name = self.handle_file_extension(
-                StringIO.StringIO(submit.blackbox.data).read(1024)
+                io.BytesIO(submit.blackbox.data).read(1024)
             )
             files['blackbox'] = SimpleUploadedFile(
                 blackbox_name, submit.blackbox.data
@@ -85,7 +87,7 @@ class FeedbackFormView(FormView):
         for attach in submit.product_specific_binary_data:
             key = 'attached_file'
             logs_key = 'system_logs'
-            if attach.name == u'system_logs.zip' and logs_key not in files:
+            if attach.name == 'system_logs.zip' and logs_key not in files:
                 key = logs_key
             files[key] = SimpleUploadedFile(attach.name, attach.data)
 
@@ -97,11 +99,6 @@ class FeedbackFormView(FormView):
         blackbox_name = 'blackbox'
         if file_description['file_extension']:
             blackbox_name += '.%s' % file_description['file_extension']
-        else:
-            capture_message(
-                'This is file type not supported, mime type: %s' % file_description['mime_type'],
-                level='error'
-            )
         return blackbox_name
 
     def form_valid(self, form):
@@ -116,5 +113,4 @@ class FeedbackFormView(FormView):
 
     def form_invalid(self, form):
         message = 'Invalid feedback form: ' + form.errors.as_json()
-        capture_message(message, level='error')
         return HttpResponseBadRequest(message)

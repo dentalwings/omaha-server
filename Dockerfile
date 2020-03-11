@@ -1,5 +1,11 @@
-FROM python:2
+FROM python:3.7.1
 WORKDIR /usr/src/app
-COPY omaha_server/requirements*.txt ./
-RUN pip install --no-cache-dir -r requirements_dev.txt
+
+RUN mkdir -p ./requirements
+ADD Pipfile Pipfile.lock ./
+
+RUN pip install pipenv && pipenv install --system --dev
+
+ADD omaha_server/ ./
+
 CMD [ "python", "manage.py", "runserver", "0.0.0.0:8000" ]

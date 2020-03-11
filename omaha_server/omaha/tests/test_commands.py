@@ -1,14 +1,15 @@
 # coding: utf8
 
+import datetime
+
 from django.test import TestCase
 from django.core.management import call_command
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from bitmapist import YearEvents
 
-from override_storage import override_storage
-
-from omaha.utils import redis, timezone
+from omaha.tests.utils import temporary_media_root
+from omaha.utils import redis
 from omaha.models import (
     Application,
     Platform,
@@ -20,7 +21,7 @@ from omaha.models import (
 
 
 class GenerateFakeDataTest(TestCase):
-    @override_storage()
+    @temporary_media_root()
     def setUp(self):
         redis.flushdb()
         self.app = Application.objects.create(id='{5FAD27D4-6BFA-4daa-A1B3-5A1F821FEE0F}', name='app')
@@ -50,9 +51,9 @@ class GenerateFakeDataTest(TestCase):
 
 
 class GenerateFakeStatisticsTest(TestCase):
-    @override_storage()
+    @temporary_media_root()
     def setUp(self):
-        redis.flushall()
+        redis.flushdb()
         self.app = Application.objects.create(id='{5FAD27D4-6BFA-4daa-A1B3-5A1F821FEE0F}', name='app')
         self.channel = Channel.objects.create(name='stable')
         self.platform = Platform.objects.create(name='win')
@@ -70,11 +71,11 @@ class GenerateFakeStatisticsTest(TestCase):
             file=SimpleUploadedFile('./chrome_installer.exe', False))
 
     def tearDown(self):
-        redis.flushall()
+        redis.flushdb()
 
     def test_command(self):
-        now = timezone.now()
+        now = datetime.datetime.now()
         year = now.year
         self.assertEqual(0, len(YearEvents('request', year)))
-        call_command('generate_fake_statistics', count=10)
+        call_command('generate_fake_statistics', self.app.id, count=10)
         self.assertGreater(len(YearEvents('request', year)), 0)

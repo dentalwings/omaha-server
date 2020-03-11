@@ -20,47 +20,49 @@ the License.
 
 from datetime import datetime, timedelta
 
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from django.test.client import Client
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
-from override_storage import override_storage
-from django_redis import get_redis_connection
 
 from xmlunittest import XmlTestMixin
 from freezegun import freeze_time
 from mock import patch
 from bitmapist import DayEvents
 
-from omaha.tests import fixtures
+from omaha.tests import fixtures, OverloadTestStorageMixin
+from omaha.tests.utils import temporary_media_root
 
 from omaha.factories import ApplicationFactory, ChannelFactory, PlatformFactory, VersionFactory
 from omaha.models import Action, Request, EVENT_DICT_CHOICES, Data, NAME_DATA_DICT_CHOICES, Version
 from omaha.utils import redis, get_id
 
 
-class UpdateViewTest(TestCase, XmlTestMixin):
+class UpdateViewTest(OverloadTestStorageMixin, TestCase, XmlTestMixin):
     model = Version
 
     def setUp(self):
         self.client = Client()
-        redis.flushall()
+        redis.flushdb()
         super(UpdateViewTest, self).setUp()
 
     def tearDown(self):
-        redis.flushall()
+        redis.flushdb()
         super(UpdateViewTest, self).tearDown()
 
     @freeze_time('2014-01-01 15:41:48')  # 56508 sec
     def test_updatecheck_negative(self):
-        response = self.client.post(reverse('update'), fixtures.request_update_check, content_type='text/xml')
+        response = self.client.post(reverse('update'),
+                                    fixtures.request_update_check, content_type='text/xml')
+
         self.assertEqual(response.status_code, 200)
+
         self.assertXmlDocument(response.content)
-        self.assertXmlEquivalentOutputs(response.content, fixtures.response_update_check_negative)
+        self.assertXmlEquivalentOutputs(response.content,
+                                        fixtures.response_update_check_negative)
 
     @freeze_time('2014-01-01 15:41:48')  # 56508 sec
-    @override_storage()
-    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     @patch('omaha.models.version_upload_to', lambda o, f: f)
     def test_updatecheck_positive(self):
         app = ApplicationFactory.create(id='{D0AB2EBC-931B-4013-9FEB-C9C4C2225C8C}', name='chrome')
@@ -92,15 +94,17 @@ class UpdateViewTest(TestCase, XmlTestMixin):
             )
         )
 
-        response = self.client.post(reverse('update'), fixtures.request_update_check, content_type='text/xml')
+        response = self.client.post(reverse('update'),
+                                    fixtures.request_update_check, content_type='text/xml')
 
         self.assertEqual(response.status_code, 200)
+
         self.assertXmlDocument(response.content)
-        self.assertXmlEquivalentOutputs(response.content, fixtures.response_update_check_positive)
+        self.assertXmlEquivalentOutputs(response.content,
+                                        fixtures.response_update_check_positive)
 
     @freeze_time('2014-01-01 15:41:48')  # 56508 sec
-    @override_storage()
-    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     @patch('omaha.models.version_upload_to', lambda o, f: f)
     def test_updatecheck_positive_critical(self):
         app = ApplicationFactory.create(id='{D0AB2EBC-931B-4013-9FEB-C9C4C2225C8C}', name='chrome')
@@ -147,8 +151,7 @@ class UpdateViewTest(TestCase, XmlTestMixin):
                                         fixtures.response_update_check_postitive_critical)
 
     @freeze_time('2014-01-01 15:41:48')  # 56508 sec
-    @override_storage()
-    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     @patch('omaha.models.version_upload_to', lambda o, f: f)
     def test_updatecheck_positive_critical_on_other_channel(self):
         app = ApplicationFactory.create(id='{D0AB2EBC-931B-4013-9FEB-C9C4C2225C8C}', name='chrome')
@@ -202,29 +205,29 @@ class UpdateViewTest(TestCase, XmlTestMixin):
             )
         )
 
-        response = self.client.post(reverse('update'), fixtures.request_update_check, content_type='text/xml')
+        response = self.client.post(reverse('update'),
+                                    fixtures.request_update_check, content_type='text/xml')
 
         self.assertEqual(response.status_code, 200)
 
         self.assertXmlDocument(response.content)
-        self.assertXmlEquivalentOutputs(response.content, fixtures.response_update_check_positive)
+        self.assertXmlEquivalentOutputs(response.content,
+                                        fixtures.response_update_check_positive)
 
-    @override_storage()
-    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     @patch('omaha.models.version_upload_to', lambda o, f: f)
     def test_userid_counting(self):
+        now = datetime.utcnow()
         userid = '{D0BBD725-742D-44ae-8D46-0231E881D58E}'
         user_id = get_id(userid)
-        appid1 = '{DD13223F-AC0E-436E-B20D-85F7371A555D}'
+        appid1 = '{430FD4D0-B729-4F61-AA34-91526481799D}'
         appid2 = '{D0AB2EBC-931B-4013-9FEB-C9C4C2225C8C}'
         install_date = datetime(year=2014, month=1, day=1, hour=15, minute=41, second=48)
         update_date = install_date + timedelta(days=31)
 
         request_events = DayEvents('request', install_date.year, install_date.month, install_date.day)
-        app1_install_events = DayEvents('new_install:%s' % appid1, install_date.year, install_date.month,
-                                        install_date.day)
-        app2_install_events = DayEvents('new_install:%s' % appid2, install_date.year, install_date.month,
-                                        install_date.day)
+        app1_install_events = DayEvents('new_install:%s' % appid1, install_date.year, install_date.month, install_date.day)
+        app2_install_events = DayEvents('new_install:%s' % appid2, install_date.year, install_date.month, install_date.day)
         app1_update_events = DayEvents('request:%s' % appid1, update_date.year, update_date.month, update_date.day)
         app2_update_events = DayEvents('request:%s' % appid2, update_date.year, update_date.month, update_date.day)
 
@@ -276,7 +279,8 @@ class UpdateViewTest(TestCase, XmlTestMixin):
         self.assertTrue(user_id in app2_install_events)
 
         with freeze_time(update_date):
-            self.client.post(reverse('update'), fixtures.request_update_check, content_type='text/xml')
+            self.client.post(reverse('update'),
+                             fixtures.request_update_check, content_type='text/xml')
 
         self.assertEqual(len(app1_update_events), 0)
         self.assertEqual(len(app2_update_events), 1)
@@ -300,11 +304,10 @@ class UpdateViewTest(TestCase, XmlTestMixin):
         self.assertEqual(request.ip, '8.8.8.8')
 
     @freeze_time('2014-01-01 15:45:54')  # 56754 sec
-    @override_storage()
-    @override_settings(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
+    @temporary_media_root(MEDIA_URL='http://cache.pack.google.com/edgedl/chrome/install/782.112/')
     @patch('omaha.models.version_upload_to', lambda o, f: f)
     def test_data(self):
-        app = ApplicationFactory.create(id='{DD13223F-AC0E-436E-B20D-85F7371A555D}', name='chrome')
+        app = ApplicationFactory.create(id='{430FD4D0-B729-4F61-AA34-91526481799D}', name='chrome')
         platform = PlatformFactory.create(name='win')
         channel = ChannelFactory.create(name='stable')
         obj = VersionFactory.create(

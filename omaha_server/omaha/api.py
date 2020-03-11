@@ -94,7 +94,7 @@ class AppViewSet(viewsets.ModelViewSet):
                 "name": "Chromium"
             },
             {
-                "id": "{DD13223F-AC0E-436E-B20D-85F7371A555D}",
+                "id": "{430FD4D0-B729-4F61-AA34-91526481799D}",
                 "name": "Potato"
             }
         ]
@@ -267,10 +267,6 @@ class StatisticsVersionsLiveView(APIView):
         logging.info('Getting data is finished')
         serializer = StatisticsMonthsSerializer(dict(data=dict(data)))
         return Response(serializer.data)
-
-    @classmethod
-    def get_extra_actions(cls):
-        return []
 
 
 class StatisticsChannelsView(APIView):

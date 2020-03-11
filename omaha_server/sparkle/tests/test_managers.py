@@ -21,14 +21,13 @@ the License.
 from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from override_storage import override_storage
-
 from sparkle.models import SparkleVersion
 from sparkle.factories import SparkleVersionFactory
+from omaha.tests.utils import temporary_media_root
 
 
 class VersionManagerTest(TestCase):
-    @override_storage()
+    @temporary_media_root()
     def test_filter_by_enabled(self):
         version = SparkleVersionFactory.create(
             version='2062.125',
