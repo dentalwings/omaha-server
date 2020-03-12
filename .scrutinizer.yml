@@ -2,8 +2,8 @@ build:
   environment:
     python: 3.6.9
   tests:
-   override:
-     command: "python --version"
+    override:
+      command: "python --version"
 
 filter:
   dependency_paths:

@@ -2,7 +2,7 @@ language: python
 os: linux
 dist: xenial
 python:
-  - "3.6"
+  - "3.7"
 
 addons:
   apt:
@@ -36,24 +36,24 @@ jobs:
   include:
     - stage: test
       script:
-        - tox -e py36
+        - tox -e py37
       env:
         - OMAHA_SERVER_PRIVATE=True
     - stage: test
       script:
-        - tox -e py36
+        - tox -e py37
       env:
         - OMAHA_SERVER_PRIVATE=False
     - stage: test
       script:
-        - tox -e py36
+        - tox -e py37
         - if [ $COVERAGE = true ] ; then coveralls --skip_ssl_verify; fi
       env:
         - OMAHA_SERVER_PRIVATE=True
         - DJANGO_SETTINGS_MODULE=omaha_server.settings_test_postgres
     - stage: test
       script:
-        - tox -e py36
+        - tox -e py37
       env:
         - OMAHA_SERVER_PRIVATE=False
         - DJANGO_SETTINGS_MODULE=omaha_server.settings_test_postgres
