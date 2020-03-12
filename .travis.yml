@@ -66,7 +66,7 @@ jobs:
         - docker build -t ${REGISTRY}:${VERSION}-${TRAVIS_BUILD_NUMBER} -t ${REGISTRY}:${VERSION} -t ${REGISTRY}:latest .
         - pyenv global 3.7.1 && pip install -U pip && pip install awscli
         - $(aws --region ca-central-1 ecr get-login --no-include-email)
-        - docker push ${REGISTRY}:latest && docker push ${REGISTRY}:${VERSION}
+        - docker push ${REGISTRY}
     - stage: deploy
       if: type != pull_request AND branch != master
       script:
@@ -75,4 +75,4 @@ jobs:
         - docker build -t ${REGISTRY}:${VERSION}-${TRAVIS_BUILD_NUMBER} -t ${REGISTRY}:${VERSION} .
         - pyenv global 3.7.1 && pip install -U pip && pip install awscli
         - $(aws --region ca-central-1 ecr get-login --no-include-email)
-        - docker push ${REGISTRY}:${VERSION}
+        - docker push ${REGISTRY}
