@@ -1,0 +1,150 @@
+#     # Migration preparation
+#       * edit this file to have the good values (check TODO comments)
+#       * stop all the pods
+#         `kubectl delete deploy --all`
+#     # Perform migration
+#       * apply this file
+#       * check if everything worked well:
+#         * POD=$(kubectl get pod -l service=postgres-new -o jsonpath="{.items[0].metadata.name}")
+#         * `kubectl get pods`
+#           Should display 2 pods (even though the postgres-new may take time to initialize)
+#         * `kubectl exec $POD -it -- psql -U postgres -V`
+#           Should display the new version of postgres
+#         * `kubectl exec $POD -it -- psql -U postgres -c "\dt"`
+#           Should display the list of tables (once the pod is initialized)
+#       * put the new values (for the PVC and the image version) in `postgres.yml`
+#       * restart all the pods
+#         `kubectl apply -f deploy/`
+#       * open omaha as admin and see if data (ex:channels) is still present
+#     # Clean up
+#       * once we are sure everything is working OK, remove temporary resources:
+#         * `kubectl delete deploy postgres-old`
+#         * `kubectl delete deploy postgres-new`
+#         * `kubectl delete pvc <old-pvc>`
+#       * edit this file and put the current values of postgres.yaml as the old ones
+#         (and may be figure out what the next ones could be ?)
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc-v12 # TODO: should be put in postgres.yaml AFTER migration
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ebs-sc
+  resources:
+    requests:
+      storage: 10Gi
+---
+# This section should be the same as the current postgres.yaml, 
+# with an additional volume and the "lifecycle" section.
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: postgres-old
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: postgres-old
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:9.4 # TODO: should be the same as in postgres.yaml
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_HOST_AUTH_METHOD
+              value: trust
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: pg-data
+              subPath: pgdata
+            - mountPath: /tmp/dump
+              name: dump
+              subPath: dump
+          lifecycle:
+            postStart:
+              exec:
+                command: 
+                  - "bash"
+                  - "-c"
+                  - |
+                    DB_DUMP=/tmp/dump/postgres_dump_`date +%Y-%m-%d`.sql
+                    pg_dump -U postgres > $DB_DUMP && touch ${DB_DUMP/.sql/.ok}
+      volumes:
+        - name: pg-data
+          persistentVolumeClaim:
+            claimName: postgres-pvc # TODO: name of the old PVC
+        - name: dump
+          persistentVolumeClaim:
+            claimName: postgres-pvc-v12 # TODO: name of the new PVC
+---
+# This will create an identical pod as the regular postgres,
+# but with a new version, that will import the dump exported previously.
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: postgres-new
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: postgres-new
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:12 # TODO: should be the wanted version, to update in postgres.yaml AFTER migration
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_HOST_AUTH_METHOD
+              value: trust
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: pg-data
+              subPath: pgdata
+            - mountPath: /tmp/dump
+              name: pg-data
+              subPath: dump
+          lifecycle:
+            postStart:
+              exec:
+                command: 
+                  - "bash"
+                  - "-c"
+                  - |
+                    DB_DUMP=/tmp/dump/postgres_dump_`date +%Y-%m-%d`.sql
+                    psql -U postgres < $DB_DUMP > ${DB_DUMP/.sql/.log} 2>&1 && rm $DB_DUMP || exit 1
+      initContainers:
+        - name: upgrade-db
+          image: postgres:12 # TODO: same as above
+          volumeMounts:
+            - name: pg-data
+              mountPath: /var/lib/postgresql/data
+              subPath: pgdata
+            - mountPath: /tmp/dump
+              name: pg-data
+              subPath: dump
+          command:
+             - "bash"
+             - "-c"
+             - |
+                DB_DUMP_FINISHED=/tmp/dump/postgres_dump_`date +%Y-%m-%d`.ok
+                for i in {1..120}; do 
+                  sleep 1; 
+                  echo "Waiting for $DB_DUMP_FINISHED ..."
+                  if [ -f $DB_DUMP_FINISHED ]; then 
+                    echo "Dump found, starting container as usual to import dump (server needed)"
+                    rm $DB_DUMP_FINISHED
+                    exit 0;
+                  fi;
+                done;
+                echo "No import found"
+                exit 1
+      volumes:
+        - name: pg-data
+          persistentVolumeClaim:
+            claimName: postgres-pvc-v12 # TODO: name of the new PVC
