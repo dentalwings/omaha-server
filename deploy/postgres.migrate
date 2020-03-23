@@ -23,6 +23,9 @@
 #         * `kubectl delete pvc <old-pvc>`
 #       * edit this file and put the current values of postgres.yaml as the old ones
 #         (and may be figure out what the next ones could be ?)
+#     # Manual config of the database
+#       * Set at 5 mins the idle transaction session timeout.
+#         * `kubectl exec <postgre pod> -it -- psql -U postgres -c 'alter system set idle_in_transaction_session_timeout="5min";'`
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
