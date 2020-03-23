@@ -27,7 +27,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: postgres-pvc-v12 # TODO: should be put in postgres.yaml AFTER migration
+  name: postgres-pvc-v13 # TODO: should be put in postgres.yaml AFTER migration
 spec:
   accessModes:
     - ReadWriteOnce
@@ -51,7 +51,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: postgres:9.4 # TODO: should be the same as in postgres.yaml
+          image: postgres:12 # TODO: should be the same as in postgres.yaml
           ports:
             - containerPort: 5432
           env:
@@ -76,10 +76,10 @@ spec:
       volumes:
         - name: pg-data
           persistentVolumeClaim:
-            claimName: postgres-pvc # TODO: name of the old PVC
+            claimName: postgres-pvc-v12 # TODO: name of the old PVC
         - name: dump
           persistentVolumeClaim:
-            claimName: postgres-pvc-v12 # TODO: name of the new PVC
+            claimName: postgres-pvc-v13 # TODO: name of the new PVC
 ---
 # This will create an identical pod as the regular postgres,
 # but with a new version, that will import the dump exported previously.
@@ -96,7 +96,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: postgres:12 # TODO: should be the wanted version, to update in postgres.yaml AFTER migration
+          image: postgres:13 # TODO: should be the wanted version, to update in postgres.yaml AFTER migration
           ports:
             - containerPort: 5432
           env:
@@ -120,7 +120,7 @@ spec:
                     psql -U postgres < $DB_DUMP > ${DB_DUMP/.sql/.log} 2>&1 && rm $DB_DUMP || exit 1
       initContainers:
         - name: upgrade-db
-          image: postgres:12 # TODO: same as above
+          image: postgres:13 # TODO: same as above
           volumeMounts:
             - name: pg-data
               mountPath: /var/lib/postgresql/data
@@ -147,4 +147,4 @@ spec:
       volumes:
         - name: pg-data
           persistentVolumeClaim:
-            claimName: postgres-pvc-v12 # TODO: name of the new PVC
+            claimName: postgres-pvc-v13 # TODO: name of the new PVC
