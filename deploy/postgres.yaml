@@ -39,6 +39,9 @@ spec:
         - name: pg-data
           persistentVolumeClaim:
             claimName: postgres-pvc-v12
+      selector:
+          matchLabels:
+            service: postgres
 ---
 apiVersion: v1
 kind: Service
