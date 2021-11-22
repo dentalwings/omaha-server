@@ -15,6 +15,9 @@ kind: Deployment
 metadata:
   name: postgres
 spec:
+  selector:
+    matchLabels:
+      service: postgres
   replicas: 1
   template:
     metadata:
@@ -39,9 +42,6 @@ spec:
         - name: pg-data
           persistentVolumeClaim:
             claimName: postgres-pvc-v12
-      selector:
-          matchLabels:
-            service: postgres
 ---
 apiVersion: v1
 kind: Service
