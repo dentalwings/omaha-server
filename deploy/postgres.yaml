@@ -5,7 +5,6 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: ebs-sc
   resources:
     requests:
       storage: 10Gi
@@ -27,8 +26,7 @@ spec:
       containers:
         - name: postgres
           image: postgres:12
-          command: 
-            - postgres -c 'max_connections=200'
+          command: ["docker-entrypoint.sh", "-c","max_connections=200"]
           ports:
             - containerPort: 5432
           env:
