@@ -339,6 +339,7 @@ CUP_REQUEST_VALIDATION = os.environ.get('CUP_REQUEST_VALIDATION', False)
 
 CUP_PEM_KEYS = {
     # 'keyid': 'private_key_path',
+    '1': '\\dw-samba\public\jschaal\omaha\'
 }
 
 CRASH_TRACKER = os.environ.get('CRASH_TRACKER', 'Sentry')
