@@ -204,9 +204,13 @@ kind: Ingress
 metadata:
   annotations:
     alb.ingress.kubernetes.io/scheme: internet-facing
-    alb.ingress.kubernetes.io/ip-address-type: dualstack
+    alb.ingress.kubernetes.io/ip-address-type: ipv4
     alb.ingress.kubernetes.io/healthcheck-path: /healthcheck/status/
-    alb.ingress.kubernetes.io/inbound-cidrs: 67.212.85.162/32,77.245.44.50/32,172.110.76.70/32,24.212.252.237/32,158.181.78.255/32
+    # 67.212.85.162/32   eStruxture
+    # 77.245.44.50/32    Berlin
+    # 213.187.92.100/32  Chemnitz
+    # 173.231.123.211/32 St Viateur
+    alb.ingress.kubernetes.io/inbound-cidrs: 67.212.85.162/32,77.245.44.50/32,213.187.92.100/32,173.231.123.211/32
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ca-central-1:712964028200:certificate/16d48101-28ec-4819-a771-4f4f826c06bb
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
@@ -231,7 +235,7 @@ kind: Ingress
 metadata:
   annotations:
     alb.ingress.kubernetes.io/scheme: internet-facing
-    alb.ingress.kubernetes.io/ip-address-type: dualstack
+    alb.ingress.kubernetes.io/ip-address-type: ipv4
     alb.ingress.kubernetes.io/healthcheck-path: /healthcheck/status/
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ca-central-1:712964028200:certificate/16d48101-28ec-4819-a771-4f4f826c06bb
