@@ -22,7 +22,7 @@ data:
   AWS_STORAGE_BUCKET_NAME: "ca-central-1-omaha-s3bucket"
   DB_PUBLIC_USER: "omaha_public"
   DB_PUBLIC_PASSWORD: "omaha_public_password"
-  SENTRY_DSN: "https://d22e416e3a414956a2cf22b15922bc0c@sentry.aws.dwos.com/3"
+  SENTRY_DSN: "https://5ac205e747f445d08d7c0ab4b0c05b76@o977510.ingest.sentry.io/6070898"
   C_FORCE_ROOT: "True" # celery specific
 ---
 apiVersion: v1
@@ -42,7 +42,7 @@ data:
   AWS_STORAGE_BUCKET_NAME: "ca-central-1-omaha-s3bucket"
   DB_PUBLIC_USER: "omaha_public"
   DB_PUBLIC_PASSWORD: "omaha_public_password"
-  SENTRY_DSN: "https://d22e416e3a414956a2cf22b15922bc0c@sentry.aws.dwos.com/3"
+  SENTRY_DSN: "https://5ac205e747f445d08d7c0ab4b0c05b76@o977510.ingest.sentry.io/6070898"
 ---
 apiVersion: apps/v1
 kind: Deployment
