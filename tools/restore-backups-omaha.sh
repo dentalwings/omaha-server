@@ -88,7 +88,7 @@ fillVolumeInfo() {
       #fi
       local pvc="postgres-pvc-v12"
       local pv="pvc-a87f0c51-3eb8-48d6-94ae-a086bc4f9f79"
-      local tagspec="{Key=kubernetes.io/cluster/DW,Value=owned},{Key=kubernetes.io/created-for/pv/name,Value=pvc-a87f0c51-3eb8-48d6-94ae-a086bc4f9f79},Key=kubernetes.io/created-for/pvc/namespace,Value=omaha},{Key=kubernetes.io/created-for/pvc/name,Value=postgres-pvc-v12}"
+      local tagspec="{Key=kubernetes.io/cluster/DW,Value=owned},{Key=kubernetes.io/created-for/pv/name,Value='pvc-a87f0c51-3eb8-48d6-94ae-a086bc4f9f79'},{Key=kubernetes.io/created-for/pvc/namespace,Value=omaha},{Key=kubernetes.io/created-for/pvc/name,Value='postgres-pvc-v12'}}"
     elif ! [ -z "$data" ] ; then
       local az=$data
     fi
