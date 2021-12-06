@@ -8,7 +8,7 @@ declare -gA volume2PVC
 declare -gA volume2PV
 declare -gA volume2AZ
 declare -gA volume2Size
-declare -gA sts2Replica
+declare -gA dpl2Replica
 declare -gA pvc2NewVolume
 
 logStep() {
@@ -17,7 +17,7 @@ logStep() {
 }
 
 askDescription() {
-  default_desc="Sentry Backup"
+  default_desc="Omaha Backup"
 
   read -p "What is the description of the backup to restore: " desc
 
@@ -43,11 +43,11 @@ createVolume() {
       local size=`echo $result| awk '{print $2}'`
     fi
   done
-
+  
   volume2Size[$new_vol]=$size
   volume2AZ[$new_vol]=${volume2AZ[$volume]}
   pvc2NewVolume[${volume2PVC[$volume]}]=$new_vol
-
+ 
   while true; do
     local result=`aws ec2 describe-volumes --volume-ids $new_vol --query "Volumes[*].State" --output text`
     [[ "$result" = "available" ]] && break
@@ -88,14 +88,17 @@ fillVolumeInfo() {
       #fi
       local pvc="postgres-pvc-v12"
       local pv="pvc-a87f0c51-3eb8-48d6-94ae-a086bc4f9f79"
-      local tagspec="{Key=kubernetes.io/cluster/DW,Value=owned},{Key=kubernetes.io/created-for/pv/name,Value='pvc-a87f0c51-3eb8-48d6-94ae-a086bc4f9f79'},{Key=kubernetes.io/created-for/pvc/namespace,Value=omaha},{Key=kubernetes.io/created-for/pvc/name,Value='postgres-pvc-v12'}}"
+      local tagspec="{Key=kubernetes.io/cluster/DW,Value=owned}"
+            tagspec="$tagspec,{Key=kubernetes.io/created-for/pv/name,Value=$pv}"
+            tagspec="$tagspec,{Key=kubernetes.io/created-for/pvc/name,Value=$pvc}"
+            tagspec="$tagspec,{Key=kubernetes.io/created-for/pvc/namespace,Value=omaha}"
     elif ! [ -z "$data" ] ; then
       local az=$data
     fi
   done
   unset IFS
 
-  if [ -z "pvc-a87f0c51-3eb8-48d6-94ae-a086bc4f9f79"] || [ -z "${pvc2Pod['pvc-a87f0c51-3eb8-48d6-94ae-a086bc4f9f79']}" ] || [ -z "$az" ] ; then
+  if [ -z "${pvc2Pod['pvc-a87f0c51-3eb8-48d6-94ae-a086bc4f9f79']}" ] || [ -z "$az" ] ; then
     echo "Could not find all volume info for volume $1"
     exit 1
   fi
@@ -121,7 +124,7 @@ createPV(){
   local az=$3
   local region=${az::-1}
   local size=$4
-
+  
   # Remove PV if present
   kubectl get pv $name >/dev/null 2>&1 && kubectl delete pv $name
   echo "Creating PV $name"
@@ -203,18 +206,15 @@ createVolumes() {
 }
 
 scaleDown() {
-  logStep "Scaling down Statefulsets"
-  scaleDown() {
-    logStep "Scaling down Statefulsets"
-    for sts in `kubectl get deployment.apps/postgres -o name`; do
-      sts2Replica[$sts]=`kubectl get $sts -o jsonpath='{.status.replicas}'`
-      kubectl scale $sts --replicas=0 --timeout=10m
-    done
-	}			
-}
+  logStep "Scaling down deployments"
+  for dpl in `kubectl get deployment.apps/postgres -o name`; do
+    dpl2Replica[$dpl]=`kubectl get $dpl -o jsonpath='{.status.replicas}'`
+    kubectl scale $dpl --replicas=0 --timeout=10m
+  done
+}			
 
 scaleUp() {
-  logStep "Scaling up Statefulsets"
+  logStep "Scaling up deployments"
   kubectl scale deployment postgres --replicas=1 --timeout=10m
 }
 
@@ -249,9 +249,14 @@ unit_test() {
   #volume2AZ["vol-123"]="ca-central-1"
   #volume2Size["vol-123"]=16
   #createPVs
+  snapshot2Volume['snap-0ca0eb7ef7bc5cdb4']='vol-0e69abef562a3e356'
+  askDescription
   fillPVCInfo
   fillSnapshotInfo
+  createVolumes
   scaleDown
+  #deletePVCs
+  createPVCs
   scaleUp
   exit
 }
