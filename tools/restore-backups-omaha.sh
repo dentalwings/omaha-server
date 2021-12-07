@@ -59,7 +59,7 @@ createVolume() {
 
 fillPVCInfo() {
   logStep "Scanning PVC data"
-  pvc2Pod["pvc-a87f0c51-3eb8-48d6-94ae-a086bc4f9f79"]='postgres-pvc-v12'
+  pvc2Pod[$pvc]='postgres-pvc-v12'
 }
 
 fillSnapshotInfo() {
@@ -97,8 +97,7 @@ fillVolumeInfo() {
     fi
   done
   unset IFS
-
-  if [ -z "${pvc2Pod['pvc-a87f0c51-3eb8-48d6-94ae-a086bc4f9f79']}" ] || [ -z "$az" ] ; then
+  if [ -z "${pvc2Pod[$pvc]}" ] || [ -z "$az" ] ; then
     echo "Could not find all volume info for volume $1"
     exit 1
   fi
@@ -250,6 +249,9 @@ unit_test() {
   #volume2Size["vol-123"]=16
   #createPVs
   snapshot2Volume['snap-0ca0eb7ef7bc5cdb4']='vol-0e69abef562a3e356'
+  pvc="postgres-pvc-v12"
+  pv="pvc-a87f0c51-3eb8-48d6-94ae-a086bc4f9f79"
+  vol='vol-0e69abef562a3e356'
   askDescription
   fillPVCInfo
   fillSnapshotInfo
