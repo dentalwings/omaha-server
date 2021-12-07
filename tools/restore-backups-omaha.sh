@@ -1,7 +1,6 @@
 #!/bin/bash
 
 set -e
-declare -gA pvc2Pod
 declare -gA snapshot2Volume
 declare -gA volume2Tags
 declare -gA volume2PVC
@@ -59,7 +58,8 @@ createVolume() {
 
 fillPVCInfo() {
   logStep "Scanning PVC data"
-  pvc2Pod[$pvc]='postgres-pvc-v12'
+  pvc="postgres-pvc-v12"
+  pv="pvc-a87f0c51-3eb8-48d6-94ae-a086bc4f9f79"
 }
 
 fillSnapshotInfo() {
@@ -69,7 +69,7 @@ fillSnapshotInfo() {
   for snap in ${!snapshot2Volume[@]}; do
     local volume=${snapshot2Volume[$snap]}
     fillVolumeInfo $volume
-    echo "Found $snap for $volume (bound to ${volume2PV[$volume]} [${volume2PVC[$volume]}], mounted by ${pvc2Pod[${volume2PVC[$volume]}]})"
+    echo "Found $snap for $volume (bound to ${volume2PV[$volume]} [${volume2PVC[$volume]}]"
   done
 }
 
@@ -86,8 +86,6 @@ fillVolumeInfo() {
       #elif [ "$tagn" = "kubernetes.io/created-for/pv/name" ] ; then
         #local pv=$tagv
       #fi
-      local pvc="postgres-pvc-v12"
-      local pv="pvc-a87f0c51-3eb8-48d6-94ae-a086bc4f9f79"
       local tagspec="{Key=kubernetes.io/cluster/DW,Value=owned}"
             tagspec="$tagspec,{Key=kubernetes.io/created-for/pv/name,Value=$pv}"
             tagspec="$tagspec,{Key=kubernetes.io/created-for/pvc/name,Value=$pvc}"
@@ -97,7 +95,7 @@ fillVolumeInfo() {
     fi
   done
   unset IFS
-  if [ -z "${pvc2Pod[$pvc]}" ] || [ -z "$az" ] ; then
+  if [ -z "$az" ] ; then
     echo "Could not find all volume info for volume $1"
     exit 1
   fi
@@ -186,15 +184,13 @@ EOF
 
 deletePVCs() {
   logStep "Deleting all PVCs (and the PVs they are bound with)"
-  for pvc in ${!pvc2Pod[@]}; do
-    local pv=`kubectl get pvc $pvc -o jsonpath='{.spec.volumeName}'`
-    echo "Retaining pv $pv"
-    kubectl patch pv $pv -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'
-    echo "Deleting pvc $pvc"
-    kubectl delete pvc $pvc
-    echo "Deleting pv  $pv"
-    kubectl delete pv $pv
-  done
+  local pv=`kubectl get pvc $pvc -o jsonpath='{.spec.volumeName}'`
+  echo "Retaining pv $pv"
+  kubectl patch pv $pv -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'
+  echo "Deleting pvc $pvc"
+  kubectl delete pvc $pvc
+  echo "Deleting pv  $pv"
+  kubectl delete pv $pv
 }
 
 createVolumes() {
@@ -230,7 +226,6 @@ unit_test() {
   #kubectl patch pvc data-sentry-sentry-postgresql-0 -p '{"metadata":{"name":"data-sentry-sentry-postgresql-0-bkp"}}'
   #kubectl patch pvc data-sentry-sentry-postgresql-0 -p '{"metadata":{"selfLink": "/api/v1/namespaces/production/persistentvolumeclaims/data-sentry-sentry-postgresql-0-bkp"}}'
   #kubectl patch pvc data-sentry-sentry-postgresql-0 -p '{"spec":{"volumeName":"pvc-e1d437cc-291b-4a09-bfb1-16c61624f098"}}'
-  #pvc2Pod["data-sentry-sentry-postgresql-0"]="sentry-postgresql-0"
   #deletePVCs
   #createPV pv-postgres vol-0f984b9ee06014555 ca-central-1a 16
   #createPVC data-sentry-sentry-postgresql-0 pv-postgres 16
@@ -249,8 +244,6 @@ unit_test() {
   #volume2Size["vol-123"]=16
   #createPVs
   snapshot2Volume['snap-0ca0eb7ef7bc5cdb4']='vol-0e69abef562a3e356'
-  pvc="postgres-pvc-v12"
-  pv="pvc-a87f0c51-3eb8-48d6-94ae-a086bc4f9f79"
   vol='vol-0e69abef562a3e356'
   askDescription
   fillPVCInfo
