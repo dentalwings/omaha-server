@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+
 DEFAULT_NAMESPACE=omaha
 DEFAULT_DESCRIPTION="OmahaBackup_$(date +'%Y-%m-%d')"
 
@@ -73,21 +75,28 @@ initVariables() {
 }
 
 getVolumeTags() {
+  declare -A tags
+  
   IFS=$'\n'
   for data in `aws ec2 describe-volumes --volume-ids $1 --query "Volumes[*].{Tags:Tags[*]}" --output text`; do
-    local tagn=$(echo $data| cut -f 2)
-    local tagv=$(echo $data| cut -f 3)
-    if [ -z "$tagspec" ]; then
-      tagspec="{Key=$tagn,Value=$tagv}"
-    else
-      tagspec="$tagspec,{Key=$tagn,Value=$tagv}"
-    fi
+    tags["$(echo $data| cut -f 2)"]="$(echo $data| cut -f 3)"
   done
   unset IFS
+
+  tags["Software"]="Omaha"
+  tags["Team"]="Infra"
+  tags["env"]="prod"
+
+  for key in ${!tags[@]}; do
+    if [ -z "$tagspec" ]; then
+      tagspec="{Key=$key,Value=${tags[$key]}}"
+    else
+      tagspec="$tagspec,{Key=$key,Value=${tags[$key]}}"
+    fi
+  done
 }
 
 createSnapshots() {
-  echo "$volumes"
   IFS=','
   for vol in $volumes; do
     echo "Creating snapshot for $vol"
@@ -95,7 +104,7 @@ createSnapshots() {
     getVolumeTags $vol
   
     IFS=$'\n'
-    for result in `aws ec2 create-snapshot --volume-id $vol --tag-specifications "ResourceType=snapshot,Tags=[{Key=Software,Value=Omaha},{Key=Team,Value=Infra},{Key=env,Value=prod},$tagspec]" --description "$description"`; do
+    for result in `aws ec2 create-snapshot --volume-id $vol --tag-specifications "ResourceType=snapshot,Tags=[$tagspec]" --description "$description"`; do
       if [[ "$result" = *SnapshotId* ]]; then
         local new_snap=`echo $result| cut -d '"' -f 4`
       fi
@@ -114,4 +123,5 @@ createSnapshots() {
 }
 parseParams "$@"
 initVariables
+getVolumeTags $volumes
 createSnapshots
