@@ -1,0 +1,99 @@
+{
+  "Comment": "Switch to new cluster for Omaha",
+  "Changes": [
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "omaha.aws.dwos.com",
+        "Type": "A",
+        "AliasTarget": {
+          "HostedZoneId": "ZQSVJUPU6J1EY",
+          "DNSName": "k8s-omaha-omahaser-b0887bddca-867949110.ca-central-1.elb.amazonaws.com.",
+          "EvaluateTargetHealth": true
+        }
+      }
+    },
+    {
+      "Action": "DELETE",
+      "ResourceRecordSet": {
+        "Name": "omaha.aws.dwos.com",
+        "Type": "AAAA",
+        "AliasTarget": {
+          "HostedZoneId": "ZQSVJUPU6J1EY",
+          "DNSName": "6d2486c7-omahaprod-omahase-2a96-1760106777.ca-central-1.elb.amazonaws.com.",
+          "EvaluateTargetHealth": true
+        }
+      }
+    },
+    {
+      "Action": "DELETE",
+      "ResourceRecordSet": {
+        "Name": "omaha.aws.dwos.com",
+        "Type": "TXT",
+        "TTL": 300,
+        "ResourceRecords": [{
+          "Value": "\"heritage=external-dns,external-dns/dualstack=true,external-dns/owner=eksDentalWingsCanada,external-dns/resource=ingress/omaha-prod/omaha-server-ingress-private\""
+        }]
+      }
+    },
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "updates.aws.dwos.com",
+        "Type": "A",
+        "AliasTarget": {
+          "HostedZoneId": "ZQSVJUPU6J1EY",
+          "DNSName": "k8s-omaha-omahaser-61cbe68563-476141626.ca-central-1.elb.amazonaws.com.",
+          "EvaluateTargetHealth": true
+        }
+      }
+    },
+    {
+      "Action": "DELETE",
+      "ResourceRecordSet": {
+        "Name": "updates.aws.dwos.com",
+        "Type": "AAAA",
+        "AliasTarget": {
+          "HostedZoneId": "ZQSVJUPU6J1EY",
+          "DNSName": "6d2486c7-omahaprod-omahase-e25e-1906208123.ca-central-1.elb.amazonaws.com.",
+          "EvaluateTargetHealth": true
+        }
+      }
+    },
+    {
+      "Action": "DELETE",
+      "ResourceRecordSet": {
+        "Name": "updates.aws.dwos.com",
+        "Type": "TXT",
+        "TTL": 300,
+        "ResourceRecords": [{
+          "Value": "\"heritage=external-dns,external-dns/dualstack=true,external-dns/owner=eksDentalWingsCanada,external-dns/resource=ingress/omaha-prod/omaha-server-ingress-public\""
+        }]
+      }
+    },
+    {
+      "Action": "DELETE",
+      "ResourceRecordSet": {
+        "Name": "omaha-staging.aws.dwos.com",
+        "Type": "A",
+        "AliasTarget": {
+          "HostedZoneId": "ZQSVJUPU6J1EY",
+          "DNSName": "k8s-omaha-omahaser-b0887bddca-867949110.ca-central-1.elb.amazonaws.com.",
+          "EvaluateTargetHealth": true
+        }
+      }
+    },
+    {
+      "Action": "DELETE",
+      "ResourceRecordSet": {
+        "Name": "updates-staging.aws.dwos.com",
+        "Type": "A",
+        "AliasTarget": {
+          "HostedZoneId": "ZQSVJUPU6J1EY",
+          "DNSName": "k8s-omaha-omahaser-61cbe68563-476141626.ca-central-1.elb.amazonaws.com.",
+          "EvaluateTargetHealth": true
+        }
+      }
+    }
+  ]
+}
