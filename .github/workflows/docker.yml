@@ -17,6 +17,6 @@ jobs:
         uses: actions-ecosystem/action-regex-match@v2
         with:
           text: ${{ steps.settings.outputs.content }}
-          regex: '^APP_VERSION = "(.*?)"$'
+          regex: 'APP_VERSION = \"(.*?)\"'
       - name: Echo version
         run: echo "${{ steps.parse-version.outputs.group1 }}"
