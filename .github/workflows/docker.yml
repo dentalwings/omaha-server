@@ -1,0 +1,16 @@
+name: Build Docker image and push it to ECR
+run-name: ${{ github.actor }} is pushing a new version of Omaha from ${{github.ref}}
+on: [push]
+jobs:
+  Deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Read Settings
+        id: settings
+        uses: juliangruber/read-file-action@v1
+        with:
+          path: omaha_server/omaha_server/settings.py
+      - name: Echo settings
+        run: echo "${{ steps.settings.outputs.content }}"
