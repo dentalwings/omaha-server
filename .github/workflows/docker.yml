@@ -12,5 +12,11 @@ jobs:
         uses: juliangruber/read-file-action@v1
         with:
           path: omaha_server/omaha_server/settings.py
-      - name: Echo settings
-        run: echo "${{ steps.settings.outputs.content }}"
+      - name: Parse version
+        id: parse-version
+        uses: actions-ecosystem/action-regex-match@v2
+        with:
+          text: ${{ steps.settings.outputs.content }}
+          regex: '^APP_VERSION = "(.*?)"$'
+      - name: Echo version
+        run: echo "${{ steps.parse-version.outputs.group1 }}"
