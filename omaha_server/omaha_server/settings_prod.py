@@ -23,6 +23,7 @@ AWS_SES_REGION_ENDPOINT = os.environ.get(
 )
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
 S3_URL = 'https://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
+AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN', '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME)
 
 EMAIL_BACKEND = 'django_ses.SESBackend'
 EMAIL_SENDER = os.environ.get('EMAIL_SENDER')

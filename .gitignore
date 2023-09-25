@@ -24,4 +24,4 @@ omaha_server/media
 *.zip
 
 # CUP_PEM_KEYS
-cups_pem_keys/
+cup_pem_keys/

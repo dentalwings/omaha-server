@@ -25,5 +25,7 @@ services:
       - redis
     ports:
         - "8080:8000"
+    volumes:
+        - ./cup_pem_keys:/usr/src/app/cup_pem_keys
 volumes:
   postgres-data:

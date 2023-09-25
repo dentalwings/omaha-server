@@ -71,4 +71,5 @@ paver = "==1.2.4"
 Pillow = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3.7.1"
+setuptools     = "57.5.0"
