@@ -24,6 +24,7 @@ data:
   DB_PUBLIC_PASSWORD: "omaha_public_password"
   SENTRY_DSN: "https://5ac205e747f445d08d7c0ab4b0c05b76@o977510.ingest.sentry.io/6070898"
   C_FORCE_ROOT: "True" # celery specific
+  AWS_S3_CUSTOM_DOMAIN: "omaha-proxy.dwos.com"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -43,6 +44,7 @@ data:
   DB_PUBLIC_USER: "omaha_public"
   DB_PUBLIC_PASSWORD: "omaha_public_password"
   SENTRY_DSN: "https://5ac205e747f445d08d7c0ab4b0c05b76@o977510.ingest.sentry.io/6070898"
+  AWS_S3_CUSTOM_DOMAIN: "omaha-proxy.dwos.com"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -60,7 +62,7 @@ spec:
     spec:
       serviceAccountName: omaha-server
       containers:
-      - image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:0.9.2-312
+      - image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:0.9.2-20230925
         imagePullPolicy: Always
         name: omaha-server-public
         ports:
@@ -95,7 +97,7 @@ spec:
       serviceAccountName: omaha-server
       initContainers:
       - name: init-migrate-db
-        image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:0.9.2-312
+        image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:0.9.2-20230925
         imagePullPolicy: Always
         envFrom:
         - configMapRef:
@@ -106,7 +108,7 @@ spec:
         command: ["python"]
         args: ["manage.py", "migrate"]
       - name: init-create-admin
-        image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:0.9.2-312
+        image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:0.9.2-20230925
         imagePullPolicy: Always
         envFrom:
         - configMapRef:
@@ -117,7 +119,7 @@ spec:
         command: ["python"]
         args: ["createadmin.py"]
       - name: init-collect-static
-        image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:0.9.2-312
+        image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:0.9.2-20230925
         imagePullPolicy: Always
         envFrom:
         - configMapRef:
@@ -128,7 +130,7 @@ spec:
         command: ["python"]
         args: ["manage.py", "collectstatic", "--noinput"]
       containers:
-      - image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:0.9.2-312
+      - image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:0.9.2-20230925
         imagePullPolicy: Always
         name: omaha-server-private
         ports:
@@ -160,9 +162,9 @@ spec:
       labels:
         app: omaha-server-celery
     spec:
-      serviceAccountName: omaha-server
+      serviceAccountName: Omaha-server
       containers:
-      - image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:0.9.2-312
+      - image: 712964028200.dkr.ecr.ca-central-1.amazonaws.com/omaha-server:0.9.2-20230925
         imagePullPolicy: Always
         name: omaha-server-celery
         envFrom:
