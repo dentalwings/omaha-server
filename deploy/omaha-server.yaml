@@ -201,7 +201,7 @@ spec:
   selector:
     app: omaha-server-private
 ---
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
@@ -216,7 +216,7 @@ metadata:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ca-central-1:712964028200:certificate/16d48101-28ec-4819-a771-4f4f826c06bb
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
-    alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
   name: omaha-server-ingress-private
 spec:
   rules:
@@ -225,14 +225,12 @@ spec:
       paths:
       - path: /*
         backend:
-          serviceName: ssl-redirect
-          servicePort: use-annotation
-      - path: /*
-        backend:
-          serviceName: omaha-server-private
-          servicePort: 80
+          service:
+            name: omaha-server-private
+            port:
+              number: 80
 ---
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
@@ -242,7 +240,7 @@ metadata:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ca-central-1:712964028200:certificate/16d48101-28ec-4819-a771-4f4f826c06bb
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
-    alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
   name: omaha-server-ingress-public
 spec:
   rules:
@@ -251,9 +249,7 @@ spec:
       paths:
       - path: /*
         backend:
-          serviceName: ssl-redirect
-          servicePort: use-annotation
-      - path: /*
-        backend:
-          serviceName: omaha-server-public
-          servicePort: 80
+          service:
+            name: omaha-server-public
+            port:
+              number: 80
