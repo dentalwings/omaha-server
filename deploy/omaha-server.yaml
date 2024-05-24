@@ -225,6 +225,7 @@ spec:
     http:
       paths:
       - path: /*
+        pathType: Prefix
         backend:
           service:
             name: omaha-server-private
@@ -249,6 +250,7 @@ spec:
     http:
       paths:
       - path: /*
+        pathType: Prefix
         backend:
           service:
             name: omaha-server-public
