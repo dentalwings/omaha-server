@@ -25,3 +25,6 @@ omaha_server/media
 
 # CUP_PEM_KEYS
 cup_pem_keys/
+
+# Docker
+.env

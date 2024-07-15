@@ -16,16 +16,25 @@ services:
     ports:
       - "6379:6379"
 
-  django:
+  django_migration:
     extends:
       file: docker-compose.common.yml
       service: django
-    links:
+    command: bash -c " python manage.py makemigrations && python manage.py migrate && python createadmin.py"
+    depends_on:
       - db
       - redis
-    ports:
-        - "8080:8000"
+  django:
+    container_name: django
+    extends:
+      file: docker-compose.common.yml
+      service: django
+    depends_on:
+      django_migration:
+        condition: service_completed_successfully
     volumes:
         - ./cup_pem_keys:/usr/src/app/cup_pem_keys
+    ports:
+        - "8080:8000"
 volumes:
   postgres-data:
